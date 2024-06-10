@@ -121,6 +121,10 @@ END
 # Write out a tarball:
 mv imp imp-${IMPVERSION} && tar --exclude .git -czf ${IMPSRCTGZ} imp-${IMPVERSION}
 
+# Add build scripts
+cd `dirname $0`
+cp build.sh build_vagrant.sh build_functions.sh "${IMPINSTALL}/build/"
+
 # Cleanup
 cd /
 rm -rf ${TMPDIR}
