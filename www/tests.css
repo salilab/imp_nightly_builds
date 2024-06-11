@@ -1,0 +1,566 @@
+img {
+  border: 0px;
+}
+
+body {
+  margin-right: 20px;
+  margin-left: 20px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 100%;
+  color: #666666;
+  background-color: white;
+}
+
+#impnav {
+   border-bottom: 1px solid #E0DFDF;
+}
+
+.linkspacer {
+  height: 5px;
+}
+
+.imptnav {
+   width: 100%;
+   height: 50px;
+}
+
+.imptnav tr {
+   vertical-align: bottom;
+}
+.imptnav td {
+   vertical-align: bottom;
+}
+
+.testres td {
+   vertical-align: middle;
+}
+
+#impheaderline {
+   display: block;
+   height: 20px;
+   background-color: #43829C;
+   color: #ffffff;
+   margin-right: -20px;
+   margin-left: -20px;
+   margin-bottom: 10px;
+}
+  
+.implinks {
+   text-align: right;
+}
+.implinks ul { 
+   list-style: none;
+   display: inline;
+}
+.implinks li { 
+   display: inline;
+   padding: 5px 5px 0px 5px;
+   border-right: 1px dotted #cccccc;
+}
+
+.implinks a { 
+   text-decoration: none;
+}
+
+td.testfail {
+  color: red;
+}
+
+td.testok {
+  color: green;
+}
+
+li.compfail {
+  color: red;
+  margin-bottom: 1em;
+}
+
+li.compok {
+  color: green;
+  margin-bottom: 1em;
+}
+
+a.compsource {
+  font-size: 80%;
+}
+
+ol.comperrors {
+  color: black;
+}
+
+div.benchmark {
+  margin-top: 1em;
+  margin-bottom: 3em;
+  margin-left: 3em;
+  height: 250px;
+  width: 80%;
+}
+
+a.permalink {
+  font-size: small;
+}
+
+span.filename {
+  font-family: monospace;
+}
+
+table.modules {
+  color: black;
+  font-size: small;
+  margin-bottom: 2em;
+  text-align: left;
+}
+
+.modules caption {
+  text-align: left;
+  padding-left: 15em;
+}
+
+.modules td {
+  width: 5em;
+  padding: 0;
+}
+
+td.comptype {
+  width: auto;
+}
+
+#header {
+  position: relative;
+  z-index: 10;
+}
+
+.labonly {
+  float: left;
+}
+
+.branchlink {
+  float: left;
+}
+
+.warning {
+  font-weight: bold;
+  color: #CC0000;
+}
+
+.summbox {
+  display: block;
+  min-width: 1em;
+  text-align: center;
+  text-decoration: none;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 0;
+  margin-right: 1em;
+  margin-left: 0;
+}
+
+.moduleok {
+  background: #00FF00;
+}
+
+.modulebuild {
+  background: #FF0000;
+}
+
+.moduledisab {
+  background: #FF0000;
+}
+
+.modulecircdep {
+  background: #FF0000;
+}
+
+.moduleskip {
+  background: #646464;
+}
+
+.modulefaildep {
+  background: #FFDD2A;
+}
+
+.moduletestnotrun {
+  background: #FFDD2A;
+}
+
+.moduletest {
+  background: #FF9650;
+}
+
+.modulebench {
+  background: #FF9650;
+}
+
+.moduleexample {
+  background: #00AEEF;
+}
+
+.incomplete {
+  font-weight: bold;
+  color: #CC0000;
+}
+
+.nonimp {
+  float: left;
+  border-left: 1px dotted #cccccc;
+  margin-left: 0.3em;
+  padding-left: 0.3em;
+}
+
+p.maillist {
+  font-style: italic;
+}
+
+div.log {
+  position: relative;
+  margin-left: 15em;
+  z-index: 1;
+}
+
+div.loglinks {
+  width: 14em;
+  position: fixed;
+  background-color: white;
+  z-index: 2;
+  height: 100%;
+  top: 0;
+  padding-top: 10em;
+  padding-left: 0.5em;
+  left: 0;
+}
+
+.modules img {
+  width: 4em;
+  height: 1em;
+  border: none;
+}
+
+div.log pre {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  font-size: 80%;
+}
+
+pre.errorline {
+  background-color: yellow;
+}
+
+h1 {
+   margin-top:10px;
+   font-weight: bold;
+   font-size: 180%;
+   color:#FF7C02;
+}
+
+h2 {
+   margin-top:10px;
+   font-weight: normal;
+   font-size: 150%;
+   color:#FF7C02;
+}
+
+h3 {
+   margin-top:10px;
+   font-weight: normal;
+   font-size: 105%;
+   color: #FF7C02;
+}
+
+.detail {
+  display: none;
+}
+
+li.thispage {
+    background-color:#ccc;
+}
+
+.gitlog td { 
+    padding-right: 1em;
+}
+
+.gitlog a { 
+    font-family: monospace;
+}
+
+/* Sortable tables */
+table.sortable thead {
+    background-color:#ccc;
+    color:#666666;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+table.sortable td {
+  vertical-align: top;
+}
+
+div.system_summary {
+   border: 1px;
+   border-style: solid;
+   border-color: black;
+   border-radius: 5px;
+   padding: 8px;
+   margin-top: 15px;
+   overflow: hidden;
+}
+
+p.systitle {
+   margin-top: 5px;
+   margin-bottom: 2em;
+}
+
+p.sysdesc {
+  font-style: italic;
+}
+
+div.last_build {
+  padding-left: 2em;
+}
+
+span.build_fail {
+  color: red;
+}
+
+div.branch_summary {
+   border: 1px;
+   border-style: solid;
+   border-color: black;
+   padding: 5px;
+   margin-top: 15px;
+}
+
+.buildbox {
+  display: block;
+  width: 100%;
+  min-width: 1em;
+  text-align: center;
+  text-decoration: none;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 0;
+  margin-right: 1em;
+  margin-left: 0;
+}
+
+a.build_ok {
+  background: #00FF00;
+}
+
+a.build_fail {
+  background: #FF0000;
+}
+
+table.allbuilds {
+  color: black;
+  margin-bottom: 2em;
+  text-align: left;
+  display: block;
+  overflow-x: auto;
+}
+
+.allbuilds td {
+  width: 3em;
+}
+
+td.builddate {
+  padding-right: 1em;
+}
+
+a.sysmore {
+  font-size: small;
+}
+
+.thumb {
+  margin-right: 0.5em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  float: right;
+  height: 7em;
+  max-height: 100%;
+}
+
+.thumb img {
+  height: 100%;
+}
+
+.systhumb {
+  float: left;
+  height: 10em;
+  max-height: 100%;
+  margin-right: 2em;
+}
+
+.systhumb img {
+  height: 100%;
+}
+
+.subtitle {
+   font-style: italic;
+   width: 95%;
+}
+
+h1.systitle {
+  margin-right: 100px;
+}
+
+div.download {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  overflow: hidden;
+  display: table;
+}
+
+div.downloadbutton {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+div.downloadstat {
+  display: table-cell;
+  vertical-align: middle;
+  padding-left: 1.8em;
+  text-indent: -1.8em;
+}
+
+img.download {
+  height: 1.4em;
+  vertical-align: -5px;
+  padding-right: 0.3em;
+}
+
+a.download {
+  margin-right: 1em;
+  padding: 10px 10px;
+  display: inline-block;
+  text-align: center;
+  font-weight: bold;
+  text-decoration: none;
+  background-image: linear-gradient(#FCFCFC, #EEE);
+  color: #333;
+  background-color: #EEE;
+  background-repeat: repeat-x;
+  white-space: nowrap;
+  vertical-align: middle;
+  border: 1px solid;
+  border-radius: 3px;
+}
+
+a.download:hover {
+  background-image: linear-gradient(#CCC, #AAA);
+}
+
+img.buildstat {
+  height: 1.4em;
+  vertical-align: -5px;
+  padding-right: 0.3em;
+}
+
+div.tags {
+   padding-top: 1em;
+   padding-bottom: 3px;
+   font-size: small;
+   overflow: hidden;
+}
+
+div.tagdesc {
+   float: left;
+   width: 18%;
+}
+
+div.taglist {
+   float: left;
+   width: 82%;
+}
+
+a.tag {
+   background-color:#ddd;
+   border-radius: 3px;
+   margin-bottom: 3px;
+   padding-top: 3px;
+   padding-bottom: 3px;
+   padding-right: 5px;
+   padding-left: 5px;
+   display: inline-block;
+   text-align: center;
+   text-decoration: none;
+   color: #333;
+}
+
+a.tag:hover {
+   background-color:#999;
+}
+
+a.pubmed {
+   margin-left: 0.5em;
+}
+
+a.pubmed img {
+   height: 1.2em;
+   vertical-align: -3px;
+}
+
+a.pdb_dev {
+  font-style: normal;
+  font-size: 90%;
+}
+
+a.low_coverage {
+  color: #FF0000;
+}
+
+a.med_coverage {
+  color: #00AA00;
+}
+
+a.high_coverage {
+  color: #00AA00;
+}
+
+div.conda_install {
+  display: none;
+  background: #eeeeee;
+  padding: 0.5em;
+  margin: 0.3em;
+}
+
+div.conda_install p {
+  margin-top: 0;
+}
+
+a.conda_show {
+   background-image: linear-gradient(#FCFCFC, #EEE);
+   background-color: #EEE;
+   border-radius: 3px;
+   border: 1px solid;
+   margin-bottom: 3px;
+   padding-top: 3px;
+   padding-bottom: 3px;
+   padding-right: 5px;
+   padding-left: 5px;
+   display: inline-block;
+   text-align: center;
+   text-decoration: none;
+   color: #333;
+}
+
+a.conda_show:hover {
+  background-image: linear-gradient(#CCC, #AAA);
+}
+
+div.conda_install img {
+   height: 1.2em;
+}
+
+div.conda_install p {
+   margin-top: 1.4em;
+}
+
+div.conda_install p:first-child {
+   margin-top: 0;
+}
