@@ -12,7 +12,7 @@ import pickle
 import MySQLdb
 import time
 import datetime
-sys.path.append('/home/ben/imp_nightly_builds/www')
+sys.path.append('/home/ben/imp_nightly_builds')
 from imp_build_utils import BuildDatabase, get_topdir, lab_only_topdir
 from imp_build_utils import all_platforms, platforms_dict, OK_STATES
 from imp_build_utils import results_url, lab_only_results_url
