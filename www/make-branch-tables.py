@@ -4,8 +4,9 @@ import re
 import sys
 import subprocess
 
+
 def rename_tables(lines, branch):
-    create_table = re.compile('(CREATE TABLE `)(\w+)(` \(.*$)')
+    create_table = re.compile(r'(CREATE TABLE `)(\w+)(` \(.*$)')
     tables = []
     for line in lines:
         m = create_table.match(line)
@@ -15,10 +16,11 @@ def rename_tables(lines, branch):
             line = m.group(1) + table + m.group(3) + '\n'
         sys.stdout.write(line)
     for table in tables:
-        print("GRANT SELECT ON `impusers`.`%s` TO 'imp_www'@'localhost';" \
+        print("GRANT SELECT ON `impusers`.`%s` TO 'imp_www'@'localhost';"
               % table)
-        print("GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP ON " \
+        print("GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP ON "
               "`impusers`.`%s` TO 'impusers'@'localhost';" % table)
+
 
 if len(sys.argv) != 2:
     print("Usage: %s branch" % sys.argv[0], file=sys.stderr)

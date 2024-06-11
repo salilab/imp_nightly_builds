@@ -548,67 +548,67 @@ all_platforms = (('i386-intel8', Platform('Lin32', 'Linux32',
                  ('pkg.f30-x86_64', Platform('F30', 'F30 RPM',
                        'Fedora 30 64-bit RPM build; Boost 1.69, gcc 9.0, '
                        'Python 3',
-                       rpm_vlong_header % "64-bit Fedora 30" \
+                       rpm_vlong_header % "64-bit Fedora 30"
                         + rpm_vlong_footer + "</p>",
                        'package.fc30-x86_64.log')),
                  ('pkg.f31-x86_64', Platform('F31', 'F31 RPM',
                        'Fedora 31 64-bit RPM build; Boost 1.69, gcc 9.2, '
                        'Python 3',
-                       rpm_vlong_header % "64-bit Fedora 31" \
+                       rpm_vlong_header % "64-bit Fedora 31"
                         + rpm_vlong_footer + "</p>",
                        'package.fc31-x86_64.log')),
                  ('pkg.f32-x86_64', Platform('F32', 'F32 RPM',
                        'Fedora 32 64-bit RPM build; Boost 1.69, gcc 10.0, '
                        'Python 3',
-                       rpm_vlong_header % "64-bit Fedora 32" \
+                       rpm_vlong_header % "64-bit Fedora 32"
                         + rpm_vlong_footer + "</p>",
                        'package.fc32-x86_64.log')),
                  ('pkg.f33-x86_64', Platform('F33', 'F33 RPM',
                        'Fedora 33 64-bit RPM build; Boost 1.73, gcc 10.2, '
                        'Python 3',
-                       rpm_vlong_header % "64-bit Fedora 33" \
+                       rpm_vlong_header % "64-bit Fedora 33"
                         + rpm_vlong_footer + "</p>",
                        'package.fc33-x86_64.log')),
                  ('pkg.f34-x86_64', Platform('F34', 'F34 RPM',
                        'Fedora 34 64-bit RPM build; Boost 1.75, gcc 11.1, '
                        'Python 3',
-                       rpm_vlong_header % "64-bit Fedora 34" \
+                       rpm_vlong_header % "64-bit Fedora 34"
                         + rpm_vlong_footer + "</p>",
                        'package.fc34-x86_64.log')),
                  ('pkg.f35-x86_64', Platform('F35', 'F35 RPM',
                        'Fedora 35 64-bit RPM build; Boost 1.76, gcc 11.2, '
                        'Python 3',
-                       rpm_vlong_header % "64-bit Fedora 35" \
+                       rpm_vlong_header % "64-bit Fedora 35"
                         + rpm_vlong_footer + "</p>",
                        'package.fc35-x86_64.log')),
                  ('pkg.f36-x86_64', Platform('F36', 'F36 RPM',
                        'Fedora 36 64-bit RPM build; Boost 1.76, gcc 12.2, '
                        'Python 3',
-                       rpm_vlong_header % "64-bit Fedora 36" \
+                       rpm_vlong_header % "64-bit Fedora 36"
                         + rpm_vlong_footer + "</p>",
                        'package.fc36-x86_64.log')),
                  ('pkg.f37-x86_64', Platform('F37', 'F37 RPM',
                        'Fedora 37 64-bit RPM build; Boost 1.78, gcc 12.2, '
                        'Python 3',
-                       rpm_vlong_header % "64-bit Fedora 37" \
+                       rpm_vlong_header % "64-bit Fedora 37"
                         + rpm_vlong_footer + "</p>",
                        'package.fc37-x86_64.log')),
                  ('pkg.f38-x86_64', Platform('F38', 'F38 RPM',
                        'Fedora 38 RPM build; Boost 1.78, gcc 13.0, '
                        'Python 3',
-                       rpm_vlong_header % "Fedora 38" \
+                       rpm_vlong_header % "Fedora 38"
                         + rpm_vlong_footer + "</p>",
                        'package.fc38-x86_64.log')),
                  ('pkg.f39-x86_64', Platform('F39', 'F39 RPM',
                        'Fedora 39 RPM build; Boost 1.81, gcc 13.2, '
                        'Python 3',
-                       rpm_vlong_header % "Fedora 39" \
+                       rpm_vlong_header % "Fedora 39"
                         + rpm_vlong_footer + "</p>",
                        'package.fc39-x86_64.log')),
                  ('pkg.f40-x86_64', Platform('F40', 'F40 RPM',
                        'Fedora 40 RPM build; Boost 1.83, gcc 14.0, '
                        'Python 3',
-                       rpm_vlong_header % "Fedora 40" \
+                       rpm_vlong_header % "Fedora 40"
                         + rpm_vlong_footer + "</p>",
                        'package.fc40-x86_64.log')),
                  ('pkg.precise-x86_64', Platform('deb12', 'deb12',
@@ -1028,7 +1028,7 @@ def send_imp_results_email(conn, msg_from, lab_only, branch):
     doc = db.get_doc_summary()
     summary.make_only_failed()
     msg = MIMEText(_get_email_body(db, buildsum, summary, url, log, doc))
-    msg['Keywords'] = ", ".join(["FAIL:" + _short_unit_name(x) \
+    msg['Keywords'] = ", ".join(["FAIL:" + _short_unit_name(x)
                                  for x in set(summary.failed_units)])
     msg['Subject'] = 'IMP nightly build results, %s' % db.date
     msg['Date'] = formatdate(localtime=True)
@@ -1065,12 +1065,12 @@ DISAB = disabled due to wrong configuration;
 UNCON = was not configured; skip = not built on this platform;
 only components that failed on at least one platform are shown)
 """ % (db.date, _get_email_build_summary(buildsum), url)
-    body += " " * 18 + " ".join("%-5s" % platforms_dict[x].very_short \
+    body += " " * 18 + " ".join("%-5s" % platforms_dict[x].very_short
                                 for x in summary.all_archs) + "\n"
 
     for row in summary.all_units:
         errs = [_text_format_build_summary(summary.data, row, col,
-                                           summary.arch_ids[col]) \
+                                           summary.arch_ids[col])
                 for col in summary.all_archs]
         body += "%-18s" % row[:18] + " ".join("%-5s" % e[:5] for e in errs) \
                 + "\n"
@@ -1084,7 +1084,7 @@ only components that failed on at least one platform are shown)
         body += "\nThere were %d new test failures (tests that passed " \
                 "yesterday\n" % numfail \
                 + "but failed today) in the following components:\n" \
-                + "\n".join("   " + unit \
+                + "\n".join("   " + unit
                             for unit in sorted(failed_units.keys()))
     if doc:
         def _format_doc(title, nbroken):
