@@ -1,4 +1,4 @@
-SUBDIRS=nonimp github-hook github-tutorial-doc
+SUBDIRS=
 .PHONY: install ${SUBDIRS}
 WEB=/guitar3/home/www/IMP
 FILES=${WEB}/index.py ${WEB}/sorttable.js ${WEB}/testfunc.js ${WEB}/tests.css \
