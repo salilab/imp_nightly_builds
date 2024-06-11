@@ -4,12 +4,8 @@ import pickle
 import os
 import MySQLdb
 import collections
-try:
-    from email.Utils import formatdate  # python2
-    from email.MIMEText import MIMEText
-except ImportError:
-    from email.utils import formatdate  # python3
-    from email.mime.text import MIMEText
+from email.utils import formatdate
+from email.mime.text import MIMEText
 
 topdir = '/salilab/diva1/home/imp'
 lab_only_topdir = '/salilab/diva1/home/imp-salilab/develop'
@@ -44,7 +40,7 @@ def get_topdir(branch):
     """Get the top-level directory on diva1 for this branch"""
     return os.path.join(topdir, branch)
 
-class Platform(object):
+class Platform:
     def __init__(self, very_short, short, long, very_long, logfile):
         self.very_short = very_short
         self.short = short
@@ -653,7 +649,7 @@ def date_to_directory(date):
        directories on our system (e.g. '20120825')"""
     return date.strftime('%Y%m%d')
 
-class _UnitSummary(object):
+class _UnitSummary:
     def __init__(self, cur, test_fails, new_test_fails, build_info):
         self.data = summary = {}
         self.arch_ids = seen_archs = {}
@@ -715,7 +711,7 @@ class _UnitSummary(object):
         return sorted_units + list(unsorted_units.keys())
 
 
-class BuildDatabase(object):
+class BuildDatabase:
     def __init__(self, conn, date, lab_only, branch):
         self.conn = conn
         self.date = date
