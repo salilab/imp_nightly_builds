@@ -721,21 +721,17 @@ class Product(object):
                     # errors for excluded modules
                     if isinstance(olderr, ExcludedModule) \
                        and isinstance(err, (ModuleDisabledError,
-                                            ModuleNotConfiguredError,
                                             TestNotRunError)):
                         err.remove = True
                     # Module disabled hides not configured
-                    if isinstance(olderr, ModuleDisabledError) \
-                       and isinstance(err, ModuleNotConfiguredError):
+                    if isinstance(olderr, ModuleDisabledError):
                         err.remove = True
                     # Build failures take precedence over test failures
                     elif not olderr or (isinstance(olderr, (TestFailedError,
                                        TestNotRunError, BenchmarkFailedError)) \
-                                        and isinstance(err, (BuildFailedError,
-                                                   ModuleNotConfiguredError))):
+                                        and isinstance(err, BuildFailedError)):
                         failure = True
                         if isinstance(err, (ModuleDisabledError,
-                                            ModuleNotConfiguredError,
                                             TestNotRunError,
                                             BuildFailedError)):
                             self.state = 'BUILD'
@@ -1457,7 +1453,6 @@ class DatabaseUpdater(object):
 
         state_to_sql = {type(None): 'OK',
                         ModuleDisabledError: 'DISABLED',
-                        ModuleNotConfiguredError: 'UNCON',
                         TestFailedError: 'TEST',
                         TestNotRunError: 'NOTEST',
                         BuildFailedError: 'BUILD',
