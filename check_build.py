@@ -92,7 +92,7 @@ class NotRunError(Error):
     pass
 class BuildNotRunError(NotRunError):
     pass
-class NewTestNotRunError(NotRunError):
+class TestNotRunError(NotRunError):
     pass
 class ExampleNotRunError(NotRunError):
     pass
@@ -124,90 +124,16 @@ class ExtraLogError(Error):
 
 
 class ModuleDisabledError(Error):
-    module_re = [re.compile('Module (\w+) '),
-                 re.compile('Application (\w+) '),
-                 re.compile('System (\w+) ')]
-
-    def __init__(self, line, logpath, abslogpath, description, line_number):
-        self._line = line
-        self._logpath = logpath
-        self._abslogpath = abslogpath
-        self._description = description
-        self._line_number = line_number
-
-class ModuleNotConfiguredError(Error):
-    def __init__(self, logpath, abslogpath, description, mod):
-        self._logpath = logpath
-        self._abslogpath = abslogpath
-        self._description = description
-        self._mod = mod
-    def get_module(self):
-        return self._mod
+    pass
 
 class TestFailedError(Error):
-    module_re = [re.compile('(\w+?)(_local)? (module|application) unit tests'),
-                 re.compile('modules/([^/]+)/test/\w+\.o'),
-                 re.compile('(\w+) systems'),
-                 re.compile('(\w+) examples')]
-
-    def __init__(self, line, logpath, abslogpath, description, line_number):
-        self._line = line
-        self._logpath = logpath
-        self._abslogpath = abslogpath
-        self._description = description
-        self._line_number = line_number
-
-class TestNotRunError(Error):
-    def __init__(self, logpath, abslogpath, description, mod):
-        self._logpath = logpath
-        self._abslogpath = abslogpath
-        self._description = description
-        self._mod = mod
-    def get_module(self):
-        return self._mod
+    pass
 
 class BuildFailedError(Error):
-    module_re = [re.compile('modules/([^/]+)/(?:src|bin)'),
-                 re.compile('applications/([^/]+)/(?:[^/]+/)?\w+\.o'),
-                 re.compile('build/src/(?:imp_|IMP_)?(\w+)_(?:wrap|all)\.'),
-                 re.compile('build/include/IMP/(\w+)/\w+\.h'),
-                 re.compile('build/src/IMP/(\w+)/\w+\.cpp'),
-                 re.compile('build/src/(?:IMP\.)?(\w+)\.'),
-                 re.compile('build/src/(\w+)/\w+\.(?:o|pb)'),
-                 re.compile('build/lib/_IMP_(\w+)\.'),
-                 re.compile('build/lib/\w+_(\w+)\.'),
-                 re.compile('build/lib/_(\w+)\.'),
-                 re.compile('\[.*CMakeFiles\/(\w+?)_.*\.dir.*\]'),
-                 re.compile('\[.*CMakeFiles\/_?(\w+)\.dir.*\]')]
-    kernel_re = [re.compile('kernel/src'),
-                 re.compile('build/lib/libimp\.')]
-
-    def __init__(self, line, logpath, abslogpath, description, line_number):
-        self._line = line
-        self._logpath = logpath
-        self._abslogpath = abslogpath
-        self._description = description
-        self._line_number = line_number
+    pass
 
 class BenchmarkFailedError(Error):
-    module_re = [re.compile('modules/([^/]+)/benchmark/'),
-                 re.compile('build/benchmark/([^/]+)/')]
-
-    def __init__(self, line, logpath, abslogpath, description, line_number):
-        self._line = line
-        self._logpath = logpath
-        self._abslogpath = abslogpath
-        self._description = description
-        self._line_number = line_number
-
-class BuildIncompleteError(Error):
-
-    def __init__(self, logpath, abslogpath, description, line_number):
-        self._logpath = logpath
-        self._abslogpath = abslogpath
-        self._description = description
-        self._line_number = line_number
-
+    pass
 
 class MissingOutputError(Error):
     def __init__(self, output, logpath, abslogpath, description):
@@ -263,8 +189,6 @@ def _get_text_module_map(name, module_map, modules, archs):
             return "TEST"
         elif isinstance(error, ModuleDisabledError):
             return "DISAB"
-        elif isinstance(error, ModuleNotConfiguredError):
-            return "UNCON"
         elif isinstance(error, ExcludedModule):
             return "skip"
         raise RuntimeError("Cannot handle error: " + str(error))
@@ -555,26 +479,6 @@ class TextFormatter(Formatter):
         elif isinstance(error, MissingOutputError):
             print("  %s: output %s not generated; see log %s" \
                    % (error._description, error._output, error._logpath))
-        elif isinstance(error, TestFailedError):
-            print("  %s: %s; see log %s" % (error._description,
-                                            error._line, error._logpath))
-        elif isinstance(error, TestNotRunError):
-            print("  %s: see log %s" % (error._description, error._logpath))
-        elif isinstance(error, ModuleNotConfiguredError):
-            print("  %s: module %s not configured; see log %s"
-                  % (error._description, error._mod, error._logpath))
-        elif isinstance(error, ModuleDisabledError):
-            print("  %s: %s; see log %s" % (error._description,
-                                            error._line, error._logpath))
-        elif isinstance(error, BuildFailedError):
-            print("  %s: %s; see log %s" % (error._description,
-                                            error._line, error._logpath))
-        elif isinstance(error, BenchmarkFailedError):
-            print("  %s: %s; see log %s" % (error._description,
-                                            error._line, error._logpath))
-        elif isinstance(error, BuildIncompleteError):
-            print("  %s: build did not complete; see log %s"
-                  % (error._description, error._logpath))
 
 def get_imp_build_email_from():
     """Get the From: address for emails to the IMP-build mailing list"""
@@ -604,17 +508,6 @@ class EmailFormatter(Formatter):
             failed_modules, failed_arch = _get_only_failed_modules(module_map,
                                                                modules, archs)
             self._failed_modules.extend(failed_modules)
-            for e in errors:
-                if isinstance(e, BuildIncompleteError):
-                    incompletes.append(e._description)
-            if len(incompletes) > 0:
-                m = ("The %s build DID NOT COMPLETE (ran out of time) on the\n"
-                     "following platforms:\n%s.\n"
-                     "This is usually caused by tests or examples that take\n"
-                     "too long to run (or sometimes by the build machine\n"
-                     "crashing during the build).\n\n" \
-                     % (comp.name, ", ".join(incompletes))) \
-                     + m
             self._module_maps.append(m)
 
     def print_header(self, title=None):
@@ -859,9 +752,6 @@ class Product(object):
                         break
                     elif isinstance(e, (MissingLogError, ExtraLogError)):
                         self.state = 'BADLOG'
-                    elif isinstance(e, BuildIncompleteError) \
-                         and self.state != 'BADLOG':
-                        self.state = 'INCOMPLETE'
             if self.state == 'OK':
                 self.state == 'BUILD'
             for f in formatters:
@@ -903,7 +793,7 @@ class Product(object):
 class CMakeLog(object):
     all_build_types = ['build', 'test', 'example', 'benchmark']
 
-    not_run_error = {'build': BuildNotRunError, 'test': NewTestNotRunError,
+    not_run_error = {'build': BuildNotRunError, 'test': TestNotRunError,
                      'example': ExampleNotRunError,
                      'benchmark': BenchmarkNotRunError}
     running_error = {'build': BuildRunningError, 'test': TestRunningError,
@@ -988,18 +878,18 @@ class CMakeLog(object):
                 elif res == 'depfail':
                     err = FailedDependencyError()
                 elif res == 'disabled':
-                    err = ModuleDisabledError('', '', '', '', -1)
+                    err = ModuleDisabledError()
                 elif res == 'running':
                     err = self.running_error[typ]()
                 else:
                     if typ == 'build':
-                        err = BuildFailedError('', '', '', '', -1)
+                        err = BuildFailedError()
                     elif typ == 'test':
-                        err = TestFailedError('', '', '', '', -1)
+                        err = TestFailedError()
                     elif typ == 'example':
                         err = ExampleFailedError()
                     elif typ == 'benchmark':
-                        err = BenchmarkFailedError('', '', '', '', -1)
+                        err = BenchmarkFailedError()
             else:
                 err = self.not_run_error[typ]()
             if self.update_module_error(comp.module_map[m], err, m):
@@ -1575,7 +1465,6 @@ class DatabaseUpdater(object):
                         NoLogModule: 'NOLOG',
                         ExcludedModule: 'SKIP',
                         BuildNotRunError: 'NOBUILD',
-                        NewTestNotRunError: 'NOTEST',
                         ExampleNotRunError: 'NOEX',
                         BenchmarkNotRunError: 'NOBENCH',
                         BuildRunningError: 'RUNBUILD',
