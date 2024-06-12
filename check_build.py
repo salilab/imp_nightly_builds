@@ -57,28 +57,7 @@ class NoLogModule(object):
     pass
 
 class Error(object):
-    module_re = []
-    kernel_re = []
-
-    def get_module(self):
-        # Hack to catch CTest errors (currently only used for RMF)
-        if hasattr(self, '_line') and 'make: *** [test]' in self._line:
-            return 'RMF'
-        for r in self.module_re:
-            m = r.search(self._line)
-            if m:
-                # Hack for librmf->RMF renaming
-                if m.group(1) == 'librmf':
-                    return 'RMF'
-                elif m.group(1) == 'rmf' and 'CMakeFiles' in self._line:
-                    return 'RMF'
-                else:
-                    return m.group(1)
-        for r in self.kernel_re:
-            m = r.search(self._line)
-            if m:
-                return 'kernel'
-        return None
+    pass
 
 class CircularDependencyError(Error):
     pass
@@ -629,40 +608,6 @@ class Product(object):
     def print_product(self, formatters, logdir):
         self.state = self.get_module_state()
         failure = (self.state != 'OK')
-        if len(self.modules) > 0:
-            for err in self._errors:
-                # If a log file is missing, mark every module as missing
-                if isinstance(err, MissingLogError):
-                    for m, archs in self.module_map.items():
-                        if err._description in archs:
-                            archs[err._description] = NoLogModule()
-                m = err.get_module()
-                if m and m in self.module_map \
-                   and err._description in self.module_map[m]:
-                    olderr = self.module_map[m][err._description]
-                    # Hide 'module disabled/not configured' or 'test not run'
-                    # errors for excluded modules
-                    if isinstance(olderr, ExcludedModule) \
-                       and isinstance(err, (ModuleDisabledError,
-                                            TestNotRunError)):
-                        err.remove = True
-                    # Module disabled hides not configured
-                    if isinstance(olderr, ModuleDisabledError):
-                        err.remove = True
-                    # Build failures take precedence over test failures
-                    elif not olderr or (isinstance(olderr, (TestFailedError,
-                                       TestNotRunError, BenchmarkFailedError)) \
-                                        and isinstance(err, BuildFailedError)):
-                        failure = True
-                        if isinstance(err, (ModuleDisabledError,
-                                            TestNotRunError,
-                                            BuildFailedError)):
-                            self.state = 'BUILD'
-                        elif self.state == 'OK':
-                            self.state = 'TEST'
-                        self.module_map[m][err._description] = err
-            self._errors = [x for x in self._errors \
-                            if not hasattr(x, 'remove')]
         if failure:
             if self.state in ('OK', 'TEST'):
                 for e in self._errors:
