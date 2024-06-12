@@ -490,83 +490,6 @@ def get_imp_build_email_from():
             return line
     raise ValueError("Could not read email address")
 
-class EmailFormatter(Formatter):
-    def __init__(self, send_email, testurl):
-        self.send_email = send_email
-        self.testurl = testurl
-        self.failed_products = []
-        self._module_maps = []
-        self._failed_modules = []
-
-    def print_product(self, comp, errors, module_map=None, modules=None,
-                      module_coverage=False, archs=None, logdir=None):
-        if len(errors) > 0:
-            self.failed_products.append(comp)
-        if module_map:
-            incompletes = []
-            m = _get_text_module_map(comp.name, module_map, modules, archs)
-            failed_modules, failed_arch = _get_only_failed_modules(module_map,
-                                                               modules, archs)
-            self._failed_modules.extend(failed_modules)
-            self._module_maps.append(m)
-
-    def print_header(self, title=None):
-        pass
-
-    def print_footer(self):
-        import smtplib
-        import email.utils
-        from email.mime.text import MIMEText
-        if len(self.failed_products) == 0:
-            return
-        timenow = time.strftime("%m/%d/%Y")
-        msg = MIMEText("Build system failed on %s.\n" % timenow + \
-                       "Failed products: %s.\n" \
-                           % ", ".join([x.name \
-                                        for x in self.failed_products]) + \
-                       "Please see %s for\nfull details." % self.testurl + \
-                       "\n\n" + "\n\n".join(self._module_maps))
-        msg_from = 'build-system@salilab.org'
-        emails = []
-        for comp in self.failed_products:
-            if isinstance(comp.contact_email, (list, tuple)):
-                emails.extend(comp.contact_email)
-            else:
-                emails.append(comp.contact_email)
-        # We need a special email address to post to IMP-build
-        if len(emails) == 1 and emails[0].startswith('imp-build'):
-            msg_from = get_imp_build_email_from()
-            # Add keywords for IMP-build topic filter
-            msg['Keywords'] = ", ".join(["FAIL:" + x for x in \
-                                         set(self._failed_modules)])
-        if len(emails) == 0:
-            return
-        msg_to = set(emails)
-        msg['Subject'] = 'Build system failure, %s' % timenow
-        msg['Date'] = email.utils.formatdate(localtime=True)
-        msg['From'] = msg_from
-        msg['To'] = ", ".join(msg_to)
-        if self.send_email:
-            s = smtplib.SMTP()
-            s.connect()
-            s.sendmail(msg_from, msg_to, msg.as_string())
-            s.close()
-        else:
-            print("Subject:", msg['Subject'])
-            print("To:", msg['To'])
-            print()
-            print(msg.get_payload())
-
-    def print_start_products(self):
-        pass
-    def print_end_products(self):
-        pass
-    def print_new_repos(self, repos):
-        pass
-    def print_old_repos(self, repos):
-        pass
-
-
 class Repository(object):
     def __init__(self, name):
         self.name = name
@@ -2152,7 +2075,7 @@ def main():
         if opts.dryrun:
             formatters = [TextFormatter()]
         else:
-            formatters = [EmailFormatter(opts.email, testurl)]
+            formatters = []
             check.copy_log_files(testhtml)
 
         nerr = check.check_logs(formatters)
