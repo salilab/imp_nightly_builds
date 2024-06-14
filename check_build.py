@@ -41,15 +41,6 @@ imp_downloadhtml = '/guitar3/home/www/html/imp/nightly/download/'
 imp_lab_testhtml = '/guitar3/home/www/html/internal/imp-salilab/nightly/'
 imp_lab_testurl = 'https://salilab.org/internal/imp-salilab/nightly/tests.html'
 
-all_exetypes = {"mac12-intel": 'Intel Mac (MacOS 12, Monterey)',
-                "mac12arm64-gnu": 'Apple Silicon Mac (MacOS 12, Monterey)',
-                "mac10v4-intel64": 'Intel Mac (MacOS X 10.10, Yosemite)',
-                "i386-w32": '32-bit Windows',
-                "x86_64-w64": '64-bit Windows'}
-arch_to_exetype = {}
-for exetype, unit in all_exetypes.items():
-    arch_to_exetype[unit] = exetype
-
 class ExcludedModule(object):
     pass
 
@@ -143,7 +134,7 @@ def _get_only_failed_modules(module_map, modules, archs):
     failures = {}
     for m in modules:
         for a in archs:
-            err = module_map[m][a[0]]
+            err = module_map[m][a]
             if err is not None \
                and not isinstance(err, (ExcludedModule, NoLogModule,
                                         TestNotRunError, NotRunError)):
@@ -177,9 +168,10 @@ def _get_text_module_map(name, module_map, modules, archs):
         "at least one architecture are shown)\n" \
         % name
     modules, archs = _get_only_failed_modules(module_map, modules, archs)
-    t += " " * 13 + " ".join("%-5s" % x[2] for x in archs) + "\n"
+    t += " " * 13 + " ".join("%-5s"
+        % imp_build_utils.platforms_dict[x].very_short for x in archs) + "\n"
     for m in modules:
-        errs = [_format_module_error(module_map[m][arch[0]]) \
+        errs = [_format_module_error(module_map[m][arch]) \
                 for arch in archs]
         t += "%-13s" % m[:13] + " ".join("%-5s" % e[:5] for e in errs) + "\n"
     return t
@@ -552,16 +544,12 @@ class Product(object):
 
     def make_module_map(self, archs):
         self.module_map = {}
-        self.archs = []
-        for arch in archs:
-            self.archs.append(arch + (self.__log_from_desc.get(arch[0], ''),))
+        self.archs = archs
         for m in self.modules:
-            self.module_map[m] = dict.fromkeys([x[0] for x in archs])
+            self.module_map[m] = dict.fromkeys(archs)
             if self.units[m] == 'module':
-                self.module_map[m + ' examples'] \
-                          = dict.fromkeys([x[0] for x in archs])
-                self.module_map[m + ' benchmarks'] \
-                          = dict.fromkeys([x[0] for x in archs])
+                self.module_map[m + ' examples'] = dict.fromkeys(archs)
+                self.module_map[m + ' benchmarks'] = dict.fromkeys(archs)
 
     def exclude_component(self, module, archs):
         if module not in self.module_map:
@@ -576,10 +564,10 @@ class Product(object):
             self.module_map[module][a] = ExcludedModule()
 
     def exclude_component_all(self, module):
-        self.exclude_component(module, [x[0] for x in self.archs])
+        self.exclude_component(module, self.archs)
 
     def include_component(self, module, archs):
-        a = [x[0] for x in self.archs if x[0] not in archs]
+        a = [x for x in self.archs if x not in archs]
         self.exclude_component(module, a)
 
     def check_logs(self, checker, formatters):
@@ -665,10 +653,9 @@ class CMakeLog(object):
                      'benchmark': BenchmarkRunningError}
 
     def __init__(self, arch, build_types, generated_files):
-        self.arch = arch
         # Make sure build_types is correctly ordered
         self.build_types = [x for x in self.all_build_types if x in build_types]
-        self.exetype = arch_to_exetype[arch]
+        self.arch = arch
         self.generated_files = generated_files
     def update_module_error(self, modmap, err, compname):
         olderr = modmap[self.arch]
@@ -676,7 +663,7 @@ class CMakeLog(object):
             if not isinstance(err, (NotRunError, ModuleDisabledError)):
                 print("WARNING: build of %s reported %s for %s, but component "
                       "is supposed to be excluded" % (compname, err,
-                                                      self.exetype))
+                                                      self.arch))
             return False
         if err is None:
             return False
@@ -687,9 +674,9 @@ class CMakeLog(object):
             if build_type not in self.build_types:
                 if hasattr(comp, '%s_result' % build_type):
                     print("WARNING: %s in %s has extra build type %s"
-                          % (name, self.exetype, build_type))
+                          % (name, self.arch, build_type))
     def check_module_errors(self, comp, logdir):
-        logdir = os.path.join(logdir, self.exetype)
+        logdir = os.path.join(logdir, self.arch)
         summary = os.path.join(logdir, 'summary.pck')
         if os.path.exists(summary):
             with open(summary, 'rb') as fh:
@@ -813,7 +800,7 @@ class IMPProduct(Product):
         state = 'OK'
         for m in self.modules:
             for a in self.archs:
-                err = self.module_map[m][a[0]]
+                err = self.module_map[m][a]
                 if isinstance(err, RunningError):
                     newstate = 'INCOMPLETE'
                 elif isinstance(err, (TestFailedError, ExampleFailedError,
@@ -1337,26 +1324,24 @@ class DatabaseUpdater(object):
                         CircularDependencyError: 'CIRCDEP',
                         FailedDependencyError: 'FAILDEP',
                         ExampleFailedError: 'EXAMPLE'}
-        cmake_exetypes = [x.exetype for x in comp.cmake_logs]
+        cmake_archs = [x.arch for x in comp.cmake_logs]
         arch_ids = {}
         for unit, results in comp.module_map.items():
             unit = get_unit_name_from_modules(unit, comp.units)
             unit_id = update_unit(unit_table, unit, cur, self.lab_only)
-            for arch, state in results.items():
-                exetype = arch_to_exetype.get(arch, None)
-                if exetype:
-                    arch_id = arch_ids.get(exetype, None)
-                    if arch_id is None:
-                        arch_ids[exetype] = arch_id = update_arch(arch_table,
-                                                                  exetype, cur)
-                    sql = state_to_sql[type(state)]
-                    if exetype in cmake_exetypes:
-                        sql = 'CMAKE_' + sql
-                    cur.execute("INSERT INTO " + result_table + \
-                                " (arch, unit, "
-                                "state, logline, date) VALUES (%s, %s, %s, %s, "
-                                "%s)", (arch_id, unit_id, sql,
-                                   getattr(state, '_line_number', None), date))
+            for archs, state in results.items():
+                arch_id = arch_ids.get(arch, None)
+                if arch_id is None:
+                    arch_ids[arch] = arch_id = update_arch(arch_table,
+                                                           arch, cur)
+                sql = state_to_sql[type(state)]
+                if arch in cmake_archs:
+                    sql = 'CMAKE_' + sql
+                cur.execute("INSERT INTO " + result_table + \
+                            " (arch, unit, "
+                            "state, logline, date) VALUES (%s, %s, %s, %s, "
+                            "%s)", (arch_id, unit_id, sql,
+                               getattr(state, '_line_number', None), date))
         self.conn.commit()
 
     def get_benchmarks(self, xmldir, comp, ignore_unknown=False):
@@ -1802,94 +1787,68 @@ def main():
         c.modules.insert(0, m)
         c.units[m] = 'build'
 
+    # Main platforms to build on: macOS (Intel, ARM64); old Mac;
+    # Windows (32-bit, 64-bit)
+    mac12 = 'mac12-intel'
+    mac12arm = 'mac12arm64-gnu'
+    mac64 = 'mac10v4-intel64'
+    win32 = 'i386-w32'
+    win64 = 'x86_64-w64'
+    all_archs = [mac12, mac12arm, mac64, win32, win64]
+
     # Old Mac build is only for stable IMP release
-    mac64 = all_exetypes['mac10v4-intel64']
     if opts.imp_branch == 'develop':
-        del all_exetypes['mac10v4-intel64']
-    for (exetype, desc) in all_exetypes.items():
-        expfiles = ['lib/%s/IMP/%s/__init__.py' % (exetype, m) \
+        all_archs.remove(mac64)
+
+    for arch in all_archs:
+        expfiles = ['lib/%s/IMP/%s/__init__.py' % (arch, m) \
                     for m in imp_modules_basic]
-        c.add_cmake_log(desc, ['build', 'benchmark', 'test',
+        c.add_cmake_log(arch, ['build', 'benchmark', 'test',
                                'example'], expfiles)
 
-    # Check static, debug, release, and fast builds
-    static = 'Static build'
-    arch_to_exetype[static] = 'static9'
+    # Check static, debug and release Linux builds
+    static = 'static9'
     c.add_cmake_log(static, ['build'], [])
-    fast8 = 'Fast build'
-    arch_to_exetype[fast8] = 'fast8'
-    fastmac = 'Fast build (MacOS)'
-    arch_to_exetype[fastmac] = 'fastmac14'
-    release8 = 'Release build (64-bit Linux)'
-    arch_to_exetype[release8] = 'release8'
-    debug8 = 'Debug build (64-bit Linux)'
-    arch_to_exetype[debug8] = 'debug8'
+    debug8 = 'debug8'
+    release8 = 'release8'
+    # Check fast Linux and Mac builds
+    fast8 = 'fast8'
+    fastmac = 'fastmac14'
     for f in (fastmac, fast8, release8, debug8):
         c.add_cmake_log(f, ['build', 'benchmark', 'test', 'example'], [])
 
-    f40_64 = 'Fedora 40 64-bit RPM'
-
-    rh7_64 = 'RedHat Enterprise 7 64-bit RPM'
-    rh8_64 = 'RedHat Enterprise 8 64-bit RPM'
-    rh9_64 = 'RedHat Enterprise 9 64-bit RPM'
-    focal = 'Ubuntu 20.04 (Focal Fossa) 64-bit package'
-    jammy = 'Ubuntu 22.04 (Jammy Jellyfish) 64-bit package'
-    noble = 'Ubuntu 24.04 (Noble Numbat) 64-bit package'
-    arch_to_exetype[rh9_64] = 'pkg.el9-x86_64'
-    arch_to_exetype[rh8_64] = 'pkg.el8-x86_64'
-    arch_to_exetype[rh7_64] = 'pkg.el7-x86_64'
-    arch_to_exetype[focal] = 'pkg.focal-x86_64'
-    arch_to_exetype[jammy] = 'pkg.jammy-x86_64'
-    arch_to_exetype[noble] = 'pkg.noble-x86_64'
-    arch_to_exetype[f40_64] = 'pkg.f40-x86_64'
+    f40_64 = 'pkg.f40-x86_64'  # Fedora 40 RPM
+    rh7_64 = 'pkg.el7-x86_64'  # RHEL 7 RPM
+    rh8_64 = 'pkg.el8-x86_64'  # RHEL 8 RPM
+    rh9_64 = 'pkg.el9-x86_64'  # RHEL 9 RPM
+    focal = 'pkg.focal-x86_64'  # Ubuntu 20.04 (Focal Fossa) .deb package
+    jammy = 'pkg.jammy-x86_64'  # Ubuntu 22.04 (Jammy Jellyfish) .deb package
+    noble = 'pkg.noble-x86_64'  # Ubuntu 24.04 (Noble Numbat) .deb package
 
     # Check CUDA builds
-    cuda = 'CUDA (on Fedora)'
-    arch_to_exetype[cuda] = 'cuda'
+    cuda = 'cuda'
     c.add_cmake_log(cuda, ['build', 'test', 'example'], [])
 
-    # Check coverage log
-    coverage = 'Coverage (on Fedora)'
-    arch_to_exetype[coverage] = 'coverage'
+    # Check coverage (on Fedora)
+    coverage = 'coverage'
     c.add_cmake_log(coverage, ['build', 'test', 'example'], [])
 
-    mac12 = all_exetypes['mac12-intel']
-    mac12arm = all_exetypes['mac12arm64-gnu']
-    win32 = all_exetypes['i386-w32']
-    win64 = all_exetypes['x86_64-w64']
-    new_archs_map = [(rh8_64, 'RH8_64', 'RH8_6'),
-                     (rh9_64, 'RH9_64', 'RH9_6'),
-                     (focal, 'Ubuntu20', 'deb20'),
-                     (jammy, 'Ubuntu22', 'deb22'),
-                     (noble, 'Ubuntu24', 'deb24'),
-                     (win64, 'Win64', 'Win64')]
+    new_archs_map = [rh8_64, rh9_64, focal, jammy, noble, win64]
     rh_rpms = [rh8_64, rh9_64]
     if opts.imp_branch != 'develop':
         rh_rpms.insert(0, rh7_64)
-        new_archs_map.insert(0, (rh7_64, 'RH7_64', 'RH7_6'))
-    all_archs_map = [(debug8, 'Linux64', 'Lin64'),
-                     (mac12, 'Mac12', 'Mc12'),
-                     (mac12arm, 'MacARM', 'McARM'),
-                     (win32, 'Windows', 'Win32'),
-                     (fast8, 'Fast64', 'Fst64'),
-                     (fastmac, 'FastMac', 'FstMc'),
-                     (static, 'Static', 'Stat'),
-                     (release8, 'Rls64', 'Rls64'),
-                     (f40_64, 'F40 RPM', 'F40')] + new_archs_map \
-                     + [(coverage, 'Coverage', 'Cov'),
-                        (cuda, 'CUDA', 'CUDA')]
+        new_archs_map.insert(0, rh7_64)
+    all_archs_map = [debug8, mac12, mac12arm, win32, fast8, fastmac, static,
+                     release8, f40_64] + new_archs_map + [coverage, cuda]
     if opts.imp_branch != 'develop':
-        all_archs_map.insert(1, (mac64, 'Mac64', 'Mac64'))
+        all_archs_map.insert(1, mac64)
     c.make_module_map(all_archs_map)
     # Only cmake builds have an ALL component
-    incs = [f40_64, fastmac, \
-            coverage, cuda, fast8, static, debug8, \
-            release8, focal, jammy, noble] + rh_rpms \
-            + list(all_exetypes.values())
+    incs = [f40_64, fastmac, coverage, cuda, fast8, static, debug8,
+            release8, focal, jammy, noble] + rh_rpms + all_archs
     c.include_component('ALL', incs)
     c.include_component('INSTALL', [fastmac, fast8, debug8,
-                                release8, cuda] + \
-                                list(all_exetypes.values()))
+                                    release8, cuda] + all_archs)
     incs = [win32, win64]
     if opts.imp_branch != 'develop':
         incs.append(mac64)
@@ -1948,8 +1907,8 @@ def main():
                        module_coverage=True, repo=repo)
 
         imp_lab_check.add_product(c)
-        for (exetype, desc) in all_exetypes.items():
-            c.add_cmake_log(desc, ['build', 'benchmark', 'test',
+        for arch in all_archs:
+            c.add_cmake_log(arch, ['build', 'benchmark', 'test',
                                    'example'], [])
 
         for m in ('COVERAGE_LAB', 'INSTALL_LAB', 'ALL_LAB'):
@@ -1965,30 +1924,19 @@ def main():
         c.add_cmake_log(cuda, ['build', 'test', 'example'], [])
         # Add coverage build
         c.add_cmake_log(coverage, ['build', 'test', 'example'], [])
-        all_archs_map = [(debug8, 'Linux64', 'Lin64'),
-                         (mac12, 'Mac12', 'Mc12'),
-                         (mac12arm, 'MacARM', 'McARM'),
-                         (fast8, 'Fast64', 'Fst64'),
-                         (fastmac, 'FastMac', 'FstMc'),
-                         (static, 'Static', 'Stat'),
-                         (release8, 'Rls64', 'Rls64'),
-                         (win32, 'Windows', 'Win32'),
-                         (win64, 'Win64', 'Win64'),
-                         (cuda, 'CUDA', 'CUDA'),
-                         (coverage, 'Coverage', 'Cov')]
+        all_archs_map = [debug8, mac12, mac12arm, fast8, fastmac, static,
+                         release8, win32, win64, cuda, coverage]
         if opts.imp_branch != 'develop':
-            all_archs_map.insert(1, (mac64, 'Mac64', 'Mac64'))
+            all_archs_map.insert(1, mac64)
         c.make_module_map(all_archs_map)
 
         # Only cmake builds have an ALL_LAB component
         incs = [f40_64, fastmac, cuda, coverage, fast8, debug8,
-                static, release8, focal, jammy, noble] + rh_rpms \
-               + list(all_exetypes.values())
+                static, release8, focal, jammy, noble] + rh_rpms + all_archs
         c.include_component('ALL_LAB', incs)
         c.include_component('COVERAGE_LAB', [coverage])
         c.include_component('INSTALL_LAB', [fastmac, fast8, debug8,
-                                release8, cuda] + \
-                                list(all_exetypes.values()))
+                                release8, cuda] + all_archs)
 
         for m in ('multifit2', 'domino3', 'bayesem2d'):
             c.exclude_component(m, (static,))
