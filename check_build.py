@@ -1297,7 +1297,7 @@ class DatabaseUpdater(object):
         for unit, results in comp.module_map.items():
             unit = get_unit_name_from_modules(unit, comp.units)
             unit_id = update_unit(unit_table, unit, cur, self.lab_only)
-            for archs, state in results.items():
+            for arch, state in results.items():
                 arch_id = arch_ids.get(arch, None)
                 if arch_id is None:
                     arch_ids[arch] = arch_id = update_arch(arch_table,
