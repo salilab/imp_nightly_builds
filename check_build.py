@@ -497,20 +497,14 @@ class Repository(object):
         return (longver, version, revision)
 
 class Product(object):
-    def __init__(self, name, dir, contact_email,
-                 module_coverage=False, source_url=None):
+    def __init__(self, name, dir, module_coverage=False):
         self.modules = []
         self.units = {}
         self.module_coverage = module_coverage
         self.name = name
         self.dir = dir
-        self.coverage_log = None
-        self.coverage_links = None
-        self.contact_email = contact_email
-        self.source_url = source_url
         self.__logs = {}
         self.__log_desc = {}
-        self.__log_from_desc = {}
 
     def update_status(self, dryrun):
         pass
@@ -530,17 +524,11 @@ class Product(object):
         if log not in self.__logs:
             self.__logs[log] = []
         self.__log_desc[log] = description
-        self.__log_from_desc[description] = log
         lst = self.__logs[log]
         if isinstance(generated_files, (list, tuple)):
             lst.extend(generated_files)
         else:
             lst.append(generated_files)
-
-    def add_coverage(self, log, description, generated_files, links=None):
-        self.add_log(log, description, generated_files)
-        self.coverage_log = os.path.join(self.dir, log)
-        self.coverage_links = links
 
     def make_module_map(self, archs):
         self.module_map = {}
@@ -571,10 +559,6 @@ class Product(object):
         self.exclude_component(module, a)
 
     def check_logs(self, checker, formatters):
-        if self.coverage_links:
-            for link in self.coverage_links:
-                link.parse_logdir(os.path.join(checker.logdir, self.dir))
-
         self._errors = []
         for (log, generated_files) in self.__logs.items():
             self.__check_log(log, self.__log_desc[log], generated_files,
@@ -751,8 +735,8 @@ class CMakeLog(object):
 class GitHubProduct(Product):
     """A Product which is backed by a GitHub repository"""
 
-    def __init__(self, name, dir, contact_email, repo, *args, **kwargs):
-        Product.__init__(self, name, dir, contact_email, *args, **kwargs)
+    def __init__(self, name, dir, repo, *args, **kwargs):
+        Product.__init__(self, name, dir, *args, **kwargs)
         self.cmake_logs = []
         self.repo = repo
 
@@ -765,8 +749,8 @@ class GitHubProduct(Product):
 
 
 class IMPProduct(Product):
-    def __init__(self, name, dir, contact_email, repo, *args, **kwargs):
-        Product.__init__(self, name, dir, contact_email, *args, **kwargs)
+    def __init__(self, name, dir, repo, *args, **kwargs):
+        Product.__init__(self, name, dir, *args, **kwargs)
         self.cmake_logs = []
         self.repo = repo
 
@@ -1773,8 +1757,7 @@ def main():
     repo = Repository("imp")
     impcheck.add_repository(repo)
 
-    c = IMPProduct("IMP", "imp", [],
-                   module_coverage=True, repo=repo)
+    c = IMPProduct("IMP", "imp", module_coverage=True, repo=repo)
     imp_comp = c
     impcheck.add_product(c)
 
@@ -1903,7 +1886,7 @@ def main():
     repo = Repository("imp")
     if imp_lab_check:
         imp_lab_check.add_repository(repo)
-        c = IMPProduct("IMP-salilab", "imp-salilab", [],
+        c = IMPProduct("IMP-salilab", "imp-salilab",
                        module_coverage=True, repo=repo)
 
         imp_lab_check.add_product(c)
