@@ -732,22 +732,6 @@ class CMakeLog(object):
                 return
 
 
-class GitHubProduct(Product):
-    """A Product which is backed by a GitHub repository"""
-
-    def __init__(self, name, dir, repo, *args, **kwargs):
-        super().__init__(name, dir, *args, **kwargs)
-        self.cmake_logs = []
-        self.repo = repo
-
-    def _update_status(self, dryrun):
-        # currently doesn't work
-        s = GitHubStatusUpdater(dryrun, "salilab", self.repo.name)
-        s.set_status(sha=self.repo.newrevision,
-                     # cannot get module state, no url
-                     )
-
-
 class IMPProduct(Product):
     def __init__(self, name, dir, repo, *args, **kwargs):
         super().__init__(name, dir, *args, **kwargs)
