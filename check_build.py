@@ -736,7 +736,7 @@ class GitHubProduct(Product):
     """A Product which is backed by a GitHub repository"""
 
     def __init__(self, name, dir, repo, *args, **kwargs):
-        Product.__init__(self, name, dir, *args, **kwargs)
+        super().__init__(name, dir, *args, **kwargs)
         self.cmake_logs = []
         self.repo = repo
 
@@ -750,7 +750,7 @@ class GitHubProduct(Product):
 
 class IMPProduct(Product):
     def __init__(self, name, dir, repo, *args, **kwargs):
-        Product.__init__(self, name, dir, *args, **kwargs)
+        super().__init__(name, dir, *args, **kwargs)
         self.cmake_logs = []
         self.repo = repo
 
@@ -1024,7 +1024,7 @@ class BenchmarkSQLInserter(object):
 
 class TestXMLHandler(ContentHandler):
     def __init__(self, func, module):
-        ContentHandler.__init__(self)
+        super().__init__()
         self._test = None
         self._in_name = False
         self._in_measure = None
@@ -1499,7 +1499,7 @@ class IMPChecker(Checker):
     # to new dated directories
 
     def __init__(self, dirroot, version, branch):
-        Checker.__init__(self, dirroot, version)
+        super().__init__(dirroot, version)
         self.branch = branch
         self._dirroot = dirroot
         self.donebuildlink = os.path.join(dirroot, 'lastbuild')
@@ -1676,7 +1676,7 @@ class IMPChecker(Checker):
 class IMPLabChecker(Checker):
 
     def __init__(self, dirroot, version):
-        Checker.__init__(self, dirroot, version)
+        super().__init__(dirroot, version)
         self.donebuildlink = os.path.join(dirroot, 'nightly')
 
     def update_done_build(self, dryrun):
