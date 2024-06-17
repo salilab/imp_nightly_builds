@@ -1,9 +1,6 @@
 #!/usr/bin/python3
 
 import os
-import itertools
-import tarfile
-import tempfile
 import urllib.request
 import urllib.parse
 import http.client
@@ -41,51 +38,79 @@ imp_downloadhtml = '/guitar3/home/www/html/imp/nightly/download/'
 imp_lab_testhtml = '/guitar3/home/www/html/internal/imp-salilab/nightly/'
 imp_lab_testurl = 'https://salilab.org/internal/imp-salilab/nightly/tests.html'
 
+
 class ExcludedModule(object):
     pass
+
 
 class NoLogModule(object):
     pass
 
+
 class Error(object):
     pass
 
+
 class CircularDependencyError(Error):
     pass
+
+
 class FailedDependencyError(Error):
     pass
+
+
 class ExampleFailedError(Error):
     pass
+
 
 # Part of the build didn't start yet
 class NotRunError(Error):
     pass
+
+
 class BuildNotRunError(NotRunError):
     pass
+
+
 class TestNotRunError(NotRunError):
     pass
+
+
 class ExampleNotRunError(NotRunError):
     pass
+
+
 class BenchmarkNotRunError(NotRunError):
     pass
+
 
 # Part of the build is still running
 class RunningError(Error):
     pass
+
+
 class BuildRunningError(RunningError):
     pass
+
+
 class TestRunningError(RunningError):
     pass
+
+
 class ExampleRunningError(RunningError):
     pass
+
+
 class BenchmarkRunningError(RunningError):
     pass
+
 
 class MissingLogError(Error):
     def __init__(self, logpath, abslogpath, description):
         self._logpath = logpath
         self._abslogpath = abslogpath
         self._description = description
+
 
 class ExtraLogError(Error):
     def __init__(self, logpath, abslogpath):
@@ -96,14 +121,18 @@ class ExtraLogError(Error):
 class ModuleDisabledError(Error):
     pass
 
+
 class TestFailedError(Error):
     pass
+
 
 class BuildFailedError(Error):
     pass
 
+
 class BenchmarkFailedError(Error):
     pass
+
 
 class MissingOutputError(Error):
     def __init__(self, output, logpath, abslogpath, description):
@@ -130,6 +159,7 @@ def update_symlink(src, dest):
     os.symlink(src, tmplink)
     os.rename(tmplink, dest)
 
+
 def _get_only_failed_modules(module_map, modules, archs):
     failures = {}
     for m in modules:
@@ -141,6 +171,7 @@ def _get_only_failed_modules(module_map, modules, archs):
                 failures[m] = failures[a] = None
     return ([m for m in modules if m in failures],
             [a for a in archs if a in failures])
+
 
 def _get_text_module_map(name, module_map, modules, archs):
     def _format_module_error(error):
@@ -168,10 +199,11 @@ def _get_text_module_map(name, module_map, modules, archs):
         "at least one architecture are shown)\n" \
         % name
     modules, archs = _get_only_failed_modules(module_map, modules, archs)
-    t += " " * 13 + " ".join("%-5s"
-        % imp_build_utils.platforms_dict[x].very_short for x in archs) + "\n"
+    t += (" " * 13 +
+          " ".join("%-5s" % imp_build_utils.platforms_dict[x].very_short
+                   for x in archs) + "\n")
     for m in modules:
-        errs = [_format_module_error(module_map[m][arch]) \
+        errs = [_format_module_error(module_map[m][arch])
                 for arch in archs]
         t += "%-13s" % m[:13] + " ".join("%-5s" % e[:5] for e in errs) + "\n"
     return t
@@ -181,10 +213,13 @@ class CoverageLink(object):
     def __init__(self, desc, loc):
         self.desc = desc
         self.loc = loc
+
     def parse_logdir(self, logdir):
         return self.parse_file(os.path.join(logdir, self.loc, 'index.html'))
+
     def parse_file(self, fname):
         pass
+
     def _extract_percentage(self, fname, regex):
         # Get total percent coverage from index.html and add to desc
         r = re.compile(regex)
@@ -201,7 +236,7 @@ class CoverageLink(object):
 class PythonCoverageLink(CoverageLink):
     def parse_file(self, fname):
         return self._extract_percentage(fname,
-                                        "<span class=.pc_cov.>(\d+)%</span>")
+                                        r"<span class=.pc_cov.>(\d+)%</span>")
 
 
 class CCoverageLink(CoverageLink):
@@ -209,6 +244,7 @@ class CCoverageLink(CoverageLink):
         return self._extract_percentage(
             fname,
             r'<td class="headerCovTableEntry\w+">(\d+\.\d+)(\s|&nbsp;)*%</td>')
+
 
 class GitHubStatusUpdater(object):
     """Update the status of a repository in GitHub"""
@@ -224,7 +260,8 @@ class GitHubStatusUpdater(object):
            username: foo
            password: bar
         """
-        authfile = os.path.join(os.path.dirname(sys.argv[0]), 'githubauth.yaml')
+        authfile = os.path.join(os.path.dirname(sys.argv[0]),
+                                'githubauth.yaml')
         with open(authfile) as fh:
             self.auth = yaml.safe_load(fh)
 
@@ -261,7 +298,8 @@ class GitHubStatusUpdater(object):
             req = urllib.request.Request(url, data, headers)
             try:
                 return urllib.request.urlopen(req).read()
-            except (urllib.request.HTTPError, urllib.request.URLError) as error:
+            except (urllib.request.HTTPError,
+                    urllib.request.URLError) as error:
                 if hasattr(error, 'read'):
                     print(error.read())
                 print(str(error))
@@ -280,9 +318,9 @@ class LinkChecker(object):
     def check_link(self, fname, nline, link):
         if link in self._broken_links:
             self.add_broken_link(link, fname, nline)
-        elif link.startswith('http:') or link.startswith('https:') \
-             or link.startswith('//') or link.startswith('ftp:'):
-            if not link in self._checked_externals:
+        elif (link.startswith('http:') or link.startswith('https:')
+              or link.startswith('//') or link.startswith('ftp:')):
+            if link not in self._checked_externals:
                 self._checked_externals[link] = None
                 self._check_http_link(fname, nline, link)
             elif link in self._broken_links:
@@ -298,20 +336,20 @@ class LinkChecker(object):
     def _check_http_link(self, fname, nline, link):
         # Several websites forbid queries by bots; ninja-build.org has
         # SSL issues; doxygen often times out
-        if 'wikipedia' in link or 'amazon.com' in link \
-            or 'stackoverflow.com' in link \
-            or 'anaconda.com' in link \
-            or 'creativecommons.org' in link \
-            or 'nih.gov/pmc/' in link \
-            or 'atlassian.com' in link \
-            or 'git-scm.com' in link \
-            or 'graphviz.org' in link \
-            or 'pubs.acs.org' in link \
-            or 'msdn.microsoft' in link \
-            or 'ninja-build.org' in link \
-            or 'docs.github.com' in link \
-            or 'cmake.org' in link \
-            or link == 'http://www.doxygen.org/':
+        if ('wikipedia' in link or 'amazon.com' in link
+                or 'stackoverflow.com' in link
+                or 'anaconda.com' in link
+                or 'creativecommons.org' in link
+                or 'nih.gov/pmc/' in link
+                or 'atlassian.com' in link
+                or 'git-scm.com' in link
+                or 'graphviz.org' in link
+                or 'pubs.acs.org' in link
+                or 'msdn.microsoft' in link
+                or 'ninja-build.org' in link
+                or 'docs.github.com' in link
+                or 'cmake.org' in link
+                or link == 'http://www.doxygen.org/'):
             self.log("Skipping check of link " + link)
         else:
             self.log("Checking external link " + link)
@@ -322,11 +360,12 @@ class LinkChecker(object):
             try:
                 r = urllib.request.Request(checklink,
                                            headers={'User-Agent': 'urllib'})
-                u = urllib.request.urlopen(r, timeout=10)
+                _ = urllib.request.urlopen(r, timeout=10)
             except socket.timeout:
                 self.add_broken_link(link, fname, nline, 'timeout')
             except (urllib.request.URLError, http.client.HTTPException,
-                    ssl.SSLError, ssl.CertificateError, socket.error) as detail:
+                    ssl.SSLError, ssl.CertificateError,
+                    socket.error) as detail:
                 self.add_broken_link(link, fname, nline, str(detail))
 
     def add_broken_link(self, link, fname, nline, detail=None):
@@ -392,6 +431,7 @@ class LinkChecker(object):
                 for link in links:
                     self.check_link(fname, nline, link)
 
+
 def check_broken_links(html_dir, url_root, html, verbose, title,
                        outfh=sys.stdout):
     if not os.path.exists(html_dir):
@@ -399,7 +439,7 @@ def check_broken_links(html_dir, url_root, html, verbose, title,
     cwd = os.getcwd()
     os.chdir(html_dir)
 
-    l = LinkChecker(url_root, title, html, verbose)
+    lc = LinkChecker(url_root, title, html, verbose)
 
     nfiles = 0
     for x in os.listdir('.'):
@@ -407,13 +447,15 @@ def check_broken_links(html_dir, url_root, html, verbose, title,
             nfiles += 1
             if nfiles % 100 == 0 and verbose:
                 print("Checking file #%d" % nfiles, file=sys.stderr)
-            l.check_file(x)
-    l.print_summary(outfh)
+            lc.check_file(x)
+    lc.print_summary(outfh)
     os.chdir(cwd)
-    return l.nbroken
+    return lc.nbroken
+
 
 class Formatter(object):
     pass
+
 
 class TextFormatter(Formatter):
     def print_product(self, comp, errors, module_map=None, modules=None,
@@ -430,14 +472,19 @@ class TextFormatter(Formatter):
 
     def print_header(self, title=None):
         pass
+
     def print_footer(self):
         pass
+
     def print_start_products(self):
         pass
+
     def print_end_products(self):
         pass
+
     def print_new_repos(self, repos):
         pass
+
     def print_old_repos(self, repos):
         pass
 
@@ -448,8 +495,9 @@ class TextFormatter(Formatter):
         elif isinstance(error, ExtraLogError):
             print("  Unexpected log %s generated" % error._logpath)
         elif isinstance(error, MissingOutputError):
-            print("  %s: output %s not generated; see log %s" \
-                   % (error._description, error._output, error._logpath))
+            print("  %s: output %s not generated; see log %s"
+                  % (error._description, error._output, error._logpath))
+
 
 def get_imp_build_email_from():
     """Get the From: address for emails to the IMP-build mailing list"""
@@ -460,6 +508,7 @@ def get_imp_build_email_from():
         if len(line) > 0 and not line.startswith('#'):
             return line
     raise ValueError("Could not read email address")
+
 
 class Repository(object):
     def __init__(self, name):
@@ -473,7 +522,7 @@ class Repository(object):
                 self._parse_verfile(oldpath)
         except IOError:
             (self.oldlongver, self.oldversion, self.oldrevision) = \
-                ('unknown',)*3
+                ('unknown',) * 3
 
     def _parse_verfile(self, path):
         verfile = os.path.join(path, "build/%s-version" % self.name)
@@ -495,6 +544,7 @@ class Repository(object):
             version = longver
             revision = 'unknown'
         return (longver, version, revision)
+
 
 class Product(object):
     def __init__(self, name, dir, module_coverage=False):
@@ -638,9 +688,11 @@ class CMakeLog(object):
 
     def __init__(self, arch, build_types, generated_files):
         # Make sure build_types is correctly ordered
-        self.build_types = [x for x in self.all_build_types if x in build_types]
+        self.build_types = [x for x in self.all_build_types
+                            if x in build_types]
         self.arch = arch
         self.generated_files = generated_files
+
     def update_module_error(self, modmap, err, compname):
         olderr = modmap[self.arch]
         if isinstance(olderr, ExcludedModule):
@@ -653,12 +705,14 @@ class CMakeLog(object):
             return False
         modmap[self.arch] = err
         return True
+
     def check_extra_build_types(self, name, comp):
         for build_type in self.all_build_types:
             if build_type not in self.build_types:
                 if hasattr(comp, '%s_result' % build_type):
                     print("WARNING: %s in %s has extra build type %s"
                           % (name, self.arch, build_type))
+
     def check_module_errors(self, comp, logdir):
         logdir = os.path.join(logdir, self.arch)
         summary = os.path.join(logdir, 'summary.pck')
@@ -694,7 +748,8 @@ class CMakeLog(object):
                 self.get_build_result(m + ' benchmarks', comp, summary,
                                       ['benchmark'])
             else:
-                comp.module_map[m + ' benchmarks'][self.arch] = ExcludedModule()
+                comp.module_map[m + ' benchmarks'][self.arch] \
+                    = ExcludedModule()
 
     def get_build_result(self, m, comp, summary, build_types):
         sm = m
@@ -744,14 +799,14 @@ class IMPProduct(Product):
                      state={'OK': 'success', 'TEST': 'success',
                             'BUILD': 'failure', 'BADLOG': 'error',
                             'INCOMPLETE': 'error'}[self.state],
-                     description=
-                       {'OK': 'The build succeeded and all tests passed',
-                        'TEST': 'The build succeeded although some tests '
-                                'failed',
-                        'BUILD': 'The build failed',
-                        'BADLOG': 'A bad log file was produced',
-                        'INCOMPLETE': 'The build system '
-                                'ran out of time'}[self.state],
+                     description={
+                         'OK': 'The build succeeded and all tests passed',
+                         'TEST': 'The build succeeded although some tests '
+                                 'failed',
+                         'BUILD': 'The build failed',
+                         'BADLOG': 'A bad log file was produced',
+                         'INCOMPLETE': 'The build system '
+                                       'ran out of time'}[self.state],
                      target_url="http://integrativemodeling.org/nightly/"
                                 "results/?date=%s"
                                 % datetime.date.today().strftime('%Y%m%d'))
@@ -761,7 +816,8 @@ class IMPProduct(Product):
 
     def _check_module_errors(self, checker):
         for log in self.cmake_logs:
-            log.check_module_errors(self, os.path.join(checker.logdir, self.dir))
+            log.check_module_errors(
+                self, os.path.join(checker.logdir, self.dir))
 
     def get_module_state(self):
         states = ['BUILD', 'INCOMPLETE', 'TEST', 'OK']
@@ -806,7 +862,7 @@ class PruneDirectories(object):
 
     def _get_dirs_to_prune(self):
         today = datetime.datetime.today()
-        dirre = re.compile('(\d{4})(\d{2})(\d{2})')
+        dirre = re.compile(r'(\d{4})(\d{2})(\d{2})')
         alldirs = os.listdir(self._topdir)
         alldirs.sort()
 
@@ -825,8 +881,9 @@ class PruneDirectories(object):
                         months[month] = None
                     else:
                         dirs_to_prune.append(d)
-        self._exclude_linked_dirs(dirs_to_prune, ('nightly', 'stable',
-                                                  'lastbuild', 'last_ok_build'))
+        self._exclude_linked_dirs(dirs_to_prune,
+                                  ('nightly', 'stable',
+                                   'lastbuild', 'last_ok_build'))
         return dirs_to_prune
 
 
@@ -889,16 +946,18 @@ def update_arch(arch_table, arch, cur):
         cur.execute("SELECT LAST_INSERT_ID()")
         return cur.fetchone()[0]
 
+
 def update_unit(unit_table, unit, cur, lab_only):
     cur.execute("SELECT id FROM " + unit_table + " WHERE NAME=%s", (unit,))
     r = cur.fetchone()
     if r is not None:
         return r[0]
     else:
-        cur.execute("INSERT INTO " + unit_table + \
+        cur.execute("INSERT INTO " + unit_table +
                     " (name, lab_only) values(%s, %s)", (unit, lab_only))
         cur.execute("SELECT LAST_INSERT_ID()")
         return cur.fetchone()[0]
+
 
 def update_name(name_table, name, unit_id, cur):
     cur.execute("SELECT id FROM " + name_table + " WHERE name=%s AND unit=%s",
@@ -907,25 +966,29 @@ def update_name(name_table, name, unit_id, cur):
     if r is not None:
         return r[0]
     else:
-        cur.execute("INSERT INTO " + name_table \
+        cur.execute("INSERT INTO " + name_table
                     + " (name,unit) values(%s,%s)", (name, unit_id))
         cur.execute("SELECT LAST_INSERT_ID()")
         return cur.fetchone()[0]
+
+
 update_benchmark_file = update_name
 
+
 def update_benchmark_name(name_table, name, algorithm, file_id, cur):
-    cur.execute("SELECT id FROM " + name_table \
+    cur.execute("SELECT id FROM " + name_table
                 + " WHERE name=%s AND algorithm=%s AND file=%s",
                 (name, algorithm, file_id))
     r = cur.fetchone()
     if r is not None:
         return r[0]
     else:
-        cur.execute("INSERT INTO " + name_table \
+        cur.execute("INSERT INTO " + name_table
                     + " (name,algorithm,file) values(%s,%s,%s)",
                     (name, algorithm, file_id))
         cur.execute("SELECT LAST_INSERT_ID()")
         return cur.fetchone()[0]
+
 
 def connect_mysql():
     import MySQLdb
@@ -933,6 +996,7 @@ def connect_mysql():
     with open(os.path.join(d, 'imp-sql-args.pck'), 'rb') as fh:
         args = pickle.load(fh)
     return MySQLdb.connect(**args)
+
 
 def get_unit_name_from_modules(unit, comp_units):
     example = unit.endswith(' examples')
@@ -952,6 +1016,7 @@ def get_unit_name_from_modules(unit, comp_units):
         unit += ' benchmarks'
     return unit
 
+
 def get_benchmark_name(table, name_table, file_id, unit_id, arch_id, cur,
                        name, algorithm, runtime, check, seen_name_ids, date):
     name_id = update_benchmark_name(name_table, name, algorithm, file_id, cur)
@@ -969,6 +1034,7 @@ def get_benchmark_name(table, name_table, file_id, unit_id, arch_id, cur,
     cur.execute('INSERT INTO ' + table + ' (name, runtime, checkval, date, '
                 'platform) VALUES(%s, %s, %s, %s, %s)',
                 (name_id, runtime, check, date, arch_id))
+
 
 class BenchmarkSQLInserter(object):
     def __init__(self, file_table, unit, unit_table, lab_only, table,
@@ -1004,7 +1070,9 @@ class BenchmarkSQLInserter(object):
                     get_benchmark_name(self.table, self.name_table, file_id,
                                        self.unit_id, self.arch_id, self.cur,
                                        spl[0].strip(), spl[1].strip(),
-                                       runtime, check, seen_name_ids, self.date)
+                                       runtime, check, seen_name_ids,
+                                       self.date)
+
 
 class TestXMLHandler(ContentHandler):
     def __init__(self, func, module):
@@ -1024,7 +1092,7 @@ class TestXMLHandler(ContentHandler):
     def start_test(self, status):
         status_map = {'passed': 'OK', 'failed': 'FAIL', 'notrun': 'FAIL'}
         self._test = {'status': status_map[self.get_string(status)],
-                      'output':'', 'cases':[]}
+                      'output': '', 'cases': []}
         self.ntests += 1
 
     def end_test(self):
@@ -1187,6 +1255,7 @@ class TestSQLInserter(object):
         self.prev_tests = prev_tests
         self.seen_names = {}
         self.unit_id = None
+
     def __call__(self, test):
         if 'docstring' in test:
             test['name'] = test['docstring']
@@ -1242,7 +1311,8 @@ class DatabaseUpdater(object):
         self.conn = connect_mysql()
 
     def get_test_table(self, suffix, per_branch):
-        return self.get_table(self.test_table_prefix + '_' + suffix, per_branch)
+        return self.get_table(self.test_table_prefix + '_' + suffix,
+                              per_branch)
 
     def get_benchmark_table(self, suffix):
         return self.get_table(self.bench_table_prefix + '_' + suffix, False)
@@ -1305,11 +1375,12 @@ class DatabaseUpdater(object):
                 sql = state_to_sql[type(state)]
                 if arch in cmake_archs:
                     sql = 'CMAKE_' + sql
-                cur.execute("INSERT INTO " + result_table + \
+                cur.execute("INSERT INTO " + result_table +
                             " (arch, unit, "
                             "state, logline, date) VALUES (%s, %s, %s, %s, "
-                            "%s)", (arch_id, unit_id, sql,
-                               getattr(state, '_line_number', None), date))
+                            "%s)",
+                            (arch_id, unit_id, sql,
+                             getattr(state, '_line_number', None), date))
         self.conn.commit()
 
     def get_benchmarks(self, xmldir, comp, ignore_unknown=False):
@@ -1331,16 +1402,17 @@ class DatabaseUpdater(object):
         # Only include benchmark results for fast or release builds
         archs = [x for x in archs if 'fast' in x or 'release' in x]
         for arch in archs:
-            test_xmls = glob.glob(os.path.join(xmldir, arch, '*.benchmark.xml'))
+            test_xmls = glob.glob(os.path.join(xmldir, arch,
+                                               '*.benchmark.xml'))
             if len(test_xmls) > 0:
                 arch_id = update_arch(arch_table, arch, cur)
                 for test_xml in test_xmls:
                     t = TestXMLParser(comp, test_xml, ignore_unknown,
                                       use_base_unit=True)
                     if t.unit:
-                        t.parse(BenchmarkSQLInserter(file_table, t.unit,
-                                     unit_table, self.lab_only, table,
-                                     name_table, arch_id, cur, date))
+                        t.parse(BenchmarkSQLInserter(
+                            file_table, t.unit, unit_table, self.lab_only,
+                            table, name_table, arch_id, cur, date))
         self.conn.commit()
 
     def get_repo_revision(self, rev, version=None):
@@ -1352,11 +1424,11 @@ class DatabaseUpdater(object):
             cur.execute("DELETE FROM " + rev_table + " WHERE date=%s", (date,))
 
         if version:
-            cur.execute("INSERT INTO " + rev_table \
+            cur.execute("INSERT INTO " + rev_table
                         + " (rev, date, version) VALUES (%s, %s, %s)",
                         (rev, date, version))
         else:
-            cur.execute("INSERT INTO " + rev_table \
+            cur.execute("INSERT INTO " + rev_table
                         + " (rev, date) VALUES (%s, %s)", (rev, date))
         self.conn.commit()
 
@@ -1367,8 +1439,8 @@ class DatabaseUpdater(object):
         rev_table = self.get_test_table("other_reporev", True)
         if self.clean:
             cur.execute("DELETE FROM " + rev_table + " WHERE date=%s", (date,))
-        repovers = glob.glob(os.path.join(verdir, "*-version")) \
-                 + glob.glob(os.path.join(verdir, "*-gitrev"))
+        repovers = (glob.glob(os.path.join(verdir, "*-version"))
+                    + glob.glob(os.path.join(verdir, "*-gitrev")))
         for repover in repovers:
             repo = os.path.split(repover)[-1].split('-')[0]
             if repo == 'multifit':
@@ -1379,7 +1451,7 @@ class DatabaseUpdater(object):
                 # the IMP repo
                 continue
             rev = open(repover).readline().rstrip('\r\n')
-            cur.execute("INSERT INTO " + rev_table \
+            cur.execute("INSERT INTO " + rev_table
                         + " (rev, repo, date) VALUES (%s, %s, %s)",
                         (rev, repo, date))
         self.conn.commit()
@@ -1391,7 +1463,7 @@ class DatabaseUpdater(object):
         table = self.get_table("imp_doc", per_branch=True)
         if self.clean:
             cur.execute("DELETE FROM " + table + " WHERE date=%s", (date,))
-        cur.execute("INSERT INTO " + table + \
+        cur.execute("INSERT INTO " + table +
                     " (date, nbroken_manual, nbroken_tutorial, "
                     "nbroken_rmf_manual) VALUES (%s, %s, %s, %s)",
                     (date, broken_links[0], broken_links[1], broken_links[2]))
@@ -1404,7 +1476,7 @@ class DatabaseUpdater(object):
         table = self.get_table("imp_build_summary", per_branch=True)
         if self.clean:
             cur.execute("DELETE FROM " + table + " WHERE date=%s", (date,))
-        cur.execute("INSERT INTO " + table + \
+        cur.execute("INSERT INTO " + table +
                     " (state, date, lab_only) VALUES (%s, %s, %s)",
                     (comp.state, date, self.lab_only))
         self.conn.commit()
@@ -1436,19 +1508,19 @@ class DatabaseUpdater(object):
         except OSError:
             return
         for arch in archs:
-            test_xmls = glob.glob(os.path.join(xmldir, arch, '*.test.xml')) \
-                        + glob.glob(os.path.join(xmldir, arch,
-                                                 '*.benchmark.xml')) \
-                        + glob.glob(os.path.join(xmldir, arch, '*.example.xml'))
+            test_xmls = (glob.glob(os.path.join(xmldir, arch, '*.test.xml'))
+                         + glob.glob(os.path.join(xmldir, arch,
+                                                  '*.benchmark.xml'))
+                         + glob.glob(os.path.join(xmldir, arch,
+                                                  '*.example.xml')))
             if len(test_xmls) > 0:
                 arch_id = update_arch(arch_table, arch, cur)
                 for test_xml in test_xmls:
                     t = TestXMLParser(comp, test_xml, ignore_unknown)
                     if t.unit:
                         ntests = t.parse(TestSQLInserter(
-                                            table, name_table, t.unit,
-                                            unit_table, self.lab_only, arch_id,
-                                            date, cur, prev_tests))
+                            table, name_table, t.unit, unit_table,
+                            self.lab_only, arch_id, date, cur, prev_tests))
                         if test_xml.endswith('.test.xml') and ntests == 0:
                             print("WARNING: no tests for", t.unit, arch)
         self.conn.commit()
@@ -1477,6 +1549,7 @@ def link_to_logs(dirroot, subdir, destdir, branch):
             if not os.path.exists(target):
                 os.symlink(src, target)
 
+
 class IMPChecker(Checker):
     # Note: differs from Modeller behavior in that directories are not deleted
     # or renamed; instead symlinks are simply updated if necessary to point
@@ -1493,10 +1566,10 @@ class IMPChecker(Checker):
 
     def build_has_changed(self):
         """Return True only if the build changed since the last run"""
-        return not os.path.exists(self.donebuildlink) \
-               or not os.path.exists(self.newbuilddir) \
-               or os.readlink(self.donebuildlink) \
-                  != os.readlink(self.newbuilddir)
+        return (not os.path.exists(self.donebuildlink)
+                or not os.path.exists(self.newbuilddir)
+                or os.readlink(self.donebuildlink)
+                != os.readlink(self.newbuilddir))
 
     def print_header(self, formatter):
         title = 'IMP nightly build results, %s, %s' \
@@ -1522,7 +1595,8 @@ class IMPChecker(Checker):
             # Also copy Debian repo files
             if pattern.endswith('.deb'):
                 for f in ('Release', 'Packages', 'Packages.gz'):
-                    path = os.path.join(self.newbuilddir, 'packages', subdir, f)
+                    path = os.path.join(self.newbuilddir,
+                                        'packages', subdir, f)
                     if os.path.exists(path):
                         shutil.copy(path, download)
                     else:
@@ -1558,17 +1632,14 @@ class IMPChecker(Checker):
         outfh = open(os.path.join(self.nightlybuildlink, 'build',
                                   'broken-links.html'), 'w')
         nbroken_manual = check_broken_links(
-                   os.path.join(self.nightlybuildlink, 'doc', 'manual'),
-                   manual_url, html=True,
-                   verbose=False, title='IMP manual', outfh=outfh)
+            os.path.join(self.nightlybuildlink, 'doc', 'manual'), manual_url,
+            html=True, verbose=False, title='IMP manual', outfh=outfh)
         nbroken_ref = check_broken_links(
-                   os.path.join(self.nightlybuildlink, 'doc', 'ref'),
-                   ref_url, html=True,
-                   verbose=False, title='Reference guide', outfh=outfh)
+            os.path.join(self.nightlybuildlink, 'doc', 'ref'), ref_url,
+            html=True, verbose=False, title='Reference guide', outfh=outfh)
         nbroken_rmf_manual = check_broken_links(
-                   os.path.join(self.nightlybuildlink, 'RMF-doc'),
-                   rmf_manual_url, html=True,
-                   verbose=False, title='RMF manual', outfh=outfh)
+            os.path.join(self.nightlybuildlink, 'RMF-doc'), rmf_manual_url,
+            html=True, verbose=False, title='RMF manual', outfh=outfh)
         return (nbroken_manual, nbroken_ref, nbroken_rmf_manual)
 
     def update_done_build(self, dryrun):
@@ -1618,9 +1689,9 @@ class IMPChecker(Checker):
                              'packages/IMP*.el8.x86_64.rpm',
                              'packages/*.el6.x86_64.rpm',
                              'packages/*.el6.i686.rpm']
-        subdirs = [os.path.basename(d) \
+        subdirs = [os.path.basename(d)
                    for d in glob.glob(os.path.join(self.newbuilddir,
-                                                   'packages', '*')) \
+                                                   'packages', '*'))
                    if os.path.isdir(d)]
         if self.branch == 'develop':
             for pattern in download_patterns:
@@ -1656,6 +1727,7 @@ class IMPChecker(Checker):
         # Update 'stable' symlink to point to the new build
         src = os.readlink(self.newbuilddir)
         update_symlink(src, self.builddir)
+
 
 class IMPLabChecker(Checker):
 
@@ -1724,8 +1796,8 @@ def main():
                           'SVN', opts.imp_branch)
     # Lab-only components are currently only built against the develop branch
     if opts.imp_branch == 'develop':
-        imp_lab_check = IMPLabChecker("/salilab/diva1/home/imp-salilab/develop",
-                                      'SVN')
+        imp_lab_check = IMPLabChecker(
+            "/salilab/diva1/home/imp-salilab/develop", 'SVN')
     else:
         # Do nothing for non-develop builds if the build didn't run today
         # (unless a dry run was explicitly requested)
@@ -1742,7 +1814,6 @@ def main():
     impcheck.add_repository(repo)
 
     c = IMPProduct("IMP", "imp", module_coverage=True, repo=repo)
-    imp_comp = c
     impcheck.add_product(c)
 
     # Check RMF as part of IMP
@@ -1768,7 +1839,7 @@ def main():
         all_archs.remove(mac64)
 
     for arch in all_archs:
-        expfiles = ['lib/%s/IMP/%s/__init__.py' % (arch, m) \
+        expfiles = ['lib/%s/IMP/%s/__init__.py' % (arch, m)
                     for m in imp_modules_basic]
         c.add_cmake_log(arch, ['build', 'benchmark', 'test',
                                'example'], expfiles)
@@ -1850,14 +1921,15 @@ def main():
     c.add_log('rpm.source.log', 'RPM specfile',
               'packages/IMP.spec')
     c.add_cmake_log(f40_64, ['build', 'test'],
-              'packages/IMP-%s-1.fc38.x86_64.rpm' % repo.newlongver)
+                    'packages/IMP-%s-1.fc38.x86_64.rpm' % repo.newlongver)
     if opts.imp_branch != 'develop':
         c.add_cmake_log(rh7_64, ['build', 'test'],
-              'packages/IMP-%s-1.el7.centos.x86_64.rpm' % repo.newlongver)
+                        'packages/IMP-%s-1.el7.centos.x86_64.rpm'
+                        % repo.newlongver)
     c.add_cmake_log(rh8_64, ['build', 'test'],
-          'packages/IMP-%s-1.el8.x86_64.rpm' % repo.newlongver)
+                    'packages/IMP-%s-1.el8.x86_64.rpm' % repo.newlongver)
     c.add_cmake_log(rh9_64, ['build', 'test'],
-          'packages/IMP-%s-1.el9.x86_64.rpm' % repo.newlongver)
+                    'packages/IMP-%s-1.el9.x86_64.rpm' % repo.newlongver)
 
     # Check debs
     c.add_cmake_log(focal, ['build', 'test'],
@@ -1902,8 +1974,9 @@ def main():
                 static, release8, focal, jammy, noble] + rh_rpms + all_archs
         c.include_component('ALL_LAB', incs)
         c.include_component('COVERAGE_LAB', [coverage])
-        c.include_component('INSTALL_LAB', [fastmac, fast8, debug8,
-                                release8, cuda] + all_archs)
+        c.include_component('INSTALL_LAB',
+                            [fastmac, fast8, debug8, release8, cuda]
+                            + all_archs)
 
         for m in ('multifit2', 'domino3', 'bayesem2d'):
             c.exclude_component(m, (static,))
@@ -1931,7 +2004,7 @@ def main():
     if imp_lab_check:
         checks.append((imp_lab_check, imp_lab_testhtml, imp_lab_testurl))
 
-    for check,testhtml,testurl in checks:
+    for check, testhtml, testurl in checks:
         if opts.dryrun:
             formatters = [TextFormatter()]
         else:
@@ -1939,7 +2012,7 @@ def main():
             check.copy_log_files(testhtml)
 
         nerr = check.check_logs(formatters)
-        del formatters # Ensure that output file gets closed
+        del formatters  # Ensure that output file gets closed
         if not opts.dryrun:
             if nerr == 0:
                 check.activate_new_build()
@@ -1951,6 +2024,7 @@ def main():
         for lab_only in (False, True):
             imp_build_utils.send_imp_results_email(conn, email_from, lab_only,
                                                    opts.imp_branch)
+
 
 if __name__ == '__main__':
     main()
