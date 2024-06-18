@@ -65,6 +65,9 @@ need some extra nonstandard RPM packages to reproduce our builds:
 <a href="https://integrativemodeling.org/libTAU.html">libTAU,
 libTAU-devel</a>, and other dependencies available at
 <a href="https://integrativemodeling.org/build-extras/">https://integrativemodeling.org/build-extras/</a>.
+The build scripts can also be found in the
+<a href="https://github.com/salilab/imp_nightly_builds">IMP nightly builds</a>
+GitHub repo.
 """
 
 rpm_cvlong = rpm_vlong_header + """
@@ -121,7 +124,10 @@ Python 3, and the built IMP itself via <a href="https://winehq.org/">WINE</a>.
 
 <p>To build the .exe package yourself, see the
 <a href="https://github.com/salilab/imp/tree/develop/tools/w32">tools/w32/</a>
-directory, in particular the <tt>make-package.sh</tt> script.</p>
+directory, in particular the <tt>make-package.sh</tt> script.
+The build scripts can also be found in the
+<a href="https://github.com/salilab/imp_nightly_builds">IMP nightly builds</a>
+GitHub repo.</p>
 
 <p>It should also be possible to build IMP on a real Windows machine;
 instructions are in the IMP documentation. If it doesn't work, let us know
@@ -129,7 +135,9 @@ and we'll fix it!</p>
 """
 
 mac_header = """
-<p>This platform builds and tests IMP on a %s system with %s. This is a
+<p>This platform builds and tests IMP on a %s system with %s, using scripts in
+the <a href="https://github.com/salilab/imp_nightly_builds">IMP nightly builds</a>
+GitHub repo. This is a
 standard Mac with XCode installed plus <a href="https://brew.sh/">Homebrew</a>,
 the <tt>salilab/salilab</tt> Homebrew tap, and
 the following Homebrew packages: %s<tt>boost</tt>, <tt>cgal</tt>,
@@ -174,11 +182,17 @@ on 64-bit Ubuntu %s (running inside a
 
 <p>To build the package yourself, see the
 <a href="https://github.com/salilab/imp/tree/develop/tools/debian">tools/debian/</a>
-directory, in particular the <tt>make-package.sh</tt> script.</p>
+directory, in particular the <tt>make-package.sh</tt> script.
+The build scripts can also be found in the
+<a href="https://github.com/salilab/imp_nightly_builds">IMP nightly builds</a>
+GitHub repo.</p>
 """
 
 linux_vlong = """
-<p>This platform builds and tests IMP on a fully updated %s.%s
+<p>This platform builds and tests IMP on a fully updated %s,
+using scripts in the
+<a href="https://github.com/salilab/imp_nightly_builds">IMP nightly builds</a>
+GitHub repo.%s
 The system is customized with additional RPM packages so that all IMP modules
 and applications can be built and tested (in contrast to the RPM builds, where
 only those modules and applications that use packages in the RedHat
@@ -189,7 +203,9 @@ repositories are built).
 
 cuda_vlong = """
 <p>This platform builds and tests IMP on a fully updated %s system with
-the CUDA toolkit and Python 3, and activates IMP's <b>experimental</b> GPU code.
+the CUDA toolkit and Python 3, using scripts in the
+<a href="https://github.com/salilab/imp_nightly_builds">IMP nightly builds</a>
+GitHub repo, and activates IMP's <b>experimental</b> GPU code.
 </p>
 """
 
@@ -203,12 +219,17 @@ the build summary page.</p>
 For more information on coverage reporting, see the
 <a href="https://github.com/salilab/imp/tree/develop/tools/coverage">tools/coverage/</a>
 directory.
+The build scripts can also be found in the
+<a href="https://github.com/salilab/imp_nightly_builds">IMP nightly builds</a>
+GitHub repo.
 </p>
 %s
 """
 
 static_vlong = """
-<p>This platform builds IMP on a fully updated %s system, but unlike
+<p>This platform builds IMP on a fully updated %s system, using scripts in the
+<a href="https://github.com/salilab/imp_nightly_builds">IMP nightly builds</a>
+GitHub repo, but unlike
 regular builds, links every binary statically (<tt>IMP_STATIC</tt> cmake
 option). Note that many modules do not support static linking and thus are
 excluded from this build. Also, since Python requires dynamic linking, no
