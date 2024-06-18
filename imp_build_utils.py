@@ -269,7 +269,7 @@ all_platforms = (('i386-intel8', Platform('Lin32', 'Linux32',
                                       fast_build_module_vlong),
                        'bin-fast.x86_64-intel8.log')),
                  ('debug8', Platform('Dbg', 'Debug',
-                       'Debug build (64-bit Linux, Rocky 8.10,'
+                       'Debug build (64-bit Linux, Rocky 8.10, '
                        'Boost 1.73, Python 3)',
                        linux_vlong % ("64-bit Rocky 8.10 system with Python 3",
                                       '', debug_build_vlong),
