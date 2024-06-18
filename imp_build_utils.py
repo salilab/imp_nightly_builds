@@ -375,7 +375,7 @@ all_platforms = (('i386-intel8', Platform('Lin32', 'Linux32',
                        'bin.mac11arm64-gnu.log')),
                  ('mac12arm64-gnu', Platform('MARM', 'Mac ARM',
                        'Debug build (Apple Silicon Mac; MacOS 12 '
-                       '(Monterey); clang++; Boost 1.80; Python 3; '
+                       '(Monterey); clang++; Boost 1.85; Python 3; '
                        'per-cpp compilation)',
                        mac_vlong % ("64-bit Apple Silicon "
                                     "MacOS 12 (Monterey) Mac",
@@ -385,7 +385,7 @@ all_platforms = (('i386-intel8', Platform('Lin32', 'Linux32',
                        'bin.mac12arm64-gnu.log')),
                  ('mac12-intel', Platform('M12', 'Mac 12',
                        'Debug build (64-bit Intel Mac; MacOS 12 '
-                       '(Monterey); clang++; Boost 1.80; Python 3; '
+                       '(Monterey); clang++; Boost 1.85; Python 3; '
                        'per-cpp compilation)',
                        mac_vlong % ("64-bit MacOS 12 (Monterey) Mac",
                                     "Homebrew Python 3", "") \
@@ -399,7 +399,7 @@ all_platforms = (('i386-intel8', Platform('Lin32', 'Linux32',
                        + fast_build_vlong, 'bin-fast.mac13-intel.log')),
                  ('fastmac14', Platform('McFst', 'Mac Fast',
                        'Fast build (Apple Silicon Mac; MacOS 14 (Sonoma); ' \
-                       'clang++; Boost 1.81; Python 3)',
+                       'clang++; Boost 1.85; Python 3)',
                        mac_header % ("Apple Silicon MacOS 14 (Sonoma) Mac",
                                      "Homebrew Python 3", "") \
                        + fast_build_vlong, 'bin-fast.mac14-intel.log')),
@@ -456,12 +456,12 @@ all_platforms = (('i386-intel8', Platform('Lin32', 'Linux32',
                        static_vlong % "64-bit CentOS 7.9",
                        'bin-static.x86_64-intel8.log')),
                  ('static9', Platform('Stat', 'Static',
-                       'Static build (x86_64 Linux, Rocky 9.3, Boost 1.75)',
-                       static_vlong % "64-bit Rocky 9.3",
+                       'Static build (x86_64 Linux, Rocky 9.4, Boost 1.75)',
+                       static_vlong % "64-bit Rocky 9.4",
                        'bin-static.x86_64-intel8.log')),
                  ('coverage', Platform('Cov', 'Coverage',
                        'Coverage build (debug build on Fedora 40, 64-bit; ' \
-                       'Boost 1.83, gcc 14.0, Python 3)',
+                       'Boost 1.83, gcc 14.1, Python 3)',
                        coverage_vlong % ("64-bit Fedora 40",
                                          debug_build_vlong),
                        'coverage.log')),
@@ -496,9 +496,9 @@ all_platforms = (('i386-intel8', Platform('Lin32', 'Linux32',
                        rpm_cvlong % ("Rocky Linux 8.10", ""),
                        'package.el8-x86_64.log')),
                  ('pkg.el9-x86_64', Platform('RH9', 'RH9 RPM',
-                       'RedHat Enterprise 9.3 RPM build; '
+                       'RedHat Enterprise 9.4 RPM build; '
                        'Boost 1.75, Python 3',
-                       rpm_cvlong % ("Rocky Linux 9.3", ""),
+                       rpm_cvlong % ("Rocky Linux 9.4", ""),
                        'package.el9-x86_64.log')),
                  ('pkg.f16-x86_64', Platform('F16', 'F16 RPM',
                        'Fedora 16 64-bit RPM; Boost 1.47, gcc 4.6',
@@ -623,7 +623,7 @@ all_platforms = (('i386-intel8', Platform('Lin32', 'Linux32',
                         + rpm_vlong_footer + "</p>",
                        'package.fc39-x86_64.log')),
                  ('pkg.f40-x86_64', Platform('F40', 'F40 RPM',
-                       'Fedora 40 RPM build; Boost 1.83, gcc 14.0, '
+                       'Fedora 40 RPM build; Boost 1.83, gcc 14.1, '
                        'Python 3',
                        rpm_vlong_header % "Fedora 40"
                         + rpm_vlong_footer + "</p>",
