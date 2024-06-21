@@ -224,8 +224,22 @@ do_build() {
     codename=`lsb_release -c -s`
     DEBPKG=${IMPPKG}/${codename}
     mkdir -p ${DEBPKG}
+    # Also make source packages for non-develop builds
+    if [ ${BRANCH} != "develop" ]; then
+      mkdir ${DEBPKG}/source
+    fi
     deb_build() {
       local LOG_DIR=$1
+      # Build source package
+      if [ ${BRANCH} != "develop" ]; then
+        cp ${IMPSRCTGZ} ../imp_${IMPVERSION}.orig.tar.gz
+        tools/debian-ppa/make-package.sh  # will fail due to unmet deps
+        dpkg-buildpackage -S -d
+        rm -f ../imp_${IMPVERSION}.orig.tar.gz
+        rm -rf debian
+        mv ../*.debian.tar.gz ../*.dsc ../*.buildinfo ../*.changes ${DEBPKG}/source/
+      fi
+
       tools/debian/make-package.sh ${IMPVERSION} && cp ../imp*.deb ${DEBPKG}
       RET=$?
       release=`lsb_release -r -s`
