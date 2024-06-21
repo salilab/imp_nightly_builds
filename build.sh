@@ -284,9 +284,12 @@ EOF
 
     # Make spec file
     SPEC=${IMPPKG}/IMP.spec
+    SPEC_COPR=${IMPPKG}/IMP-copr.spec
     (mkdir -p ${IMPPKG} \
      && sed -e "s/@IMP_VERSION@/${IMPVERSION}/" < tools/rpm/IMP.spec.in \
-                                                > ${SPEC}) \
+                                                > ${SPEC} \
+     && sed -e "s/@IMP_VERSION@/${IMPVERSION}/" < tools/rpm/IMP-copr.spec.in \
+                                                > ${SPEC_COPR}) \
                             > ${IMPLOGS}/imp/rpm.source.log 2>&1
 
     make_modeller_config() {
