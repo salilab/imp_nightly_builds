@@ -223,22 +223,34 @@ do_build() {
   elif test $PLATFORM = "debs"; then
     codename=`lsb_release -c -s`
     DEBPKG=${IMPPKG}/${codename}
-    mkdir -p ${DEBPKG}
-    # Also make source packages for non-develop builds
-    if [ ${BRANCH} != "develop" ]; then
-      mkdir ${DEBPKG}/source
-    fi
+    mkdir -p ${DEBPKG}/source
     deb_build() {
       local LOG_DIR=$1
       # Build source package
-      if [ ${BRANCH} != "develop" ]; then
-        cp ${IMPSRCTGZ} ../imp_${IMPVERSION}.orig.tar.gz
-        tools/debian-ppa/make-package.sh  # will fail due to unmet deps
-        dpkg-buildpackage -S -d
-        rm -f ../imp_${IMPVERSION}.orig.tar.gz
-        rm -rf debian
-        mv ../*.debian.tar.gz ../*.dsc ../*.buildinfo ../*.changes ${DEBPKG}/source/
+      cp ${IMPSRCTGZ} ../imp_${IMPVERSION}.orig.tar.gz
+      tools/debian-ppa/make-package.sh  # will fail due to unmet deps
+      if [ ${BRANCH} = "develop" ]; then
+        # Add nightly build "version" to changelog
+	DATE_R=$(date -R)
+	mv debian/changelog debian/changelog.orig
+        cat <<END > debian/changelog
+imp (${IMPVERSION}-1~${codename}) ${codename}; urgency=low
+
+  * Synthesized changelog entry for nightly build
+
+ -- IMP Developers <imp@salilab.org>  ${DATE_R}
+
+END
+        cat debian/changelog.orig >> debian/changelog
+	rm -f debian/changelog.orig
       fi
+      dpkg-buildpackage -S -d
+      rm -f ../imp_${IMPVERSION}.orig.tar.gz
+      rm -rf debian
+      mv ../*.debian.tar.* ../*.dsc ../*.buildinfo ../*.changes \
+         ${DEBPKG}/source/
+      ln -sf ../../../build/sources/imp-${IMPVERSION}.tar.gz \
+             ${DEBPKG}/source/imp_${IMPVERSION}.orig.tar.gz
 
       tools/debian/make-package.sh ${IMPVERSION} && cp ../imp*.deb ${DEBPKG}
       RET=$?
