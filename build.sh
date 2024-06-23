@@ -244,7 +244,14 @@ END
         cat debian/changelog.orig >> debian/changelog
 	rm -f debian/changelog.orig
       fi
+      # Temporarily back out changes to MPI.cmake; dpkg wants pristine sources
+      if [ `id -u` -eq 0 ]; then
+        perl -pi -e 's#;--allow-run-as-root##' modules/mpi/dependency/MPI.cmake
+      fi
       dpkg-buildpackage -S -d
+      if [ `id -u` -eq 0 ]; then
+        perl -pi -e 's#\{MPIEXEC_PREFLAGS\}#\{MPIEXEC_PREFLAGS\};--allow-run-as-root#' modules/mpi/dependency/MPI.cmake
+      fi
       rm -f ../imp_${IMPVERSION}.orig.tar.gz
       rm -rf debian
       mv ../*.debian.tar.* ../*.dsc ../*.buildinfo ../*.changes \
