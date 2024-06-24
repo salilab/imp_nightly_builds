@@ -28,7 +28,7 @@ import base64
 import zlib
 
 # IMP modules that we expect to be installed on every architecture
-imp_modules_basic = ["algebra", "atom", "base", "container", "core",
+imp_modules_basic = ["algebra", "atom", "container", "core",
                      "display", "domino", "em", "misc", "modeller", "parallel"]
 
 imp_testhtml = '/guitar3/home/www/html/imp/nightly/'
@@ -495,8 +495,12 @@ class TextFormatter(Formatter):
         elif isinstance(error, ExtraLogError):
             print("  Unexpected log %s generated" % error._logpath)
         elif isinstance(error, MissingOutputError):
-            print("  %s: output %s not generated; see log %s"
-                  % (error._description, error._output, error._logpath))
+            if error._logpath is None:
+                print("  %s: output %s not generated"
+                      % (error._description, error._output))
+            else:
+                print("  %s: output %s not generated; see log %s"
+                      % (error._description, error._output, error._logpath))
 
 
 def get_imp_build_email_from():
@@ -613,6 +617,8 @@ class Product(object):
         for (log, generated_files) in self.__logs.items():
             self.__check_log(log, self.__log_desc[log], generated_files,
                              checker, self._errors)
+        for cmake_log in self.cmake_logs:
+            self.__check_cmake_log(cmake_log, checker, self._errors)
         self.__check_extra_logs(checker, self._errors)
         self._check_module_errors(checker)
         self.print_product(formatters, os.path.join(checker.logdir, self.dir))
@@ -662,6 +668,13 @@ class Product(object):
                 abslogpath = os.path.join(checker.logdir, logpath)
                 errors.append(ExtraLogError(logpath, abslogpath))
 
+    def __check_cmake_log(self, cmake_log, checker, errors):
+        for gen in cmake_log.generated_files:
+            filepath = os.path.join(checker.newbuilddir, gen)
+            if not os.path.exists(filepath):
+                desc = imp_build_utils.platforms_dict[cmake_log.arch].long
+                errors.append(MissingOutputError(gen, None, None, desc))
+
     def __check_log(self, log, description, generated_files, checker, errors):
         logpath = os.path.join(self.dir, log)
         abslogpath = os.path.join(checker.logdir, logpath)
@@ -691,7 +704,10 @@ class CMakeLog(object):
         self.build_types = [x for x in self.all_build_types
                             if x in build_types]
         self.arch = arch
-        self.generated_files = generated_files
+        if not isinstance(generated_files, (list, tuple)):
+            self.generated_files = [generated_files]
+        else:
+            self.generated_files = generated_files
 
     def update_module_error(self, modmap, err, compname):
         olderr = modmap[self.arch]
@@ -1921,7 +1937,7 @@ def main():
     c.add_log('rpm.source.log', 'RPM specfile',
               'packages/IMP.spec')
     c.add_cmake_log(f40_64, ['build', 'test'],
-                    'packages/IMP-%s-1.fc38.x86_64.rpm' % repo.newlongver)
+                    'packages/IMP-%s-1.fc40.x86_64.rpm' % repo.newlongver)
     if opts.imp_branch != 'develop':
         c.add_cmake_log(rh7_64, ['build', 'test'],
                         'packages/IMP-%s-1.el7.centos.x86_64.rpm'
