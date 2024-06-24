@@ -1802,6 +1802,18 @@ def get_options():
     return parser.parse_args()
 
 
+def _deb_packages(version, codename):
+    """Get a list of all generated .deb binary and source packages"""
+    srcprefix = 'packages/%s/source/imp_%s-1~%s' % (codename, version,
+                                                    codename)
+    return ['packages/%s/imp_%s-1_amd64.deb' % (codename, version),
+            'packages/%s/source/imp_%s.orig.tar.gz' % (codename, version),
+            srcprefix + '.debian.tar.xz',
+            srcprefix + '_source.buildinfo',
+            srcprefix + '_source.changes',
+            srcprefix + '.dsc']
+
+
 def main():
     opts = get_options()
     impcheck = IMPChecker("/salilab/diva1/home/imp/" + opts.imp_branch,
@@ -1942,12 +1954,11 @@ def main():
 
     # Check debs
     c.add_cmake_log(focal, ['build', 'test'],
-                    'packages/focal/imp_%s-1_amd64.deb' % repo.newlongver)
+                    _deb_packages(repo.newlongver, 'focal'))
     c.add_cmake_log(jammy, ['build', 'test'],
-                    'packages/jammy/imp_%s-1_amd64.deb' % repo.newlongver)
+                    _deb_packages(repo.newlongver, 'jammy'))
     c.add_cmake_log(noble, ['build', 'test'],
-                    'packages/noble/imp_%s-1_amd64.deb' % repo.newlongver)
-
+                    _deb_packages(repo.newlongver, 'noble'))
     repo = Repository("imp")
     if imp_lab_check:
         imp_lab_check.add_repository(repo)
