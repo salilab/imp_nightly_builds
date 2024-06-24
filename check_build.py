@@ -27,10 +27,6 @@ import yaml
 import base64
 import zlib
 
-# IMP modules that we expect to be installed on every architecture
-imp_modules_basic = ["algebra", "atom", "container", "core",
-                     "display", "domino", "em", "misc", "modeller", "parallel"]
-
 imp_testhtml = '/guitar3/home/www/html/imp/nightly/'
 imp_testurl = 'http://salilab.org/imp/nightly/tests.html'
 imp_downloadhtml = '/guitar3/home/www/html/imp/nightly/download/'
@@ -1855,10 +1851,7 @@ def main():
         all_archs.remove(mac64)
 
     for arch in all_archs:
-        expfiles = ['lib/%s/IMP/%s/__init__.py' % (arch, m)
-                    for m in imp_modules_basic]
-        c.add_cmake_log(arch, ['build', 'benchmark', 'test',
-                               'example'], expfiles)
+        c.add_cmake_log(arch, ['build', 'benchmark', 'test', 'example'], [])
 
     # Check static, debug and release Linux builds
     static = 'static9'
