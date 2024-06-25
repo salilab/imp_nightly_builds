@@ -218,6 +218,8 @@ class TestPage(object):
 <link href="jquery.jqplot.css" rel="stylesheet" type="text/css">""")  # noqa: E501
         print("""
 <link href="tests.css" rel="stylesheet" type="text/css">
+<link href="/fontawesome6/css/fontawesome.min.css" rel="stylesheet" type="text/css">
+<link href="/fontawesome6/css/brands.min.css" rel="stylesheet" type="text/css">
 
 <script type="text/javascript"><!--
 window.onload = linkEmail;
@@ -1771,6 +1773,9 @@ $(document).ready(function() {
                 cls = ''
             print('    <li%s><a href="%s">%s</a></li>'
                   % (cls, self.get_link(page=link), linktext[link]))
+        print('    <li><a href="https://github.com/salilab/'
+              'imp_nightly_builds/blob/main/www/index.py">'
+              '<i class="fab fa-github"></i> Edit on GitHub</a></li>')
         print('  </ul>\n</div>')
         print("<div class=\"linkspacer\"></div>")
         print("<div class=\"implinks\">")
