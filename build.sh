@@ -59,12 +59,8 @@ do_build() {
 
   # Skip non-develop build if nothing has changed
   if [ ${BRANCH} != "develop" ]; then
-    if [ -d $HOME/diva1/home/imp ]; then
-      OLD_IMPINSTALL=`readlink $HOME/diva1/home/imp/${BRANCH}/lastbuild | sed -e "s,/salilab,$HOME,"`
-    else
-      OLD_IMPINSTALL=`readlink /salilab/diva1/home/imp/${BRANCH}/lastbuild`
-    fi
-    if [ "${OLD_IMPINSTALL}" = "${IMPINSTALL}" ]; then
+    LAST_IMPINSTALL=$(cd ${IMP_INSTALL_TOP}/${BRANCH}/.last && pwd -P)
+    if [ "${LAST_IMPINSTALL}" = "${IMPINSTALL}" ]; then
       return
     fi
     # Otherwise, wait until the develop build is all done (at 7am)

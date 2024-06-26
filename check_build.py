@@ -905,6 +905,7 @@ class Checker(object):
         self._repos = []
         self.dirroot = dirroot
         self.version = version
+        self.newbuilddir_rel = os.path.join(dirroot, ".new")
         self.newbuilddir = os.path.join(dirroot, ".%s-new" % version)
         self.oldbuilddir = os.path.join(dirroot, ".%s-old" % version)
         self.logdir = os.path.join(self.newbuilddir, "build/logs")
@@ -1572,6 +1573,7 @@ class IMPChecker(Checker):
         self.branch = branch
         self._dirroot = dirroot
         self.donebuildlink = os.path.join(dirroot, 'lastbuild')
+        self.donebuildlink_rel = os.path.join(dirroot, '.last')
         self.okbuildlink = os.path.join(dirroot, 'last_ok_build')
         self.nightlybuildlink = os.path.join(dirroot, 'nightly')
         self.builddir = os.path.join(dirroot, 'stable')
@@ -1659,6 +1661,9 @@ class IMPChecker(Checker):
             # Update last-build symlink to point to the new build
             src = os.readlink(self.newbuilddir)
             update_symlink(src, self.donebuildlink)
+            # Also add a new-style relative symlink
+            src = os.readlink(self.newbuilddir_rel)
+            update_symlink(src, self.donebuildlink_rel)
         db = DatabaseUpdater(dryrun, 'imp_test', 'imp_benchmark', False,
                              self.branch, clean=True)
         db.get_test_results(self._products[0],
