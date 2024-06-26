@@ -77,11 +77,7 @@ do_build() {
   # For now, only build lab-only components against the develop branch
   # (not main)
   if [ ${BRANCH} = "develop" ]; then
-    if [ -d $HOME/diva1/home/imp ]; then
-      IMP_LAB_INSTALL=`readlink $HOME/diva1/home/imp-salilab/${BRANCH}/.SVN-new | sed -e "s,/salilab,$HOME,"`
-    else
-      IMP_LAB_INSTALL=`readlink /salilab/diva1/home/imp-salilab/${BRANCH}/.SVN-new`
-    fi
+    IMP_LAB_INSTALL=$(cd ${IMP_LAB_INSTALL_TOP}/${BRANCH}/.new && pwd -P)
     IMPLABSRCTGZ=${IMP_LAB_INSTALL}/build/sources/imp-salilab.tar.gz
     IMP_LAB_LOGS=${IMP_LAB_INSTALL}/build/logs
   else

@@ -4,5 +4,8 @@ GIT_TOP=XXXX
 # Top-level directory for IMP installs
 IMP_INSTALL_TOP=XXXX
 
+# Top-level directory for IMP lab-only installs
+IMP_LAB_INSTALL_TOP=XXXX
+
 # Modeller license key
 MODELLER_LICENSE_KEY=XXXX
