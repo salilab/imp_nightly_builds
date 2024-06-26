@@ -29,7 +29,7 @@ rev=`git rev-parse ${BRANCH}`
 shortrev=`git rev-parse --short ${BRANCH}`
 
 # Get old revision
-oldrev_file=${IMPTOP}/.SVN-new/build/imp-gitrev
+oldrev_file=${IMPTOP}/.new/build/imp-gitrev
 if [ -f "${oldrev_file}" ]; then
   oldrev=`cat ${oldrev_file}`
 fi
