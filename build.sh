@@ -54,11 +54,8 @@ fi
 do_build() {
   PLATFORM=$1
   BRANCH=$2
-  if [ -d $HOME/diva1/home/imp ]; then
-    IMPINSTALL=`readlink $HOME/diva1/home/imp/${BRANCH}/.SVN-new | sed -e "s,/salilab,$HOME,"`
-  else
-    IMPINSTALL=`readlink /salilab/diva1/home/imp/${BRANCH}/.SVN-new`
-  fi
+  # Get directory to install this branch of IMP in (populated by setup_build.sh)
+  IMPINSTALL=$(cd ${IMP_INSTALL_TOP}/${BRANCH}/.new && pwd -P)
 
   # Skip non-develop build if nothing has changed
   if [ ${BRANCH} != "develop" ]; then
