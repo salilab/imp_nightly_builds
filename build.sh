@@ -6,6 +6,9 @@
 # platforms, if desired).
 # Remaining arguments are the branches to build (e.g. main, develop)
 
+# Get config
+. `dirname $0`/build_config.sh
+
 # Get common functions
 . `dirname $0`/build_functions.sh
 
@@ -297,7 +300,7 @@ EOF
       local CONFIG="$2"
       cat > "${CONFIG}" <<END
 install_dir = r'/usr/lib/modeller${MODELLER_VERSION}'
-license = 'XXXXX'
+license = '${MODELLER_LICENSE_KEY}'
 END
     }
 

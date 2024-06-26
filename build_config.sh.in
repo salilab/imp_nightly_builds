@@ -1,0 +1,8 @@
+# Top-level directory containing git repos
+GIT_TOP=XXXX
+
+# Top-level directory for IMP installs
+IMP_INSTALL_TOP=XXXX
+
+# Modeller license key
+MODELLER_LICENSE_KEY=XXXX

@@ -2,6 +2,9 @@ This repository contains the scripts used internally by the Sali Lab
 to build IMP in a variety of operating systems (different versions of macOS,
 Windows, Linux) and environments (e.g. debug, release, static builds).
 
+ - `build_config.sh.in` is used to configure the scripts for your environment.
+   First copy it to `build_config.sh` and set the variables in the script
+   appropriately.
  - `setup_build.sh` gets a nightly snapshot of the IMP source code and puts
    both it and the rest of the build scripts on a network-accessible disk so
    that all build hosts can see it.

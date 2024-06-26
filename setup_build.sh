@@ -6,19 +6,20 @@
 # Should be run on from a crontab on a machine that has access to a git
 # clone, e.g.
 #
-# 10 1 * * * /cowbell1/home/ben/imp_nightly_builds/auto-build.sh develop
+# 10 1 * * * /home/ben/imp_nightly_builds/setup_build.sh develop
 
 if [ $# -ne 1 ]; then
   echo "Usage: $0 branch"
   exit 1
 fi
 
-GIT_TOP=/cowbell1/git
+# Get config
+. `dirname $0`/build_config.sh
 
 BRANCH=$1
 
 TMPDIR=/var/tmp/imp-build-$$
-IMPTOP=/salilab/diva1/home/imp/$BRANCH
+IMPTOP=${IMP_INSTALL_TOP}/$BRANCH
 mkdir -p ${IMPTOP}
 
 cd ${GIT_TOP}/imp.git
@@ -127,7 +128,7 @@ mv imp imp-${IMPVERSION} && tar --exclude .git -czf ${IMPSRCTGZ} imp-${IMPVERSIO
 
 # Add build scripts
 cd `dirname $0`
-cp build.sh build_vagrant.sh build_functions.sh "${IMPINSTALL}/build/"
+cp build.sh build_config.sh build_vagrant.sh build_functions.sh "${IMPINSTALL}/build/"
 
 # Cleanup
 cd /
