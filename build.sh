@@ -29,21 +29,14 @@ if [ -f /etc/profile.d/sali-modules.sh ] && ! module avail >& /dev/null; then
   . /etc/profile.d/sali-modules.sh
 fi
 
-# Use GNU make and tar (in /usr/local/bin on Sun, /usr/freeware/bin on IRIX,
-# and /usr/linux/bin on AIX);
-# add MacPorts path (/opt/local/bin) for 7za on our Macs;
-# and make sure we can find xlc on AIX
-PATH="/opt/homebrew/bin:/usr/local/bin:/usr/freeware/bin:/usr/linux/bin:/opt/local/bin:${PATH}:/usr/vac/bin"
+# Use GNU make and tar (potentially in Homebrew locations on Macs)
+PATH="/opt/homebrew/bin:/usr/local/bin:/opt/local/bin:${PATH}"
 
 # Make sure that log files are world-readable
 umask 0022
 
 host=`hostname`
 case $host in
-# Use scratch disks on cluster nodes
-  o64*|node*)
-    TMPDIR=/scratch/nightly-build-$$
-    ;;
 # Use larger /var partition on clarinet
   clarinet*)
     TMPDIR=/var/tmp/nightly-build-$$
@@ -126,31 +119,7 @@ do_build() {
   fi
 
   # Copy Linux support libraries so that we can run on the cluster or Fedora
-  if test ${PLATFORM} = "x86_64-intel8"; then
-    libdir=/usr/lib64
-    instdir=x86_64
-    (cd $libdir \
-     && cp libboost_filesystem-mt.so.1.53.0 \
-           libboost_system-mt.so.1.53.0 \
-           libboost_graph-mt.so.1.53.0 \
-           libboost_random-mt.so.1.53.0 \
-           libboost_regex-mt.so.1.53.0 \
-           libboost_program_options.so.1.53.0 \
-           libboost_iostreams-mt.so.1.53.0 \
-           libboost_program_options-mt.so.1.53.0 \
-           libboost_serialization-mt.so.1.53.0 \
-           libboost_thread-mt.so.1.53.0 libCGAL.so.10 \
-           libcv.so.2.1 libcxcore.so.2.1 libgslcblas.so.0 libgsl.so.0 \
-           libhighgui.so.2.1 libjpeg.so.62 \
-           libtiff.so.3 libfftw3.so.3 libhdf5.so.103 libhdf5_hl.so.100 \
-           libgmpxx.so.4 libprotobuf.so.8 \
-           libunwind.so.8 libprofiler.so.0 \
-           libesmtp.so.6 libmpfr.so.4 /salilab/diva1/home/libs/${instdir} \
-     && cp libgcrypt.so.11 libX11-xcb.so.1 libcrypt.so.1 \
-           /salilab/diva1/home/libs/${instdir}/centos8/ \
-     && cp libTAU.so.1 libgmp.so.10 \
-           /salilab/diva1/home/libs/${instdir}/centos/)
-  elif test ${PLATFORM} = "fast8"; then
+  if test ${PLATFORM} = "fast8"; then
     libdir=/usr/lib64
     instdir=x86_64
     (cd $libdir \
@@ -201,8 +170,6 @@ do_build() {
     if test $PLATFORM = "fast8"; then
       CMAKE_ARGS+=("-DIMP_TIMEOUT_FACTOR=20" "-DUSE_PYTHON2=off" \
                    "-DCMAKE_CXX_FLAGS='-std=c++14 -DOMPI_SKIP_MPICXX=1'")
-    elif test $PLATFORM = "fastmpi"; then
-      CMAKE_ARGS+=("-DIMP_TIMEOUT_FACTOR=4")
     fi
     CMAKE_ARGS+=("-DCMAKE_BUILD_TYPE=Release" \
                  "-GNinja" \
@@ -311,7 +278,7 @@ EOF
     LOG_DIR="${IMPLOGS}/imp/pkg.${codename}-x86_64"
     run_imp_build ALL ${LOG_DIR} deb_build ${LOG_DIR}
 
-  # Build IMP RPMs from spec file using mock on clarinet (Fedora box)
+  # Build IMP RPMs from spec file using mock
   elif test $PLATFORM = "rhelrpms" -o $PLATFORM = "fedorarpms"; then
     echo "Building RPMs for branch $BRANCH"
 
@@ -332,19 +299,6 @@ EOF
 install_dir = r'/usr/lib/modeller${MODELLER_VERSION}'
 license = 'XXXXX'
 END
-    }
-
-    fix_mock_environment() {
-      local CFG="$1"
-      if echo ${CFG} | grep -q fedora-34; then 
-        # test -r always fails on F34 when run in mock on EPEL8 for some
-	# reason, causing 'module' to not work. Work around by disabling
-	# the -r check in /etc/profile
-        mock -r ${CFG} --copyout /etc/profile mockprof \
-        && sed -ie 's/\[ -r "$i" \]/true/' mockprof \
-	&& mock -r ${CFG} --copyin mockprof /etc/profile \
-	&& rm -f mockprof
-      fi
     }
 
     mock_build() {
@@ -416,7 +370,6 @@ END
       && make_modeller_config ${MODELLER_VERSION} config.py.$$ \
       && mock -r $CFG --copyin config.py.$$ \
              /usr/lib/modeller${MODELLER_VERSION}/modlib/modeller/config.py \
-      && fix_mock_environment $CFG \
       && mock -r $CFG --no-clean -D "keep_going 1" \
               --enable-network \
               -D "RHEL_SALI_LAB 1" --rebuild $RESDIR/IMP-*.src.rpm \
