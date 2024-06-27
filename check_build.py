@@ -1945,7 +1945,7 @@ def main():
 
     # Check RPMs
     c.add_log('rpm.source.log', 'RPM specfile',
-              'packages/IMP.spec')
+              ['packages/IMP.spec', 'packages/IMP-copr.spec'])
     c.add_cmake_log(f40_64, ['build', 'test'],
                     'packages/IMP-%s-1.fc40.x86_64.rpm' % repo.newlongver)
     if opts.imp_branch != 'develop':
