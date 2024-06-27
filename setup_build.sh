@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Script to get a git branch and make a .tar.gz on a shared disk, for use by
 # autobuild scripts on our build machines.
@@ -14,7 +14,7 @@ if [ $# -ne 1 ]; then
 fi
 
 # Get config
-. `dirname $0`/build_config.sh
+. $(dirname $0)/build_config.sh
 
 BRANCH=$1
 
@@ -25,13 +25,13 @@ mkdir -p ${IMPTOP}
 cd ${GIT_TOP}/imp.git
 
 # Get top-most revision of branch we're interested in
-rev=`git rev-parse ${BRANCH}`
-shortrev=`git rev-parse --short ${BRANCH}`
+rev=$(git rev-parse ${BRANCH})
+shortrev=$(git rev-parse --short ${BRANCH})
 
 # Get old revision
 oldrev_file=${IMPTOP}/.new/build/imp-gitrev
 if [ -f "${oldrev_file}" ]; then
-  oldrev=`cat ${oldrev_file}`
+  oldrev=$(cat ${oldrev_file})
 fi
 
 # For non-develop builds, skip if the revision hasn't changed
@@ -58,13 +58,13 @@ else
 fi
 
 # Get date and revision-specific install directories
-SORTDATE=`date -u "+%Y%m%d"`
-DATE=`date -u +'%Y/%m/%d'`
+SORTDATE=$(date -u "+%Y%m%d")
+DATE=$(date -u +'%Y/%m/%d')
 IMPSUBDIR=${SORTDATE}-${shortrev}
 IMPINSTALL=${IMPTOP}/${IMPSUBDIR}
 if [ -e imp/VERSION ]; then
   # If VERSION file is present, use it
-  IMPVERSION="`cat imp/VERSION | sed -e 's/[ /-]/./g'`"
+  IMPVERSION="$(cat imp/VERSION | sed -e 's/[ /-]/./g')"
 else
   # Make sure VERSION file is reasonable
   (cd imp && python3 tools/build/make_version.py --source=.)
@@ -72,7 +72,7 @@ else
     # For nightly builds, prepend the date so the packages are upgradeable
     IMPVERSION="${SORTDATE}.develop.${shortrev}"
   else
-    IMPVERSION="`cat imp/VERSION | sed -e 's/[ /-]/./g'`"
+    IMPVERSION="$(cat imp/VERSION | sed -e 's/[ /-]/./g')"
     # For stable releases, assign submodules the same version as IMP itself
     rm -f imp/modules/*/VERSION
   fi
@@ -127,7 +127,7 @@ END
 mv imp imp-${IMPVERSION} && tar --exclude .git -czf ${IMPSRCTGZ} imp-${IMPVERSION}
 
 # Add build scripts
-cd `dirname $0`
+cd $(dirname $0)
 cp build.sh build_config.sh build_vagrant.sh build_functions.sh "${IMPINSTALL}/build/"
 
 # Cleanup

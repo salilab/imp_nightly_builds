@@ -7,10 +7,10 @@
 # Remaining arguments are the branches to build (e.g. main, develop)
 
 # Get config
-. `dirname $0`/build_config.sh
+. $(dirname $0)/build_config.sh
 
 # Get common functions
-. `dirname $0`/build_functions.sh
+. $(dirname $0)/build_functions.sh
 
 TAR=tar
 TMPDIR=/tmp/nightly-build-$$
@@ -38,7 +38,7 @@ PATH="/opt/homebrew/bin:/usr/local/bin:/opt/local/bin:${PATH}"
 # Make sure that log files are world-readable
 umask 0022
 
-host=`hostname`
+host=$(hostname)
 case $host in
 # Use larger /var partition on clarinet
   clarinet*)
@@ -88,7 +88,7 @@ do_build() {
   IMPSOURCES=${IMPBUILD}/sources
   IMPLOGS=${IMPBUILD}/logs
   IMPDOCDIR=${IMPINSTALL}/doc/
-  IMPVERSION=`cat ${IMPBUILD}/imp-version`
+  IMPVERSION=$(cat ${IMPBUILD}/imp-version)
   IMPSRCTGZ=${IMPSOURCES}/imp-${IMPVERSION}.tar.gz
 
   mkdir -p ${IMPLOGS}/imp
@@ -106,7 +106,7 @@ do_build() {
   cd ${TMPDIR}/imp-${IMPVERSION}
 
   # If running as root (e.g. inside a podman container), allow running mpiexec
-  if [ `id -u` -eq 0 ]; then
+  if [ $(id -u) -eq 0 ]; then
     perl -pi -e 's#\{MPIEXEC_PREFLAGS\}#\{MPIEXEC_PREFLAGS\};--allow-run-as-root#' modules/mpi/dependency/MPI.cmake
   fi
 
@@ -180,7 +180,7 @@ do_build() {
     fi
   # Build IMP .deb packages in Ubuntu Docker container
   elif [ $PLATFORM = "debs" ]; then
-    codename=`lsb_release -c -s`
+    codename=$(lsb_release -c -s)
     DEBPKG=${IMPPKG}/${codename}
     mkdir -p ${DEBPKG}/source
     deb_build() {
@@ -204,11 +204,11 @@ END
 	rm -f debian/changelog.orig
       fi
       # Temporarily back out changes to MPI.cmake; dpkg wants pristine sources
-      if [ `id -u` -eq 0 ]; then
+      if [ $(id -u) -eq 0 ]; then
         perl -pi -e 's#;--allow-run-as-root##' modules/mpi/dependency/MPI.cmake
       fi
       dpkg-buildpackage -S -d
-      if [ `id -u` -eq 0 ]; then
+      if [ $(id -u) -eq 0 ]; then
         perl -pi -e 's#\{MPIEXEC_PREFLAGS\}#\{MPIEXEC_PREFLAGS\};--allow-run-as-root#' modules/mpi/dependency/MPI.cmake
       fi
       rm -f ../imp_${IMPVERSION}.orig.tar.gz
@@ -220,7 +220,7 @@ END
 
       tools/debian/make-package.sh ${IMPVERSION} && cp ../imp*.deb ${DEBPKG}
       RET=$?
-      release=`lsb_release -r -s`
+      release=$(lsb_release -r -s)
       cpppath='/usr/include/eigen3'
       if [ "${codename}" = "focal" ] || [ "${codename}" = "jammy" ]; then
         cxxflags="-std=c++11 -I/usr/include/hdf5/serial/"
@@ -444,7 +444,7 @@ END
                 "-DCGAL_DO_NOT_WARN_ABOUT_CMAKE_BUILD_TYPE=TRUE" \
                 "-GNinja" \
                 "-DCMAKE_CXX_FLAGS='-std=c++11 -fprofile-arcs -ftest-coverage'")
-    mkdir ../build && cd ../build && CMAKE_PYTHONPATH="`pwd`/coverage" run_cmake_build ../imp-${IMPVERSION} $PLATFORM python3 "$CMAKE" "$CTEST -j4" "ninja -k9999 -j4" "--run-tests=fast --run-examples --coverage" coverage
+    mkdir ../build && cd ../build && CMAKE_PYTHONPATH="$(pwd)/coverage" run_cmake_build ../imp-${IMPVERSION} $PLATFORM python3 "$CMAKE" "$CTEST -j4" "ninja -k9999 -j4" "--run-tests=fast --run-examples --coverage" coverage
 
   # Normal full build
   else
@@ -586,7 +586,7 @@ END
       # Ensure that we find the Windows protoc in the path before the Linux one
       mkdir bins
       ln -s /usr/lib/w${BITS}comp/bin/protoc bins/
-      export PATH=`pwd`/bins:$PATH
+      export PATH=$(pwd)/bins:$PATH
       mkdir ../build && cd ../build && run_cmake_build ../imp-${IMPVERSION} $PLATFORM ${HOSTPYTHON} "$CMAKE" "$CTEST -j2" "make -k -j4" "--run-tests=fast --run-examples --run-benchmarks" allinstall:w${BITS}package
     elif [ ${PLATFORM} = "pkgtest-i386-w32" ] || [ ${PLATFORM} = "pkgtest-x86_64-w64" ]; then
       # Test IMP Windows installer
@@ -601,7 +601,7 @@ END
       # Prevent wine from trying to open an X connection
       unset DISPLAY
 
-      run_imp_build PKGTEST "${LOG_DIR}" test_w32_package `pwd` ${BITS}
+      run_imp_build PKGTEST "${LOG_DIR}" test_w32_package $(pwd) ${BITS}
     fi
   fi
 
