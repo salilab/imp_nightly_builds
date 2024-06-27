@@ -64,7 +64,7 @@ IMPSUBDIR=${SORTDATE}-${shortrev}
 IMPINSTALL=${IMPTOP}/${IMPSUBDIR}
 if [ -e imp/VERSION ]; then
   # If VERSION file is present, use it
-  IMPVERSION="$(cat imp/VERSION | sed -e 's/[ /-]/./g')"
+  IMPVERSION="$(sed -e 's/[ /-]/./g' imp/VERSION)"
 else
   # Make sure VERSION file is reasonable
   (cd imp && python3 tools/build/make_version.py --source=.)
@@ -72,7 +72,7 @@ else
     # For nightly builds, prepend the date so the packages are upgradeable
     IMPVERSION="${SORTDATE}.develop.${shortrev}"
   else
-    IMPVERSION="$(cat imp/VERSION | sed -e 's/[ /-]/./g')"
+    IMPVERSION="$(sed -e 's/[ /-]/./g' imp/VERSION)"
     # For stable releases, assign submodules the same version as IMP itself
     rm -f imp/modules/*/VERSION
   fi
