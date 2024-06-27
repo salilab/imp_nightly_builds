@@ -111,7 +111,7 @@ do_build() {
   fi
 
   # Copy Linux support libraries so that we can run on the cluster or Fedora
-  if test ${PLATFORM} = "fast8"; then
+  if [ ${PLATFORM} = "fast8" ]; then
     libdir=/usr/lib64
     instdir=x86_64
     (cd $libdir \
@@ -120,7 +120,7 @@ do_build() {
   fi
 
   # Test IMP static build
-  if test $PLATFORM = "static9"; then
+  if [ $PLATFORM = "static9" ]; then
     get_cmake $PLATFORM
     CMAKE_ARGS+=("-DCMAKE_BUILD_TYPE=Release" \
                  "-DIMP_MAX_CHECKS=INTERNAL" \
@@ -134,10 +134,10 @@ do_build() {
   elif [ $PLATFORM = "fast8" ] || [ $PLATFORM = "fastmac14" ]; then
     get_cmake $PLATFORM
     PYTHON="python3"
-    if test $PLATFORM != "fastmac14"; then
+    if [ $PLATFORM != "fastmac14" ]; then
       use_modeller_svn
     fi
-    if test $PLATFORM = "fast8"; then
+    if [ $PLATFORM = "fast8" ]; then
       # autodiff only currently tested on Fedora
       CMAKE_LAB_ONLY_ARGS+=("-DIMP_DISABLED_MODULES=liegroup:autodiff")
       module purge
@@ -149,7 +149,7 @@ do_build() {
       # Load extra modules for tests
       module load python3/scipy python3/scikit python3/matplotlib python3/pandas python3/pyrmsd gnuplot python3/biopython python3/networkx
     fi
-    if test $PLATFORM = "fastmac14"; then
+    if [ $PLATFORM = "fastmac14" ]; then
       # domino3 uses SSE3, so won't work on ARM; autodiff only currently
       # tested on Fedora
       CMAKE_LAB_ONLY_ARGS+=("-DIMP_DISABLED_MODULES=domino3:liegroup:autodiff")
@@ -159,7 +159,7 @@ do_build() {
                    "-DIMP_TIMEOUT_FACTOR=4" \
                    "-DPython3_EXECUTABLE=/opt/homebrew/bin/python3")
     fi
-    if test $PLATFORM = "fast8"; then
+    if [ $PLATFORM = "fast8" ]; then
       CMAKE_ARGS+=("-DIMP_TIMEOUT_FACTOR=20" "-DUSE_PYTHON2=off" \
                    "-DCMAKE_CXX_FLAGS='-std=c++14 -DOMPI_SKIP_MPICXX=1'")
     fi
@@ -167,19 +167,19 @@ do_build() {
                  "-GNinja" \
                  "-DIMP_MAX_CHECKS=NONE" "-DIMP_MAX_LOG=SILENT")
     EXTRA="allinstall"
-    if test $PLATFORM = "fast8"; then
+    if [ $PLATFORM = "fast8" ]; then
       # Build interfaces for all Python versions
       EXTRA="${EXTRA}:allpython"
     fi
     # Set blank PYTHONPATH so we use system numpy, not that from modules
     mkdir ../build && cd ../build && CMAKE_PYTHONPATH="NONE" run_cmake_build ../imp-${IMPVERSION} $PLATFORM $PYTHON "$CMAKE" "$CTEST" "ninja -k9999 -j1" "--run-tests=all --run-examples --run-benchmarks" ${EXTRA}
-    if test $PLATFORM = "fast8"; then
+    if [ $PLATFORM = "fast8" ]; then
       # CMake links against mpi_cxx which isn't needed (due to OMPI_SKIP_MPICXX
       # above) and isn't available on Fedora 40 or later, so remove it
       patchelf --remove-needed libmpi_cxx.so.40 ${IMPINSTALL}/lib/${PLATFORM}/*.so.* ${IMPINSTALL}/lib/${PLATFORM}/_IMP_*.so ${IMPINSTALL}/bin/${PLATFORM}/spb*
     fi
   # Build IMP .deb packages in Ubuntu Docker container
-  elif test $PLATFORM = "debs"; then
+  elif [ $PLATFORM = "debs" ]; then
     codename=`lsb_release -c -s`
     DEBPKG=${IMPPKG}/${codename}
     mkdir -p ${DEBPKG}/source
@@ -413,7 +413,7 @@ END
     rm -f config.py.$$
 
   # Build with CUDA
-  elif test $PLATFORM = "cuda"; then
+  elif [ $PLATFORM = "cuda" ]; then
     # CUDA doesn't currently support latest Fedora gcc
     module purge
     module load gcc/10.2.1 cuda/12.4.0 gnuplot
@@ -431,7 +431,7 @@ END
     mkdir ../build && cd ../build && run_cmake_build ../imp-${IMPVERSION} $PLATFORM python3 "$CMAKE" "$CTEST" "ninja -k9999 -j4" "--run-tests=fast --run-examples" allinstall
 
   # Get coverage information on clarinet (Fedora box)
-  elif test $PLATFORM = "coverage"; then
+  elif [ $PLATFORM = "coverage" ]; then
     # lcov doesn't yet understand gcc 9's output
     module purge
     module load gcc/7.3.1
@@ -458,7 +458,7 @@ END
                    "-DIMP_PER_CPP_COMPILATION=ALL" \
                    "-GNinja" \
                    "-DIMP_MAX_CHECKS=INTERNAL")
-      if test $PLATFORM = "mac12arm64-gnu"; then
+      if [ $PLATFORM = "mac12arm64-gnu" ]; then
         # Find Homebrew Python 3 on Apple Silicon
 	CMAKE_ARGS+=("-DCMAKE_FRAMEWORK_PATH=/opt/homebrew/Frameworks" \
                      "-DPython3_EXECUTABLE=/opt/homebrew/bin/python3")
@@ -478,7 +478,7 @@ END
         CMAKE_LAB_ONLY_ARGS+=("-DIMP_DISABLED_MODULES=liegroup:autodiff")
         mkdir ../build && cd ../build && run_cmake_build ../imp-${IMPVERSION} $PLATFORM python3 "$CMAKE" "$CTEST" "ninja -k9999 -j2" "--run-tests=fast --run-examples --run-benchmarks" allinstall
       fi
-    elif test $PLATFORM = "mac10v11-intel"; then
+    elif [ $PLATFORM = "mac10v11-intel" ]; then
       export LANG="en_US.UTF-8"
       get_cmake $PLATFORM
       CMAKE_ARGS+=("-DCMAKE_BUILD_TYPE=Release" \
@@ -486,7 +486,7 @@ END
                    "-GNinja" \
                    "-DIMP_MAX_CHECKS=INTERNAL")
       mkdir ../build && cd ../build && run_cmake_build ../imp-${IMPVERSION} $PLATFORM python3 "$CMAKE" "$CTEST" "ninja -k9999 -j1" "--run-tests=fast --run-examples --run-benchmarks" allinstall
-    elif test ${PLATFORM} = "debug8"; then
+    elif [ ${PLATFORM} = "debug8" ]; then
       # Debug build
       module purge
       module load mpi/openmpi-x86_64
@@ -508,7 +508,7 @@ END
       use_modeller_svn
       # Set blank PYTHONPATH so we use system numpy, not that from modules
       mkdir ../build && cd ../build && CMAKE_PYTHONPATH="NONE" run_cmake_build ../imp-${IMPVERSION} $PLATFORM python3 "$CMAKE" "$CTEST" "ninja -k9999 -j1" "--run-tests=fast --run-examples --run-benchmarks" allinstall
-    elif test ${PLATFORM} = "release8"; then
+    elif [ ${PLATFORM} = "release8" ]; then
       # Release build (no internal checks)
       module purge
       module load mpi/openmpi-x86_64
@@ -533,7 +533,7 @@ END
       # CMake links against mpi_cxx which isn't needed (due to OMPI_SKIP_MPICXX
       # above) and isn't available on Fedora 40 or later, so remove it
       patchelf --remove-needed libmpi_cxx.so.40 ${IMPINSTALL}/lib/${PLATFORM}/*.so.* ${IMPINSTALL}/lib/${PLATFORM}/_IMP_*.so ${IMPINSTALL}/bin/${PLATFORM}/spb*
-    elif test ${PLATFORM} = "mac10v4-intel64"; then
+    elif [ ${PLATFORM} = "mac10v4-intel64" ]; then
       get_cmake $PLATFORM
       CMAKE_ARGS=("${CMAKE_ARGS[@]}" "-DCMAKE_BUILD_TYPE=Release" \
                   "-DIMP_TIMEOUT_FACTOR=2" \
@@ -545,7 +545,7 @@ END
       mkdir ../build && cd ../build && run_cmake_build ../imp-${IMPVERSION} $PLATFORM python "$CMAKE" "$CTEST" "make -k -j2" "--run-tests=fast --run-examples --run-benchmarks" allinstall:macpackage
     elif [ ${PLATFORM} = "i386-w32" ] || [ ${PLATFORM} = "x86_64-w64" ]; then
       # Build IMP for Windows
-      if test ${PLATFORM} = "i386-w32"; then
+      if [ ${PLATFORM} = "i386-w32" ]; then
         local BITS=32
         local EXTRA_CXX_FLAGS=""
         local HOSTPYTHON="python3"
@@ -562,7 +562,7 @@ END
       CMAKE_ARGS+=("-DCMAKE_BUILD_TYPE=Release" \
                    "-DCMAKE_CXX_FLAGS='/DBOOST_ALL_DYN_LINK /EHsc /DH5_BUILT_AS_DYNAMIC_LIB /DWIN32 /DGSL_DLL${EXTRA_CXX_FLAGS}'" \
                    "-DIMP_TIMEOUT_FACTOR=20")
-      if test ${BITS} = "32"; then
+      if [ ${BITS} = "32" ]; then
         CMAKE_ARGS+=("-Dfftw3_LIBRARY='/usr/lib/w32comp/Program Files/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.16.27023/lib/x86/libfftw3-3.lib'")
 	CMAKE_ARGS+=("-DCGAL_DIR=/usr/lib/w32comp/CGAL-5.1/")
 	CMAKE_ARGS+=("-DPYTHON_NUMPY_INCLUDE_DIR=/usr/lib/w32comp/w32python/3.9/lib/site-packages/numpy/core/include")
@@ -590,7 +590,7 @@ END
       mkdir ../build && cd ../build && run_cmake_build ../imp-${IMPVERSION} $PLATFORM ${HOSTPYTHON} "$CMAKE" "$CTEST -j2" "make -k -j4" "--run-tests=fast --run-examples --run-benchmarks" allinstall:w${BITS}package
     elif [ ${PLATFORM} = "pkgtest-i386-w32" ] || [ ${PLATFORM} = "pkgtest-x86_64-w64" ]; then
       # Test IMP Windows installer
-      if test ${PLATFORM} = "pkgtest-i386-w32"; then
+      if [ ${PLATFORM} = "pkgtest-i386-w32" ]; then
         local BITS=32
         local LOG_DIR="${IMPLOGS}/imp/i386-w32"
       else
