@@ -199,7 +199,7 @@ do_make_install() {
     done
   done
 
-  if [ ${PLATFORM} = "debug8" -o ${PLATFORM} = "fast8" -o ${PLATFORM} = "release8" ]; then
+  if [ ${PLATFORM} = "debug8" ] || [ ${PLATFORM} = "fast8" ] || [ ${PLATFORM} = "release8" ]; then
     # Make sure command line tools use system Python 3
     sed -i -e 's,^#!.*python.*,#!/usr/bin/python3,' ${IMPINSTALL}/bin/${PLATFORM}/*
   fi
@@ -209,7 +209,7 @@ do_make_install() {
   else
     SCONS=scons
   fi
-  if [ ${PLATFORM} = "debug8" -o ${PLATFORM} = "fast8" -o ${PLATFORM} = "release8" ]; then
+  if [ ${PLATFORM} = "debug8" ] || [ ${PLATFORM} = "fast8" ] || [ ${PLATFORM} = "release8" ]; then
     # Get install-time paths from IMP CMake config
     local CMAKECFG="${IMPINSTALL}/lib/${PLATFORM}/cmake/IMP/IMPConfig.cmake"
     local EIGEN_INCLUDE=$(grep EIGEN3_INCLUDE_DIR ${CMAKECFG} | cut -d\" -f2)
@@ -364,7 +364,7 @@ get_cmake() {
 use_modeller_svn() {
   local PLATFORM=$1
   local ROOT=/salilab/diva1/home/modeller/SVN
-  if [ "${PLATFORM}" = "i386-w32" -o "${PLATFORM}" = "x86_64-w64" ]; then
+  if [ "${PLATFORM}" = "i386-w32" ] || [ "${PLATFORM}" = "x86_64-w64" ]; then
     local PP=${ROOT}/modlib
     if [ -z "${PYTHONPATH}" ]; then
       export PYTHONPATH=${PP}

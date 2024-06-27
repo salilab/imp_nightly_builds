@@ -35,7 +35,7 @@ if [ -f "${oldrev_file}" ]; then
 fi
 
 # For non-develop builds, skip if the revision hasn't changed
-if [ ${BRANCH} != "develop" -a "${oldrev}" = "${rev}" ]; then
+if [ "${BRANCH}" != "develop" ] && [ "${oldrev}" = "${rev}" ]; then
   exit 0
 fi
 

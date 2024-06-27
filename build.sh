@@ -66,7 +66,7 @@ do_build() {
     # Otherwise, wait until the develop build is all done (at 7am)
     # or, for test runs, the entire build is done (at 11am)
     # Use UTC for calculations as many containers aren't set to local time
-    if [ ${PLATFORM} = "pkgtest-x86_64-w64" -o ${PLATFORM} = "pkgtest-i386-w32" ]; then
+    if [ ${PLATFORM} = "pkgtest-x86_64-w64" ] || [ ${PLATFORM} = "pkgtest-i386-w32" ]; then
       sleep $(( $(date -u -d 1900 +%s) - $(date -u +%s) ))
     else
       sleep $(( $(date -u -d 1500 +%s) - $(date -u +%s) ))
@@ -131,7 +131,7 @@ do_build() {
     mkdir ../build && cd ../build && run_cmake_build ../imp-${IMPVERSION} $PLATFORM python3 "$CMAKE" "$CTEST" "make -k" ""
 
   # Test IMP fast build (with benchmarks)
-  elif test $PLATFORM = "fast8" -o $PLATFORM = "fastmac14" ; then
+  elif [ $PLATFORM = "fast8" ] || [ $PLATFORM = "fastmac14" ]; then
     get_cmake $PLATFORM
     PYTHON="python3"
     if test $PLATFORM != "fastmac14"; then
@@ -222,7 +222,7 @@ END
       RET=$?
       release=`lsb_release -r -s`
       cpppath='/usr/include/eigen3'
-      if [ "${codename}" = "focal" -o "${codename}" = "jammy" ]; then
+      if [ "${codename}" = "focal" ] || [ "${codename}" = "jammy" ]; then
         cxxflags="-std=c++11 -I/usr/include/hdf5/serial/"
       else
         cxxflags="-std=c++20 -I/usr/include/hdf5/serial/"
@@ -246,7 +246,7 @@ EOF
       cp build/logs/* ${LOG_DIR}
       if [ ${RET} -eq 0 ]; then
 	# Also test imp-python2 subpackage with stable branch on older Ubuntu
-	if [ "${codename}" = "noble" -o "${BRANCH}" = "develop" ]; then
+	if [ "${codename}" = "noble" ] || [ "${BRANCH}" = "develop" ]; then
           dpkg -i ../${codename}/*.deb \
             && cd tools/nightly-tests/test-install \
             && scons python=python3 mock_config=ubuntu-${codename} \
@@ -271,7 +271,7 @@ EOF
     run_imp_build ALL ${LOG_DIR} deb_build ${LOG_DIR}
 
   # Build IMP RPMs from spec file using mock
-  elif test $PLATFORM = "rhelrpms" -o $PLATFORM = "fedorarpms"; then
+  elif [ $PLATFORM = "rhelrpms" ] || [ $PLATFORM = "fedorarpms" ]; then
     echo "Building RPMs for branch $BRANCH"
 
     # Make spec file
@@ -449,7 +449,7 @@ END
   # Normal full build
   else
 
-    if test $PLATFORM = "mac10v10-intel" -o $PLATFORM = "mac10v15-intel" -o $PLATFORM = "mac11v0-intel" -o $PLATFORM = "mac12arm64-gnu" -o $PLATFORM = "mac12-intel"; then
+    if [ $PLATFORM = "mac10v10-intel" ] || [ $PLATFORM = "mac10v15-intel" ] || [ $PLATFORM = "mac11v0-intel" ] || [ $PLATFORM = "mac12arm64-gnu" ] || [ $PLATFORM = "mac12-intel" ]; then
       export LANG="en_US.UTF-8"
       get_cmake $PLATFORM
       CMAKE_ARGS+=("-DCMAKE_BUILD_TYPE=Release" \
@@ -543,7 +543,7 @@ END
       CMAKE_ARGS+=("-DIMP_DISABLED_MODULES=nestor")
       CMAKE_LAB_ONLY_ARGS+=("-DIMP_DISABLED_MODULES=nestor:pynet:liegroup:autodiff")
       mkdir ../build && cd ../build && run_cmake_build ../imp-${IMPVERSION} $PLATFORM python "$CMAKE" "$CTEST" "make -k -j2" "--run-tests=fast --run-examples --run-benchmarks" allinstall:macpackage
-    elif test ${PLATFORM} = "i386-w32" -o ${PLATFORM} = "x86_64-w64"; then
+    elif [ ${PLATFORM} = "i386-w32" ] || [ ${PLATFORM} = "x86_64-w64" ]; then
       # Build IMP for Windows
       if test ${PLATFORM} = "i386-w32"; then
         local BITS=32
@@ -588,7 +588,7 @@ END
       ln -s /usr/lib/w${BITS}comp/bin/protoc bins/
       export PATH=`pwd`/bins:$PATH
       mkdir ../build && cd ../build && run_cmake_build ../imp-${IMPVERSION} $PLATFORM ${HOSTPYTHON} "$CMAKE" "$CTEST -j2" "make -k -j4" "--run-tests=fast --run-examples --run-benchmarks" allinstall:w${BITS}package
-    elif test ${PLATFORM} = "pkgtest-i386-w32" -o ${PLATFORM} = "pkgtest-x86_64-w64"; then
+    elif [ ${PLATFORM} = "pkgtest-i386-w32" ] || [ ${PLATFORM} = "pkgtest-x86_64-w64" ]; then
       # Test IMP Windows installer
       if test ${PLATFORM} = "pkgtest-i386-w32"; then
         local BITS=32
