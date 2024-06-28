@@ -113,11 +113,7 @@ def get_coverage_link(date, covtyp, component, pct, lab_only, branch,
 
 
 class TestPage(object):
-    all_branches = ['develop', 'main', 'release/2.0.1', 'release/2.1',
-                    'release/2.3.0', 'release/2.3.1', 'release/2.4.0',
-                    'release/2.5.0', 'release/2.6.0', 'release/2.6.1',
-                    'release/2.6.2', 'release/2.7.0', 'release/2.8.0',
-                    'release/2.9.0', 'release/2.10.0', 'release/2.10.1',
+    all_branches = ['develop', 'main', 'release/2.10.1',
                     'release/2.11.0', 'release/2.11.1', 'release/2.12.0',
                     'release/2.13.0', 'release/2.14.0', 'release/2.15.0',
                     'release/2.16.0', 'release/2.17.0', 'release/2.18.0',
