@@ -898,19 +898,18 @@ class Checker(object):
         self._products = []
         self._repos = []
         self.dirroot = dirroot
-        self.newbuilddir_rel = os.path.join(dirroot, ".new")
-        self.newbuilddir = os.path.join(dirroot, ".SVN-new")
-        self.logdir = os.path.join(self.newbuilddir_rel, "build/logs")
+        self.newbuilddir = os.path.join(dirroot, ".new")
+        self.logdir = os.path.join(self.newbuilddir, "build/logs")
         self.builddir = os.path.join(dirroot, "stable")
         self.timenow = time.time()
 
     def add_product(self, prod):
         self._products.append(prod)
-        prod.set_component_file(self.newbuilddir_rel)
+        prod.set_component_file(self.newbuilddir)
 
     def add_repository(self, repo):
         self._repos.append(repo)
-        repo.set_verfile(self.newbuilddir_rel)
+        repo.set_verfile(self.newbuilddir)
 
     def print_header(self, formatter):
         formatter.print_header()
@@ -1571,9 +1570,9 @@ class IMPChecker(Checker):
     def build_has_changed(self):
         """Return True only if the build changed since the last run"""
         return (not os.path.exists(self.donebuildlink)
-                or not os.path.exists(self.newbuilddir_rel)
+                or not os.path.exists(self.newbuilddir)
                 or os.readlink(self.donebuildlink)
-                != os.readlink(self.newbuilddir_rel))
+                != os.readlink(self.newbuilddir))
 
     def print_header(self, formatter):
         title = 'IMP nightly build results, %s, %s' \
@@ -1649,7 +1648,7 @@ class IMPChecker(Checker):
     def update_done_build(self, dryrun):
         if not dryrun:
             # Update last-build symlink to point to the new build
-            src = os.readlink(self.newbuilddir_rel)
+            src = os.readlink(self.newbuilddir)
             update_symlink(src, self.donebuildlink)
         db = DatabaseUpdater(dryrun, 'imp_test', 'imp_benchmark', False,
                              self.branch, clean=True)
@@ -1760,7 +1759,7 @@ class IMPLabChecker(Checker):
             return
 
         # Update done-build symlink to point to the new build
-        src = os.readlink(self.newbuilddir_rel)
+        src = os.readlink(self.newbuilddir)
         if os.path.exists(self.donebuildlink):
             os.remove(self.donebuildlink)
         os.symlink(src, self.donebuildlink)
