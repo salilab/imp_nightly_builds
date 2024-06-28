@@ -1564,16 +1564,15 @@ class IMPChecker(Checker):
         super().__init__(dirroot)
         self.branch = branch
         self._dirroot = dirroot
-        self.donebuildlink = os.path.join(dirroot, 'lastbuild')
-        self.donebuildlink_rel = os.path.join(dirroot, '.last')
+        self.donebuildlink = os.path.join(dirroot, '.last')
         self.okbuildlink = os.path.join(dirroot, 'last_ok_build')
         self.nightlybuildlink = os.path.join(dirroot, 'nightly')
 
     def build_has_changed(self):
         """Return True only if the build changed since the last run"""
-        return (not os.path.exists(self.donebuildlink_rel)
+        return (not os.path.exists(self.donebuildlink)
                 or not os.path.exists(self.newbuilddir_rel)
-                or os.readlink(self.donebuildlink_rel)
+                or os.readlink(self.donebuildlink)
                 != os.readlink(self.newbuilddir_rel))
 
     def print_header(self, formatter):
@@ -1651,7 +1650,7 @@ class IMPChecker(Checker):
         if not dryrun:
             # Update last-build symlink to point to the new build
             src = os.readlink(self.newbuilddir_rel)
-            update_symlink(src, self.donebuildlink_rel)
+            update_symlink(src, self.donebuildlink)
         db = DatabaseUpdater(dryrun, 'imp_test', 'imp_benchmark', False,
                              self.branch, clean=True)
         db.get_test_results(self._products[0],
@@ -1738,7 +1737,7 @@ class IMPLabChecker(Checker):
 
     def __init__(self, dirroot):
         super().__init__(dirroot)
-        self.donebuildlink_rel = os.path.join(dirroot, 'nightly')
+        self.donebuildlink = os.path.join(dirroot, 'nightly')
 
     def update_done_build(self, dryrun):
         db = DatabaseUpdater(dryrun, 'imp_test', 'imp_benchmark', True,
@@ -1762,9 +1761,9 @@ class IMPLabChecker(Checker):
 
         # Update done-build symlink to point to the new build
         src = os.readlink(self.newbuilddir_rel)
-        if os.path.exists(self.donebuildlink_rel):
-            os.remove(self.donebuildlink_rel)
-        os.symlink(src, self.donebuildlink_rel)
+        if os.path.exists(self.donebuildlink):
+            os.remove(self.donebuildlink)
+        os.symlink(src, self.donebuildlink)
 
         # Remove old builds
         p = PruneDirectories(self.dirroot)
