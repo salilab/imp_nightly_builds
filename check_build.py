@@ -514,15 +514,9 @@ class Repository(object):
     def __init__(self, name):
         self.name = name
 
-    def set_verfile(self, newpath, oldpath):
+    def set_verfile(self, newpath):
         (self.newlongver, self.newversion, self.newrevision) = \
             self._parse_verfile(newpath)
-        try:
-            (self.oldlongver, self.oldversion, self.oldrevision) = \
-                self._parse_verfile(oldpath)
-        except IOError:
-            (self.oldlongver, self.oldversion, self.oldrevision) = \
-                ('unknown',) * 3
 
     def _parse_verfile(self, path):
         verfile = os.path.join(path, "build/%s-version" % self.name)
@@ -900,16 +894,14 @@ class PruneDirectories(object):
 
 
 class Checker(object):
-    def __init__(self, dirroot, version):
+    def __init__(self, dirroot):
         self._products = []
         self._repos = []
         self.dirroot = dirroot
-        self.version = version
         self.newbuilddir_rel = os.path.join(dirroot, ".new")
-        self.newbuilddir = os.path.join(dirroot, ".%s-new" % version)
-        self.oldbuilddir = os.path.join(dirroot, ".%s-old" % version)
+        self.newbuilddir = os.path.join(dirroot, ".SVN-new")
         self.logdir = os.path.join(self.newbuilddir, "build/logs")
-        self.builddir = os.path.join(dirroot, version)
+        self.builddir = os.path.join(dirroot, "stable")
         self.timenow = time.time()
 
     def add_product(self, prod):
@@ -918,7 +910,7 @@ class Checker(object):
 
     def add_repository(self, repo):
         self._repos.append(repo)
-        repo.set_verfile(self.newbuilddir, self.builddir)
+        repo.set_verfile(self.newbuilddir)
 
     def print_header(self, formatter):
         formatter.print_header()
@@ -1568,15 +1560,14 @@ class IMPChecker(Checker):
     # or renamed; instead symlinks are simply updated if necessary to point
     # to new dated directories
 
-    def __init__(self, dirroot, version, branch):
-        super().__init__(dirroot, version)
+    def __init__(self, dirroot, branch):
+        super().__init__(dirroot)
         self.branch = branch
         self._dirroot = dirroot
         self.donebuildlink = os.path.join(dirroot, 'lastbuild')
         self.donebuildlink_rel = os.path.join(dirroot, '.last')
         self.okbuildlink = os.path.join(dirroot, 'last_ok_build')
         self.nightlybuildlink = os.path.join(dirroot, 'nightly')
-        self.builddir = os.path.join(dirroot, 'stable')
 
     def build_has_changed(self):
         """Return True only if the build changed since the last run"""
@@ -1748,8 +1739,8 @@ class IMPChecker(Checker):
 
 class IMPLabChecker(Checker):
 
-    def __init__(self, dirroot, version):
-        super().__init__(dirroot, version)
+    def __init__(self, dirroot):
+        super().__init__(dirroot)
         self.donebuildlink = os.path.join(dirroot, 'nightly')
 
     def update_done_build(self, dryrun):
@@ -1822,11 +1813,11 @@ def _deb_packages(version, codename):
 def main():
     opts = get_options()
     impcheck = IMPChecker("/salilab/diva1/home/imp/" + opts.imp_branch,
-                          'SVN', opts.imp_branch)
+                          opts.imp_branch)
     # Lab-only components are currently only built against the develop branch
     if opts.imp_branch == 'develop':
         imp_lab_check = IMPLabChecker(
-            "/salilab/diva1/home/imp-salilab/develop", 'SVN')
+            "/salilab/diva1/home/imp-salilab/develop")
     else:
         # Do nothing for non-develop builds if the build didn't run today
         # (unless a dry run was explicitly requested)
