@@ -83,10 +83,7 @@ IMPSRCTGZ=${IMPINSTALL}/build/sources/imp-${IMPVERSION}.tar.gz
 rm -rf ${IMPINSTALL}
 mkdir -p ${IMPINSTALL}/build/sources ${IMPINSTALL}/build/logs
 
-# Make absolute link so build system can find the install location
-rm -f ${IMPTOP}/.SVN-new
-ln -s ${IMPINSTALL} ${IMPTOP}/.SVN-new
-# Also make relative link which works better when NFS is mounted under $HOME
+# Make link so build system can find the install location
 rm -f ${IMPTOP}/.new
 ln -s ${IMPSUBDIR} ${IMPTOP}/.new
 
