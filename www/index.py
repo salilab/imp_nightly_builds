@@ -292,8 +292,7 @@ window.onload = linkEmail;
 
     def get_last_build_date(self):
         """Get date of most recent nightly build"""
-        s = os.readlink(os.path.join(get_topdir(self.branch), 'lastbuild'))
-        s = os.path.basename(os.path.normpath(s))
+        s = os.readlink(os.path.join(get_topdir(self.branch), '.last'))
         return datetime.date(year=int(s[:4]), month=int(s[4:6]),
                              day=int(s[6:8]))
 
