@@ -1684,14 +1684,11 @@ class IMPChecker(Checker):
         if not os.path.exists(self.newbuilddir + '/doc/manual/index.html'):
             link_to_logs(self.dirroot, 'imp', imp_testhtml, self.branch)
             return
-        download_patterns = ['packages/*-10.8.dmg',
+        download_patterns = ['packages/*-10.10.dmg',
                              'packages/*.exe',
                              'packages/*.src.rpm', 'build/sources/*.tar.gz',
                              'packages/*.fc*.x86_64.rpm',
-                             'packages/IMP*.el7.x86_64.rpm',
-                             'packages/IMP*.el8.x86_64.rpm',
-                             'packages/*.el6.x86_64.rpm',
-                             'packages/*.el6.i686.rpm']
+                             'packages/IMP*.el*.x86_64.rpm']
         subdirs = [os.path.basename(d)
                    for d in glob.glob(os.path.join(self.newbuilddir,
                                                    'packages', '*'))
