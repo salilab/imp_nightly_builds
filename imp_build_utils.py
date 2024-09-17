@@ -453,6 +453,14 @@ all_platforms = (('i386-intel8',
                       mac_header % ("Apple Silicon MacOS 14 (Sonoma) Mac",
                                     "Homebrew Python 3", "")
                       + fast_build_vlong, 'bin-fast.mac14-intel.log')),
+                 ('fastmac15',
+                  Platform(
+                      'McFst', 'Mac Fast',
+                      'Fast build (Apple Silicon Mac; MacOS 15 (Sequoia); '
+                      'clang++; Boost 1.86; Python 3)',
+                      mac_header % ("Apple Silicon MacOS 15 (Sequoia) Mac",
+                                    "Homebrew Python 3", "")
+                      + fast_build_vlong, 'bin-fast.mac15-intel.log')),
                  ('i386-w32',
                   Platform(
                       'Win32', 'Win32',

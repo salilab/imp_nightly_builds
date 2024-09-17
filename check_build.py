@@ -1860,7 +1860,7 @@ def main():
     release8 = 'release8'
     # Check fast Linux and Mac builds
     fast8 = 'fast8'
-    fastmac = 'fastmac14'
+    fastmac = 'fastmac15'
     for f in (fastmac, fast8, release8, debug8):
         c.add_cmake_log(f, ['build', 'benchmark', 'test', 'example'], [])
 

@@ -131,10 +131,10 @@ do_build() {
     mkdir ../build && cd ../build && run_cmake_build ../imp-${IMPVERSION} $PLATFORM python3 "$CMAKE" "$CTEST" "make -k" ""
 
   # Test IMP fast build (with benchmarks)
-  elif [ $PLATFORM = "fast8" ] || [ $PLATFORM = "fastmac14" ]; then
+  elif [ $PLATFORM = "fast8" ] || [ $PLATFORM = "fastmac15" ]; then
     get_cmake $PLATFORM
     PYTHON="python3"
-    if [ $PLATFORM != "fastmac14" ]; then
+    if [ $PLATFORM != "fastmac15" ]; then
       use_modeller_svn
     fi
     if [ $PLATFORM = "fast8" ]; then
@@ -149,7 +149,7 @@ do_build() {
       # Load extra modules for tests
       module load python3/scipy python3/scikit python3/matplotlib python3/pandas python3/pyrmsd gnuplot python3/biopython python3/networkx
     fi
-    if [ $PLATFORM = "fastmac14" ]; then
+    if [ $PLATFORM = "fastmac15" ]; then
       # domino3 uses SSE3, so won't work on ARM; autodiff only currently
       # tested on Fedora
       CMAKE_LAB_ONLY_ARGS+=("-DIMP_DISABLED_MODULES=domino3:liegroup:autodiff")
