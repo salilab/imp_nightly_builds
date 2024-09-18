@@ -449,7 +449,7 @@ END
   # Normal full build
   else
 
-    if [ $PLATFORM = "mac10v10-intel" ] || [ $PLATFORM = "mac10v15-intel" ] || [ $PLATFORM = "mac11v0-intel" ] || [ $PLATFORM = "mac12arm64-gnu" ] || [ $PLATFORM = "mac12-intel" ]; then
+    if [ $PLATFORM = "mac10v10-intel" ] || [ $PLATFORM = "mac10v15-intel" ] || [ $PLATFORM = "mac11v0-intel" ] || [ $PLATFORM = "mac13arm64-gnu" ] || [ $PLATFORM = "mac12-intel" ]; then
       export LANG="en_US.UTF-8"
       get_cmake $PLATFORM
       CMAKE_ARGS+=("-DCMAKE_BUILD_TYPE=Release" \
@@ -458,7 +458,7 @@ END
                    "-DIMP_PER_CPP_COMPILATION=ALL" \
                    "-GNinja" \
                    "-DIMP_MAX_CHECKS=INTERNAL")
-      if [ $PLATFORM = "mac12arm64-gnu" ]; then
+      if [ $PLATFORM = "mac13arm64-gnu" ]; then
         # Find Homebrew Python 3 on Apple Silicon
 	CMAKE_ARGS+=("-DCMAKE_FRAMEWORK_PATH=/opt/homebrew/Frameworks" \
                      "-DPython3_EXECUTABLE=/opt/homebrew/bin/python3")

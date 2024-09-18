@@ -428,6 +428,19 @@ all_platforms = (('i386-intel8',
                                    "<tt>graphviz</tt>, ")
                       + percpp_vlong,
                       'bin.mac12arm64-gnu.log')),
+                 ('mac13arm64-gnu',
+                  Platform(
+                      'MARM', 'Mac ARM',
+                      'Debug build (Apple Silicon Mac; MacOS 13 '
+                      '(Ventura); clang++; Boost 1.86; Python 3; '
+                      'per-cpp compilation)',
+                      mac_vlong % ("64-bit Apple Silicon "
+                                   "MacOS 13 (Ventura) Mac",
+                                   "Homebrew Python 3",
+                                   "<tt>doxygen@1.8.6</tt>, "
+                                   "<tt>graphviz</tt>, ")
+                      + percpp_vlong,
+                      'bin.mac13arm64-gnu.log')),
                  ('mac12-intel',
                   Platform(
                       'M12', 'Mac 12',
