@@ -449,7 +449,7 @@ END
   # Normal full build
   else
 
-    if [ $PLATFORM = "mac10v10-intel" ] || [ $PLATFORM = "mac10v15-intel" ] || [ $PLATFORM = "mac11v0-intel" ] || [ $PLATFORM = "mac13arm64-gnu" ] || [ $PLATFORM = "mac12-intel" ]; then
+    if [ $PLATFORM = "mac10v10-intel" ] || [ $PLATFORM = "mac10v15-intel" ] || [ $PLATFORM = "mac11v0-intel" ] || [ $PLATFORM = "mac13arm64-gnu" ] || [ $PLATFORM = "mac14-intel" ]; then
       export LANG="en_US.UTF-8"
       get_cmake $PLATFORM
       CMAKE_ARGS+=("-DCMAKE_BUILD_TYPE=Release" \

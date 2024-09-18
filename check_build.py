@@ -1839,12 +1839,12 @@ def main():
 
     # Main platforms to build on: macOS (Intel, ARM64); old Mac;
     # Windows (32-bit, 64-bit)
-    mac12 = 'mac12-intel'
+    mac14 = 'mac14-intel'
     mac13arm = 'mac13arm64-gnu'
     mac64 = 'mac10v4-intel64'
     win32 = 'i386-w32'
     win64 = 'x86_64-w64'
-    all_archs = [mac12, mac13arm, mac64, win32, win64]
+    all_archs = [mac14, mac13arm, mac64, win32, win64]
 
     # Old Mac build is only for stable IMP release
     if opts.imp_branch == 'develop':
@@ -1885,7 +1885,7 @@ def main():
     if opts.imp_branch != 'develop':
         rh_rpms.insert(0, rh7_64)
         new_archs_map.insert(0, rh7_64)
-    all_archs_map = [debug8, mac12, mac13arm, win32, fast8, fastmac, static,
+    all_archs_map = [debug8, mac14, mac13arm, win32, fast8, fastmac, static,
                      release8, f40_64] + new_archs_map + [coverage, cuda]
     if opts.imp_branch != 'develop':
         all_archs_map.insert(1, mac64)
@@ -1906,7 +1906,7 @@ def main():
     c.include_component('ALLPYTHON', [fast8, release8])
     for m in ('mpi', 'spb', 'nestor'):
         mods = [release8, debug8, rh8_64, rh9_64, f40_64, fast8,
-                coverage, win32, win64, mac12, mac13arm, fastmac, focal,
+                coverage, win32, win64, mac14, mac13arm, fastmac, focal,
                 jammy, noble]
         # IMP.nestor *also* needs Python 3, not available on mac64
         # or RHEL7
@@ -1971,7 +1971,7 @@ def main():
         c.add_cmake_log(cuda, ['build', 'test', 'example'], [])
         # Add coverage build
         c.add_cmake_log(coverage, ['build', 'test', 'example'], [])
-        all_archs_map = [debug8, mac12, mac13arm, fast8, fastmac, static,
+        all_archs_map = [debug8, mac14, mac13arm, fast8, fastmac, static,
                          release8, win32, win64, cuda, coverage]
         if opts.imp_branch != 'develop':
             all_archs_map.insert(1, mac64)
@@ -2002,7 +2002,7 @@ def main():
             c.include_component(m, [cuda, coverage])
         for m in ('isd_emxl',):
             incs = [release8, debug8, f40_64, fast8, coverage, win32,
-                    win64, mac12, mac13arm, fastmac] + rh_rpms
+                    win64, mac14, mac13arm, fastmac] + rh_rpms
             if opts.imp_branch != 'develop':
                 incs.append(mac64)
             c.include_component(m, incs)

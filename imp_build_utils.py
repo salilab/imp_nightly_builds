@@ -451,6 +451,16 @@ all_platforms = (('i386-intel8',
                                    "Homebrew Python 3", "")
                       + percpp_vlong,
                       'bin.mac12-intel.log')),
+                 ('mac14-intel',
+                  Platform(
+                      'M14', 'Mac 14',
+                      'Debug build (64-bit Intel Mac; MacOS 14 '
+                      '(Sonoma); clang++; Boost 1.86; Python 3; '
+                      'per-cpp compilation)',
+                      mac_vlong % ("64-bit MacOS 14 (Sonoma) Mac",
+                                   "Homebrew Python 3", "")
+                      + percpp_vlong,
+                      'bin.mac14-intel.log')),
                  ('fastmac13',
                   Platform(
                       'McFst', 'Mac Fast',
