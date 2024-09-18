@@ -424,7 +424,8 @@ all_platforms = (('i386-intel8',
                       mac_vlong % ("64-bit Apple Silicon "
                                    "MacOS 12 (Monterey) Mac",
                                    "Homebrew Python 3",
-                                   "<tt>doxygen@1.8.6</tt>, ")
+                                   "<tt>doxygen@1.8.6</tt>, "
+                                   "<tt>graphviz</tt>, ")
                       + percpp_vlong,
                       'bin.mac12arm64-gnu.log')),
                  ('mac12-intel',
