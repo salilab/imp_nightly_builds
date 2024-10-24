@@ -177,6 +177,9 @@ do_build() {
       # CMake links against mpi_cxx which isn't needed (due to OMPI_SKIP_MPICXX
       # above) and isn't available on Fedora 40 or later, so remove it
       patchelf --remove-needed libmpi_cxx.so.40 ${IMPINSTALL}/lib/${PLATFORM}/*.so.* ${IMPINSTALL}/lib/${PLATFORM}/_IMP_*.so ${IMPINSTALL}/bin/${PLATFORM}/spb*
+      # Remove bundled copy of python-ihm; lab users will get it instead
+      # with "module load python3/ihm"
+      rm -rf ${IMPINSTALL}/lib/${PLATFORM}/ihm
     fi
   # Build IMP .deb packages in Ubuntu Docker container
   elif [ $PLATFORM = "debs" ]; then
@@ -533,6 +536,9 @@ END
       # CMake links against mpi_cxx which isn't needed (due to OMPI_SKIP_MPICXX
       # above) and isn't available on Fedora 40 or later, so remove it
       patchelf --remove-needed libmpi_cxx.so.40 ${IMPINSTALL}/lib/${PLATFORM}/*.so.* ${IMPINSTALL}/lib/${PLATFORM}/_IMP_*.so ${IMPINSTALL}/bin/${PLATFORM}/spb*
+      # Remove bundled copy of python-ihm; lab users will get it instead
+      # with "module load python3/ihm"
+      rm -rf ${IMPINSTALL}/lib/${PLATFORM}/ihm
     elif [ ${PLATFORM} = "mac10v4-intel64" ]; then
       get_cmake $PLATFORM
       CMAKE_ARGS=("${CMAKE_ARGS[@]}" "-DCMAKE_BUILD_TYPE=Release" \
