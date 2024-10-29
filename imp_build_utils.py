@@ -798,6 +798,14 @@ all_platforms = (('i386-intel8',
                       rpm_vlong_header % "Fedora 40"
                       + rpm_vlong_footer + "</p>",
                       'package.fc40-x86_64.log')),
+                 ('pkg.f41-x86_64',
+                  Platform(
+                      'F41', 'F41 RPM',
+                      'Fedora 41 RPM build; Boost 1.83, gcc 14.2, '
+                      'Python 3',
+                      rpm_vlong_header % "Fedora 41"
+                      + rpm_vlong_footer + "</p>",
+                      'package.fc41-x86_64.log')),
                  ('pkg.precise-x86_64',
                   Platform(
                       'deb12', 'deb12',

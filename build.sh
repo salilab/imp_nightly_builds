@@ -405,7 +405,7 @@ END
     }
 
     if [ $PLATFORM = "fedorarpms" ]; then
-      run_mock_build pkg.f40-x86_64 fedora-40-x86_64 "-std=c++20" "" "" "" "mpi/mpich-x86_64"
+      run_mock_build pkg.f41-x86_64 fedora-41-x86_64 "-std=c++20" "" "" "" "mpi/mpich-x86_64"
     else
       if [ ${BRANCH} != "develop" ]; then
         run_mock_build pkg.el7-x86_64 epel-7-x86_64 "-std=c++11" "" "" "" "mpi/mpich-x86_64"
