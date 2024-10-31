@@ -375,7 +375,8 @@ END
       # We should be able to use IMP without the debuginfo packages
       rm -f packages-${CFG}/IMP-*debuginfo*.rpm
       cp /var/lib/mock/${CFG}/root/builddir/build/BUILD/imp-*/build/logs/* \
-         ${LOG_DIR}
+       /var/lib/mock/${CFG}/root/builddir/build/BUILD/IMP-*/imp-*/build/logs/* \
+       ${LOG_DIR}
       cat /var/lib/mock/${CFG}/result/*.log
       if [ ${RET} -eq 0 ]; then
         mock -r $CFG --clean \
