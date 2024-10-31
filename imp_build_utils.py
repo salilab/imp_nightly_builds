@@ -318,9 +318,9 @@ all_platforms = (('i386-intel8',
                  ('cuda',
                   Platform(
                       'CUDA', 'CUDA',
-                      'CUDA build (64-bit Linux, Fedora 40, gcc 10.2, '
+                      'CUDA build (64-bit Linux, Fedora 41, gcc 10.2, '
                       'Boost 1.83, CUDA toolkit 12.4, Python 3)',
-                      cuda_vlong % "64-bit Fedora 40",
+                      cuda_vlong % "64-bit Fedora 41",
                       'bin-cuda.log')),
                  ('mac10v4-intel',
                   Platform(
@@ -566,9 +566,9 @@ all_platforms = (('i386-intel8',
                  ('coverage',
                   Platform(
                       'Cov', 'Coverage',
-                      'Coverage build (debug build on Fedora 40, 64-bit; '
-                      'Boost 1.83, gcc 14.1, Python 3)',
-                      coverage_vlong % ("64-bit Fedora 40",
+                      'Coverage build (debug build on Fedora 41, 64-bit; '
+                      'Boost 1.83, gcc 14.2, Python 3)',
+                      coverage_vlong % ("64-bit Fedora 41",
                                         debug_build_vlong),
                       'coverage.log')),
                  ('pkg.el5-i386',
