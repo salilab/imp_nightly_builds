@@ -568,7 +568,8 @@ END
       get_cmake $PLATFORM
       CMAKE_ARGS+=("-DCMAKE_BUILD_TYPE=Release" \
                    "-DCMAKE_CXX_FLAGS='/DBOOST_ALL_DYN_LINK /EHsc /DH5_BUILT_AS_DYNAMIC_LIB /DWIN32 /DGSL_DLL${EXTRA_CXX_FLAGS}'" \
-                   "-DIMP_TIMEOUT_FACTOR=20")
+                   "-DIMP_TIMEOUT_FACTOR=20" \
+                   "-DCMAKE_DEPENDS_USE_COMPILER=FALSE")
       if [ ${BITS} = "32" ]; then
         CMAKE_ARGS+=("-Dfftw3_LIBRARY='/usr/lib/w32comp/Program Files/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.16.27023/lib/x86/libfftw3-3.lib'")
 	CMAKE_ARGS+=("-DCGAL_DIR=/usr/lib/w32comp/CGAL-5.1/")
