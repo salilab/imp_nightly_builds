@@ -396,7 +396,7 @@ use_modeller_svn() {
 
 # Modify wine's default path so that IMP binaries will run from the build dir
 add_imp_to_wine_path() {
-  python2 - "$1" <<END
+  python3 - "$1" <<END
 import os, sys
 dbl_bksl = '\\\\\\\\'
 imp = 'Z:' + sys.argv[1].replace('/', dbl_bksl)
@@ -404,11 +404,11 @@ sysreg = os.path.join(os.environ['HOME'], '.wine', 'system.reg')
 outfh = open(sysreg + '.new', 'w')
 for line in open(sysreg):
     if line.startswith('"PATH"='):
-        print >> outfh, \\
-              r'"PATH"=str(2):"C:\\\\windows\\\\system32;C:\\\\windows;' \\
-              + dbl_bksl.join((imp, 'lib')) + ';' \\
-              + dbl_bksl.join((imp, 'bin')) + ';' \\
-              + dbl_bksl.join((imp, 'src', 'dependency', 'RMF')) + '"'
+        print(r'"PATH"=str(2):"C:\\\\windows\\\\system32;C:\\\\windows;'
+              + dbl_bksl.join((imp, 'lib')) + ';'
+              + dbl_bksl.join((imp, 'bin')) + ';'
+              + dbl_bksl.join((imp, 'src', 'dependency', 'RMF')) + '"',
+              file=outfh)
     else:
         outfh.write(line)
 os.rename(sysreg + '.new', sysreg)
