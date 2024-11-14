@@ -87,7 +87,6 @@ build_w32_package() {
     ${CMAKE} ${SRCDIR} -DCMAKE_INSTALL_PYTHONDIR=/pylib/$PYVER \
                 -DSWIG_PYTHON_LIBRARIES=$w32py/$PYVER/lib/$PYLIB \
                 -DPYTHON_INCLUDE_DIRS=$w32py/$PYVER/include/ \
-                -DPYTHON_INCLUDE_PATH=$w32py/$PYVER/include/ \
                 -DPYTHON_LIBRARIES=$w32py/$PYVER/lib/$PYLIB \
                 -DCMAKE_INSTALL_PREFIX=/usr/local \
                 -DCMAKE_INSTALL_DATADIR=share \
