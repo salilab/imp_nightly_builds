@@ -248,24 +248,12 @@ EOF
       rm -f /tmp/Release
       cp build/logs/* ${LOG_DIR}
       if [ ${RET} -eq 0 ]; then
-	# Also test imp-python2 subpackage with stable branch on older Ubuntu
-	if [ "${codename}" = "noble" ] || [ "${BRANCH}" = "develop" ]; then
-          dpkg -i ../${codename}/*.deb \
-            && cd tools/nightly-tests/test-install \
-            && scons python=python3 mock_config=ubuntu-${codename} \
-                     cxxflags="${cxxflags}" cpppath="${cpppath}" \
-            && dpkg -r imp imp-dev imp-openmpi
-          RET=$?
-	else
-          dpkg -i ../${codename}/*.deb \
-            && cd tools/nightly-tests/test-install \
-            && scons python=python2 mock_config=ubuntu-${codename} \
-                     cxxflags="${cxxflags}" cpppath="${cpppath}" \
-            && scons python=python3 mock_config=ubuntu-${codename} \
-                     cxxflags="${cxxflags}" cpppath="${cpppath}" \
-            && dpkg -r imp imp-dev imp-python2 imp-openmpi
-          RET=$?
-	fi
+        dpkg -i ../${codename}/*.deb \
+          && cd tools/nightly-tests/test-install \
+          && scons python=python3 mock_config=ubuntu-${codename} \
+                   cxxflags="${cxxflags}" cpppath="${cpppath}" \
+          && dpkg -r imp imp-dev imp-openmpi
+        RET=$?
       fi
       return $RET
     }
@@ -408,9 +396,6 @@ END
     if [ $PLATFORM = "fedorarpms" ]; then
       run_mock_build pkg.f41-x86_64 fedora-41-x86_64 "-std=c++20" "" "" "" "mpi/mpich-x86_64"
     else
-      if [ ${BRANCH} != "develop" ]; then
-        run_mock_build pkg.el7-x86_64 epel-7-x86_64 "-std=c++11" "" "" "" "mpi/mpich-x86_64"
-      fi
       run_mock_build pkg.el8-x86_64 epel-8-x86_64 "-std=c++11" "" "" "" "mpi/mpich-x86_64"
       run_mock_build pkg.el9-x86_64 epel-9-x86_64 "" "" "" "" "mpi/mpich-x86_64"
     fi

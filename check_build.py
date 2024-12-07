@@ -1841,14 +1841,9 @@ def main():
     # Windows (32-bit, 64-bit)
     mac14 = 'mac14-intel'
     mac13arm = 'mac13arm64-gnu'
-    mac64 = 'mac10v4-intel64'
     win32 = 'i386-w32'
     win64 = 'x86_64-w64'
-    all_archs = [mac14, mac13arm, mac64, win32, win64]
-
-    # Old Mac build is only for stable IMP release
-    if opts.imp_branch == 'develop':
-        all_archs.remove(mac64)
+    all_archs = [mac14, mac13arm, win32, win64]
 
     for arch in all_archs:
         c.add_cmake_log(arch, ['build', 'benchmark', 'test', 'example'], [])
@@ -1865,7 +1860,6 @@ def main():
         c.add_cmake_log(f, ['build', 'benchmark', 'test', 'example'], [])
 
     f41_64 = 'pkg.f41-x86_64'  # Fedora 41 RPM
-    rh7_64 = 'pkg.el7-x86_64'  # RHEL 7 RPM
     rh8_64 = 'pkg.el8-x86_64'  # RHEL 8 RPM
     rh9_64 = 'pkg.el9-x86_64'  # RHEL 9 RPM
     focal = 'pkg.focal-x86_64'  # Ubuntu 20.04 (Focal Fossa) .deb package
@@ -1882,13 +1876,8 @@ def main():
 
     new_archs_map = [rh8_64, rh9_64, focal, jammy, noble, win64]
     rh_rpms = [rh8_64, rh9_64]
-    if opts.imp_branch != 'develop':
-        rh_rpms.insert(0, rh7_64)
-        new_archs_map.insert(0, rh7_64)
     all_archs_map = [debug8, mac14, mac13arm, win32, fast8, fastmac, static,
                      release8, f41_64] + new_archs_map + [coverage, cuda]
-    if opts.imp_branch != 'develop':
-        all_archs_map.insert(1, mac64)
     c.make_module_map(all_archs_map)
     # Only cmake builds have an ALL component
     incs = [f41_64, fastmac, coverage, cuda, fast8, static, debug8,
@@ -1897,8 +1886,6 @@ def main():
     c.include_component('INSTALL', [fastmac, fast8, debug8,
                                     release8, cuda] + all_archs)
     incs = [win32, win64]
-    if opts.imp_branch != 'develop':
-        incs.append(mac64)
     c.include_component('PACKAGE', incs)
     # Only the Windows installer has a separate package test step
     c.include_component('PKGTEST', [win32, win64])
@@ -1908,10 +1895,6 @@ def main():
         mods = [release8, debug8, rh8_64, rh9_64, f41_64, fast8,
                 coverage, win32, win64, mac14, mac13arm, fastmac, focal,
                 jammy, noble]
-        # IMP.nestor *also* needs Python 3, not available on mac64
-        # or RHEL7
-        if m != 'nestor' and opts.imp_branch != 'develop':
-            mods.extend((rh7_64, mac64))
         c.include_component(m, mods)
     # Documentation only built on one platform
     c.include_component('DOC', mac13arm)
@@ -1933,10 +1916,6 @@ def main():
               ['packages/IMP.spec', 'packages/IMP-copr.spec'])
     c.add_cmake_log(f41_64, ['build', 'test'],
                     'packages/IMP-%s-1.fc41.x86_64.rpm' % repo.newlongver)
-    if opts.imp_branch != 'develop':
-        c.add_cmake_log(rh7_64, ['build', 'test'],
-                        'packages/IMP-%s-1.el7.centos.x86_64.rpm'
-                        % repo.newlongver)
     c.add_cmake_log(rh8_64, ['build', 'test'],
                     'packages/IMP-%s-1.el8.x86_64.rpm' % repo.newlongver)
     c.add_cmake_log(rh9_64, ['build', 'test'],
@@ -1975,8 +1954,6 @@ def main():
         c.add_cmake_log(coverage, ['build', 'test', 'example'], [])
         all_archs_map = [debug8, mac14, mac13arm, fast8, fastmac, static,
                          release8, win32, win64, cuda, coverage]
-        if opts.imp_branch != 'develop':
-            all_archs_map.insert(1, mac64)
         c.make_module_map(all_archs_map)
 
         # Only cmake builds have an ALL_LAB component
@@ -1994,10 +1971,6 @@ def main():
             c.exclude_component(m, (cuda,))
         for m in ('domino3',):
             c.exclude_component(m, (win32, win64, mac13arm, fastmac))
-        if opts.imp_branch != 'develop':
-            for m in ('pynet',):
-                # pynet doesn't work on Python 2 platforms
-                c.exclude_component(m, (mac64,))
         # Seth's code only works on very recent machines with cppad-devel
         # installed (just our Fedora boxes)
         for m in ('liegroup', 'autodiff'):
@@ -2005,8 +1978,6 @@ def main():
         for m in ('isd_emxl',):
             incs = [release8, debug8, f41_64, fast8, coverage, win32,
                     win64, mac14, mac13arm, fastmac] + rh_rpms
-            if opts.imp_branch != 'develop':
-                incs.append(mac64)
             c.include_component(m, incs)
 
     checks = []
