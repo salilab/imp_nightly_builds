@@ -1813,8 +1813,7 @@ def main():
     else:
         # Do nothing for non-develop builds if the build didn't run today
         # (unless a dry run was explicitly requested)
-        if opts.imponly and not opts.dryrun \
-           and not impcheck.build_has_changed():
+        if not opts.dryrun and not impcheck.build_has_changed():
             return
         imp_lab_check = None
 
