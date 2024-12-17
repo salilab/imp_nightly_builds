@@ -558,7 +558,6 @@ END
       if [ ${BITS} = "32" ]; then
         CMAKE_ARGS+=("-Dfftw3_LIBRARY='/usr/lib/w32comp/Program Files/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.16.27023/lib/x86/libfftw3-3.lib'")
 	CMAKE_ARGS+=("-DCGAL_DIR=/usr/lib/w32comp/CGAL-5.1/")
-	CMAKE_ARGS+=("-DPYTHON_NUMPY_INCLUDE_DIR=/usr/lib/w32comp/w32python/3.9/lib/site-packages/numpy/core/include")
 	CMAKE_ARGS+=("-DPYTHON_TEST_EXECUTABLE=w32python3")
 	CMAKE_ARGS+=("-DPYTHON_INCLUDE_DIRS=/usr/lib/w32comp/w32python/3.9/include/")
 	CMAKE_ARGS+=("-DPYTHON_EXECUTABLE=python3")
@@ -566,7 +565,6 @@ END
         CMAKE_ARGS+=("-DCMAKE_C_FLAGS='/Dinline=__inline'")
         CMAKE_ARGS+=("-Dfftw3_LIBRARY='/usr/lib/w64comp/Program Files/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.16.27023/lib/x64/libfftw3-3.lib'")
 	CMAKE_ARGS+=("-DCGAL_DIR=/usr/lib/w64comp/CGAL-5.1/")
-	CMAKE_ARGS+=("-DPYTHON_NUMPY_INCLUDE_DIR=/usr/lib/w64comp/w64python/3.9/lib/site-packages/numpy/core/include")
 	CMAKE_ARGS+=("-DPYTHON_TEST_EXECUTABLE=w64python3")
       fi
       CMAKE_NON_CACHE_ARGS+=("-DPATH_SEP=:" "-DSETUP_EXT=sh" \
