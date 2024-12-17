@@ -1899,8 +1899,6 @@ def main():
     c.include_component('DOC', mac13arm)
     c.include_component('RMF-DOC', mac13arm)
 
-    # bff currently doesn't work for Windows
-    c.exclude_component('bff', [win32, win64])
     # scratch module is excluded from all RPM and deb builds
     for m in ('scratch',):
         c.exclude_component(m, [f41_64, focal, jammy, noble] + rh_rpms)
