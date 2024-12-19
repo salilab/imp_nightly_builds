@@ -550,6 +550,9 @@ END
       # Prevent wine from trying to open an X connection
       unset DISPLAY
 
+      # Prevent matplotlib from trying to use the non-functional TkAgg backend
+      export MPLBACKEND=Agg
+
       get_cmake $PLATFORM
       CMAKE_ARGS+=("-DCMAKE_BUILD_TYPE=Release" \
                    "-DCMAKE_CXX_FLAGS='/DBOOST_ALL_DYN_LINK /EHsc /DH5_BUILT_AS_DYNAMIC_LIB /DWIN32 /DGSL_DLL${EXTRA_CXX_FLAGS}'" \
