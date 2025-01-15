@@ -13,6 +13,9 @@ Windows, Linux) and environments (e.g. debug, release, static builds).
  - `build_vagrant.sh` is a utility script to start up a virtual machine using
    [Vagrant](https://www.vagrantup.com/), run the `build.sh` script, and
    then stop the VM.
+ - `check_build_dir.py` can be run in the top-level install directory to
+   check on the status of a currently running build (for example, to check
+   if some `build.sh` runs failed and need to be restarted).
  - `check_build.py` collates the results from all of the `build.sh` runs
    and stores them in a database, and notifies the IMP developers by email.
  - the `www` subdirectory contains a CGI script that powers the
