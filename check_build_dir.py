@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import pickle
-import glob
 import os
 
 dirs = os.listdir('build/logs/imp')
