@@ -429,7 +429,7 @@ END
     module load mpi/openmpi-x86_64
 
     CMAKE_ARGS=("${CMAKE_ARGS[@]}" "-DCMAKE_BUILD_TYPE=Debug" \
-                "-DIMP_TIMEOUT_FACTOR=20" \
+                "-DIMP_TIMEOUT_FACTOR=30" \
                 "-DCGAL_DO_NOT_WARN_ABOUT_CMAKE_BUILD_TYPE=TRUE" \
                 "-GNinja" \
                 "-DCMAKE_CXX_FLAGS='-std=c++11 -fprofile-arcs -ftest-coverage'")
