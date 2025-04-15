@@ -566,9 +566,9 @@ all_platforms = (('i386-intel8',
                  ('coverage',
                   Platform(
                       'Cov', 'Coverage',
-                      'Coverage build (debug build on Fedora 41, 64-bit; '
-                      'Boost 1.83, gcc 14.2, Python 3)',
-                      coverage_vlong % ("64-bit Fedora 41",
+                      'Coverage build (debug build on Fedora 42, 64-bit; '
+                      'Boost 1.83, gcc 15.0, Python 3)',
+                      coverage_vlong % ("64-bit Fedora 42",
                                         debug_build_vlong),
                       'coverage.log')),
                  ('pkg.el5-i386',
@@ -806,6 +806,14 @@ all_platforms = (('i386-intel8',
                       rpm_vlong_header % "Fedora 41"
                       + rpm_vlong_footer + "</p>",
                       'package.fc41-x86_64.log')),
+                 ('pkg.f42-x86_64',
+                  Platform(
+                      'F42', 'F42 RPM',
+                      'Fedora 42 RPM build; Boost 1.83, gcc 15.0, '
+                      'Python 3',
+                      rpm_vlong_header % "Fedora 42"
+                      + rpm_vlong_footer + "</p>",
+                      'package.fc42-x86_64.log')),
                  ('pkg.precise-x86_64',
                   Platform(
                       'deb12', 'deb12',
