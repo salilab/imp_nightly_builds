@@ -432,7 +432,7 @@ all_platforms = (('i386-intel8',
                   Platform(
                       'MARM', 'Mac ARM',
                       'Debug build (Apple Silicon Mac; MacOS 13 '
-                      '(Ventura); clang++; Boost 1.86; Python 3; '
+                      '(Ventura); clang++; Boost 1.88; Python 3; '
                       'per-cpp compilation)',
                       mac_vlong % ("64-bit Apple Silicon "
                                    "MacOS 13 (Ventura) Mac",
@@ -455,7 +455,7 @@ all_platforms = (('i386-intel8',
                   Platform(
                       'M14', 'Mac 14',
                       'Debug build (64-bit Intel Mac; MacOS 14 '
-                      '(Sonoma); clang++; Boost 1.86; Python 3; '
+                      '(Sonoma); clang++; Boost 1.88; Python 3; '
                       'per-cpp compilation)',
                       mac_vlong % ("64-bit MacOS 14 (Sonoma) Mac",
                                    "Homebrew Python 3", "")
@@ -481,7 +481,7 @@ all_platforms = (('i386-intel8',
                   Platform(
                       'McFst', 'Mac Fast',
                       'Fast build (Apple Silicon Mac; MacOS 15 (Sequoia); '
-                      'clang++; Boost 1.86; Python 3)',
+                      'clang++; Boost 1.88; Python 3)',
                       mac_header % ("Apple Silicon MacOS 15 (Sequoia) Mac",
                                     "Homebrew Python 3", "")
                       + fast_build_vlong, 'bin-fast.mac15-intel.log')),
