@@ -419,11 +419,8 @@ END
                 "-GNinja")
     mkdir ../build && cd ../build && run_cmake_build ../imp-${IMPVERSION} $PLATFORM python3 "$CMAKE" "$CTEST" "ninja -k9999 -j4" "--run-tests=fast --run-examples" allinstall
 
-  # Get coverage information on clarinet (Fedora box)
+  # Get coverage information on Fedora
   elif [ $PLATFORM = "coverage" ]; then
-    # lcov doesn't yet understand gcc 9's output
-    module purge
-    module load gcc/7.3.1
     get_cmake $PLATFORM
     use_modeller_svn
     module load mpi/openmpi-x86_64
