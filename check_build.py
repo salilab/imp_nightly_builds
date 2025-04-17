@@ -455,7 +455,7 @@ class Formatter(object):
 
 class TextFormatter(Formatter):
     def print_product(self, comp, errors, module_map=None, modules=None,
-                      module_coverage=False, archs=None, logdir=None):
+                      archs=None, logdir=None):
         if len(errors) == 0:
             print("%s OK" % comp.name)
         else:
@@ -602,7 +602,7 @@ class Product(object):
         a = [x for x in self.archs if x not in archs]
         self.exclude_component(module, a)
 
-    def check_logs(self, checker, formatters):
+    def check_logs(self, checker, formatters, dryrun):
         self._errors = []
         for (log, generated_files) in self.__logs.items():
             self.__check_log(log, self.__log_desc[log], generated_files,
@@ -611,7 +611,9 @@ class Product(object):
             self.__check_cmake_log(cmake_log, checker, self._errors)
         self.__check_extra_logs(checker, self._errors)
         self._check_module_errors(checker)
-        self.print_product(formatters, os.path.join(checker.logdir, self.dir))
+        logdir = os.path.join(checker.logdir, self.dir)
+        self.print_product(formatters, logdir)
+        self.write_build_info(logdir, dryrun)
         lenerr = len(self._errors)
         if self.get_module_state() != 'OK':
             lenerr += 1
@@ -638,16 +640,38 @@ class Product(object):
                 self.state == 'BUILD'
             for f in formatters:
                 f.print_product(self, self._errors, self.module_map,
-                                self.modules, self.module_coverage,
-                                self.archs, logdir)
+                                self.modules, self.archs, logdir)
         elif len(self.modules) > 0:
             for f in formatters:
                 f.print_product(self, self._errors, self.module_map,
-                                self.modules, self.module_coverage,
-                                self.archs, logdir)
+                                self.modules, self.archs, logdir)
         else:
             for f in formatters:
                 f.print_product(self, self._errors)
+
+    def write_build_info(self, logdir, dryrun):
+        build_info = self._get_build_info(self.modules, self.module_coverage,
+                                          logdir)
+        if dryrun:
+            print(build_info)
+        else:
+            pth = os.path.join(logdir, '..', '..', 'build_info.pck')
+            with open(pth, 'wb') as fh:
+                pickle.dump(build_info, fh, 2)
+
+    def _get_build_info(self, modules, module_coverage, logdir):
+        build_info = {}
+        build_info['modules'] = bimods = []
+        for m in modules:
+            modinfo = {'name': m}
+            if module_coverage:
+                pycov = PythonCoverageLink('', 'coverage/python/%s/' % m)
+                ccov = CCoverageLink('', 'coverage/cpp/%s/' % m)
+                for key, cov in (('pycov', pycov), ('cppcov', ccov)):
+                    pct = cov.parse_logdir(logdir)
+                    modinfo[key] = pct
+            bimods.append(modinfo)
+        return build_info
 
     def __check_extra_logs(self, checker, errors):
         logmatch = os.path.join(checker.logdir, self.dir, "*.log")
@@ -914,13 +938,13 @@ class Checker(object):
     def print_header(self, formatter):
         formatter.print_header()
 
-    def check_logs(self, formatters):
+    def check_logs(self, formatters, dryrun):
         numerr = 0
         for f in formatters:
             self.print_header(f)
             f.print_start_products()
         for comp in self._products:
-            numerr += comp.check_logs(self, formatters)
+            numerr += comp.check_logs(self, formatters, dryrun)
         for f in formatters:
             f.print_end_products()
             f.print_new_repos(self._repos)
@@ -1989,7 +2013,7 @@ def main():
             formatters = []
             check.copy_log_files(testhtml)
 
-        nerr = check.check_logs(formatters)
+        nerr = check.check_logs(formatters, opts.dryrun)
         del formatters  # Ensure that output file gets closed
         if not opts.dryrun:
             if nerr == 0:
