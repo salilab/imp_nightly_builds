@@ -403,9 +403,9 @@ END
 
   # Build with CUDA
   elif [ $PLATFORM = "cuda" ]; then
-    # CUDA doesn't currently support latest Fedora gcc
+    # Latest CUDA doesn't support latest Fedora gcc, so use previous version
     module purge
-    module load gcc/10.2.1 cuda/12.4.0 gnuplot
+    module load cuda/12.8.1 gnuplot
     get_cmake $PLATFORM
     use_modeller_svn
 
@@ -413,6 +413,7 @@ END
                 "-DCMAKE_LIBRARY_PATH=$CUDA_LIB_PATH" \
                 "-DCMAKE_INCLUDE_PATH=$CUDA_LIB_PATH/../include" \
                 "-DIMP_CUDA=ALL" \
+                "-DCUDA_HOST_COMPILER=/usr/bin/gcc-14" \
                 "-DCMAKE_BUILD_TYPE=Release" \
                 "-DIMP_TIMEOUT_FACTOR=2" \
                 "-DIMP_DISABLED_MODULES=multifit2" \
