@@ -123,7 +123,7 @@ windows_vlong = """
 <p>This platform builds and tests IMP for %s Windows, and also builds a
 <tt>.exe</tt> installer. It does not actually run on a real Windows machine;
 it runs on a Linux box and runs the real Windows binaries for the C++ compiler,
-Python 3, and the built IMP itself via <a href="https://winehq.org/">WINE</a>.
+Python, and the built IMP itself via <a href="https://winehq.org/">WINE</a>.
 (We do this to more easily integrate with our Linux systems.)
 </p>
 
@@ -209,15 +209,15 @@ repositories are built).
 
 cuda_vlong = """
 <p>This platform builds and tests IMP on a fully updated %s system with
-the CUDA toolkit and Python 3, using scripts in the
+the CUDA toolkit, using scripts in the
 <a href="https://github.com/salilab/imp_nightly_builds">IMP nightly builds</a>
 GitHub repo, and activates IMP's <b>experimental</b> GPU code.
 </p>
 """
 
 coverage_vlong = """
-<p>This platform builds and tests IMP on a fully updated %s system with
-Python 3, and collects coverage information. This information is reported for
+<p>This platform builds and tests IMP on a fully updated %s system,
+and collects coverage information. This information is reported for
 both Python and C++ code, for modules and applications, on the far right
 side of the build summary page.</p>
 
@@ -283,18 +283,15 @@ all_platforms = (('i386-intel8',
                  ('debug8',
                   Platform(
                       'Dbg', 'Debug',
-                      'Debug build (64-bit Linux, Rocky 8.10, '
-                      'Boost 1.73, Python 3)',
-                      linux_vlong % ("64-bit Rocky 8.10 system with Python 3",
+                      'Debug build (64-bit Linux, Rocky 8.10)',
+                      linux_vlong % ("64-bit Rocky 8.10 system",
                                      '', debug_build_vlong),
                       'bin.x86_64-intel8.log')),
                  ('fast8',
                   Platform(
                       'Fast', 'Fast',
-                      'Fast build (64-bit Linux, Rocky 8.10, Boost 1.73, '
-                      'Python 3)',
-                      linux_vlong % ("64-bit Rocky 8.10 system "
-                                     "with Python 3", '',
+                      'Fast build (64-bit Linux, Rocky 8.10, Boost 1.73)',
+                      linux_vlong % ("64-bit Rocky 8.10 system", '',
                                      fast_build_module_vlong),
                       'bin-fast.x86_64-intel8.log')),
                  ('release64',
@@ -309,17 +306,15 @@ all_platforms = (('i386-intel8',
                  ('release8',
                   Platform(
                       'Rls', 'Release',
-                      'Release build (64-bit Linux, Rocky 8.10, Boost 1.73, '
-                      'Python 3)',
-                      linux_vlong % ("64-bit Rocky 8.10 system "
-                                     "with Python 3", '',
+                      'Release build (64-bit Linux, Rocky 8.10, Boost 1.73)',
+                      linux_vlong % ("64-bit Rocky 8.10 system", '',
                                      release_build_module_vlong),
                       'bin-release.x86_64-intel8.log')),
                  ('cuda',
                   Platform(
                       'CUDA', 'CUDA',
                       'CUDA build (64-bit Linux, Fedora 42, gcc 15.0, '
-                      'Boost 1.83, CUDA toolkit 12.8, Python 3)',
+                      'Boost 1.83, CUDA toolkit 12.8)',
                       cuda_vlong % "64-bit Fedora 42",
                       'bin-cuda.log')),
                  ('mac10v4-intel',
@@ -432,11 +427,10 @@ all_platforms = (('i386-intel8',
                   Platform(
                       'MARM', 'Mac ARM',
                       'Debug build (Apple Silicon Mac; MacOS 13 '
-                      '(Ventura); clang++; Boost 1.88; Python 3; '
-                      'per-cpp compilation)',
+                      '(Ventura); clang++; Boost 1.88; per-cpp compilation)',
                       mac_vlong % ("64-bit Apple Silicon "
                                    "MacOS 13 (Ventura) Mac",
-                                   "Homebrew Python 3",
+                                   "Homebrew Python",
                                    "<tt>doxygen@1.8.6</tt>, "
                                    "<tt>graphviz</tt>, ")
                       + percpp_vlong,
@@ -455,10 +449,9 @@ all_platforms = (('i386-intel8',
                   Platform(
                       'M14', 'Mac 14',
                       'Debug build (64-bit Intel Mac; MacOS 14 '
-                      '(Sonoma); clang++; Boost 1.88; Python 3; '
-                      'per-cpp compilation)',
+                      '(Sonoma); clang++; Boost 1.88; per-cpp compilation)',
                       mac_vlong % ("64-bit MacOS 14 (Sonoma) Mac",
-                                   "Homebrew Python 3", "")
+                                   "Homebrew Python", "")
                       + percpp_vlong,
                       'bin.mac14-intel.log')),
                  ('fastmac13',
@@ -481,21 +474,21 @@ all_platforms = (('i386-intel8',
                   Platform(
                       'McFst', 'Mac Fast',
                       'Fast build (Apple Silicon Mac; MacOS 15 (Sequoia); '
-                      'clang++; Boost 1.88; Python 3)',
+                      'clang++; Boost 1.88)',
                       mac_header % ("Apple Silicon MacOS 15 (Sequoia) Mac",
-                                    "Homebrew Python 3", "")
+                                    "Homebrew Python", "")
                       + fast_build_vlong, 'bin-fast.mac15-intel.log')),
                  ('i386-w32',
                   Platform(
                       'Win32', 'Win32',
                       '32-bit Windows build (WINE 6.0.2, MSVC++ 2017, '
-                      'Boost 1.83, Python 3)', windows_vlong % "32-bit",
+                      'Boost 1.83)', windows_vlong % "32-bit",
                       'bin.i386-w32.log')),
                  ('x86_64-w64',
                   Platform(
                       'Win64', 'Win64',
                       '64-bit Windows build (WINE 6.0.2, MSVC++ 2017, '
-                      'Boost 1.83, Python 3)', windows_vlong % "64-bit",
+                      'Boost 1.83)', windows_vlong % "64-bit",
                       'bin.x86_64-w64.log')),
                  ('fast',
                   Platform(
@@ -567,7 +560,7 @@ all_platforms = (('i386-intel8',
                   Platform(
                       'Cov', 'Coverage',
                       'Coverage build (debug build on Fedora 42, 64-bit; '
-                      'Boost 1.83, gcc 15.0, Python 3)',
+                      'Boost 1.83, gcc 15.0)',
                       coverage_vlong % ("64-bit Fedora 42",
                                         debug_build_vlong),
                       'coverage.log')),
@@ -609,15 +602,13 @@ all_platforms = (('i386-intel8',
                  ('pkg.el8-x86_64',
                   Platform(
                       'RH8', 'RH8 RPM',
-                      'RedHat Enterprise 8.10 RPM build; '
-                      'Boost 1.66, Python 3',
+                      'RedHat Enterprise 8.10 RPM build; Boost 1.66',
                       rpm_cvlong % ("Rocky Linux 8.10", ""),
                       'package.el8-x86_64.log')),
                  ('pkg.el9-x86_64',
                   Platform(
                       'RH9', 'RH9 RPM',
-                      'RedHat Enterprise 9.5 RPM build; '
-                      'Boost 1.75, Python 3',
+                      'RedHat Enterprise 9.5 RPM build; Boost 1.75',
                       rpm_cvlong % ("Rocky Linux 9.5", ""),
                       'package.el9-x86_64.log')),
                  ('pkg.f16-x86_64',
@@ -809,8 +800,7 @@ all_platforms = (('i386-intel8',
                  ('pkg.f42-x86_64',
                   Platform(
                       'F42', 'F42 RPM',
-                      'Fedora 42 RPM build; Boost 1.83, gcc 15.0, '
-                      'Python 3',
+                      'Fedora 42 RPM build; Boost 1.83, gcc 15.0',
                       rpm_vlong_header % "Fedora 42"
                       + rpm_vlong_footer + "</p>",
                       'package.fc42-x86_64.log')),
@@ -846,21 +836,21 @@ all_platforms = (('i386-intel8',
                   Platform(
                       'deb20', 'deb20',
                       'Ubuntu 20.04 (Focal Fossa) 64-bit package; '
-                      'Boost 1.71, gcc 9.2, Python 3',
+                      'Boost 1.71, gcc 9.2',
                       ubuntu_vlong % "20.04 (Focal Fossa)",
                       'package.focal-x86_64.log')),
                  ('pkg.jammy-x86_64',
                   Platform(
                       'deb22', 'deb22',
                       'Ubuntu 22.04 (Jammy Jellyfish) 64-bit package; '
-                      'Boost 1.74, gcc 11.2, Python 3',
+                      'Boost 1.74, gcc 11.2',
                       ubuntu_vlong % "22.04 (Jammy Jellyfish)",
                       'package.jammy-x86_64.log')),
                  ('pkg.noble-x86_64',
                   Platform(
                       'deb24', 'deb24',
                       'Ubuntu 24.04 (Noble Numbat) 64-bit package; '
-                      'Boost 1.83, gcc 13.2, Python 3',
+                      'Boost 1.83, gcc 13.2',
                       ubuntu_vlong % "24.04 (Noble Numbat)",
                       'package.noble-x86_64.log')))
 platforms_dict = dict(all_platforms)
