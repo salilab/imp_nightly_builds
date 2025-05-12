@@ -345,6 +345,7 @@ class LinkChecker(object):
                 or 'ninja-build.org' in link
                 or 'docs.github.com' in link
                 or 'cmake.org' in link
+                or '/salilab/imp/blob/develop/doc/manual/' in link
                 or link == 'http://www.doxygen.org/'):
             self.log("Skipping check of link " + link)
         else:
