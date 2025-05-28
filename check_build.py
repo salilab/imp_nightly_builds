@@ -1883,13 +1883,13 @@ def main():
     for f in (fastmac, fast8, release8, debug8):
         c.add_cmake_log(f, ['build', 'benchmark', 'test', 'example'], [])
 
-    f42_64 = 'pkg.f42-x86_64'   # Fedora 42 RPM
-    rh8_64 = 'pkg.el8-x86_64'   # RHEL 8 RPM
-    rh9_64 = 'pkg.el9-x86_64'   # RHEL 9 RPM
-    rh10_64 = 'pkg.el10-x86_64' # RHEL 10 RPM
-    focal = 'pkg.focal-x86_64'  # Ubuntu 20.04 (Focal Fossa) .deb package
-    jammy = 'pkg.jammy-x86_64'  # Ubuntu 22.04 (Jammy Jellyfish) .deb package
-    noble = 'pkg.noble-x86_64'  # Ubuntu 24.04 (Noble Numbat) .deb package
+    f42_64 = 'pkg.f42-x86_64'    # Fedora 42 RPM
+    rh8_64 = 'pkg.el8-x86_64'    # RHEL 8 RPM
+    rh9_64 = 'pkg.el9-x86_64'    # RHEL 9 RPM
+    rh10_64 = 'pkg.el10-x86_64'  # RHEL 10 RPM
+    focal = 'pkg.focal-x86_64'   # Ubuntu 20.04 (Focal Fossa) .deb package
+    jammy = 'pkg.jammy-x86_64'   # Ubuntu 22.04 (Jammy Jellyfish) .deb package
+    noble = 'pkg.noble-x86_64'   # Ubuntu 24.04 (Noble Numbat) .deb package
 
     # Check CUDA builds
     cuda = 'cuda'
