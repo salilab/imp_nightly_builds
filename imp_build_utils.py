@@ -611,6 +611,12 @@ all_platforms = (('i386-intel8',
                       'RedHat Enterprise 9.5 RPM build; Boost 1.75',
                       rpm_cvlong % ("Rocky Linux 9.5", ""),
                       'package.el9-x86_64.log')),
+                 ('pkg.el10-x86_64',
+                  Platform(
+                      'RH10', 'RH10 RPM',
+                      'RedHat Enterprise 10.0 RPM build; Boost 1.83',
+                      rpm_cvlong % ("Alma Linux 10.0", ""),
+                      'package.el10-x86_64.log')),
                  ('pkg.f16-x86_64',
                   Platform(
                       'F16', 'F16 RPM',

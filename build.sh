@@ -304,6 +304,9 @@ END
         elif echo ${CFG} | grep -q epel-9; then
 	  # Pull in RHEL9's Python protobuf
           local extra_pkgs="python3-protobuf"
+        elif echo ${CFG} | grep -q epel-10; then
+	  # Pull in RHEL10's Python protobuf
+          local extra_pkgs="python3-protobuf"
 	else
           local extra_pkgs="python-biopython protobuf-python"
         fi
@@ -321,6 +324,10 @@ END
         SCONS="scons-3"
       fi
       if echo ${CFG} | grep -q epel-9; then
+        SCONS_PKG="python3-scons"
+        SCONS="scons-3"
+      fi
+      if echo ${CFG} | grep -q epel-10; then
         SCONS_PKG="python3-scons"
         SCONS="scons-3"
       fi
@@ -398,6 +405,7 @@ END
     else
       run_mock_build pkg.el8-x86_64 epel-8-x86_64 "-std=c++11" "" "" "" "mpi/mpich-x86_64"
       run_mock_build pkg.el9-x86_64 epel-9-x86_64 "" "" "" "" "mpi/mpich-x86_64"
+      run_mock_build pkg.el10-x86_64 epel-10-x86_64 "" "" "" "" "mpi/mpich-x86_64"
     fi
     rm -f config.py.$$
 
