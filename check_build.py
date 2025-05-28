@@ -1887,7 +1887,6 @@ def main():
     rh8_64 = 'pkg.el8-x86_64'    # RHEL 8 RPM
     rh9_64 = 'pkg.el9-x86_64'    # RHEL 9 RPM
     rh10_64 = 'pkg.el10-x86_64'  # RHEL 10 RPM
-    focal = 'pkg.focal-x86_64'   # Ubuntu 20.04 (Focal Fossa) .deb package
     jammy = 'pkg.jammy-x86_64'   # Ubuntu 22.04 (Jammy Jellyfish) .deb package
     noble = 'pkg.noble-x86_64'   # Ubuntu 24.04 (Noble Numbat) .deb package
 
@@ -1899,14 +1898,14 @@ def main():
     coverage = 'coverage'
     c.add_cmake_log(coverage, ['build', 'test', 'example'], [])
 
-    new_archs_map = [rh8_64, rh9_64, rh10_64, focal, jammy, noble, win64]
+    new_archs_map = [rh8_64, rh9_64, rh10_64, jammy, noble, win64]
     rh_rpms = [rh8_64, rh9_64, rh10_64]
     all_archs_map = [debug8, mac14, mac13arm, win32, fast8, fastmac, static,
                      release8, f42_64] + new_archs_map + [coverage, cuda]
     c.make_module_map(all_archs_map)
     # Only cmake builds have an ALL component
     incs = [f42_64, fastmac, coverage, cuda, fast8, static, debug8,
-            release8, focal, jammy, noble] + rh_rpms + all_archs
+            release8, jammy, noble] + rh_rpms + all_archs
     c.include_component('ALL', incs)
     c.include_component('INSTALL', [fastmac, fast8, debug8,
                                     release8, cuda] + all_archs)
@@ -1918,7 +1917,7 @@ def main():
     c.include_component('ALLPYTHON', [fast8, release8])
     for m in ('mpi', 'spb', 'nestor'):
         mods = [release8, debug8, rh8_64, rh9_64, rh10_64, f42_64, fast8,
-                coverage, win32, win64, mac14, mac13arm, fastmac, focal,
+                coverage, win32, win64, mac14, mac13arm, fastmac,
                 jammy, noble]
         c.include_component(m, mods)
     # Documentation only built on one platform
@@ -1927,7 +1926,7 @@ def main():
 
     # scratch module is excluded from all RPM and deb builds
     for m in ('scratch',):
-        c.exclude_component(m, [f42_64, focal, jammy, noble] + rh_rpms)
+        c.exclude_component(m, [f42_64, jammy, noble] + rh_rpms)
     for m in ('RMF', 'rmf', 'gsl', 'multifit', 'em2d', 'EMageFit',
               'domino', 'example', 'pepdock', 'cgal',
               'cnmultifit', 'saxs_merge', 'integrative_docking',
@@ -1947,8 +1946,6 @@ def main():
                     'packages/IMP-%s-1.el10.x86_64.rpm' % repo.newlongver)
 
     # Check debs
-    c.add_cmake_log(focal, ['build', 'test'],
-                    _deb_packages(repo.newlongver, 'focal'))
     c.add_cmake_log(jammy, ['build', 'test'],
                     _deb_packages(repo.newlongver, 'jammy'))
     c.add_cmake_log(noble, ['build', 'test'],
@@ -1983,7 +1980,7 @@ def main():
 
         # Only cmake builds have an ALL_LAB component
         incs = [f42_64, fastmac, cuda, coverage, fast8, debug8,
-                static, release8, focal, jammy, noble] + rh_rpms + all_archs
+                static, release8, jammy, noble] + rh_rpms + all_archs
         c.include_component('ALL_LAB', incs)
         c.include_component('COVERAGE_LAB', [coverage])
         c.include_component('INSTALL_LAB',

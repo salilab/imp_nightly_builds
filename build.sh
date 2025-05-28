@@ -225,7 +225,7 @@ END
       RET=$?
       release=$(lsb_release -r -s)
       cpppath='/usr/include/eigen3'
-      if [ "${codename}" = "focal" ] || [ "${codename}" = "jammy" ]; then
+      if [ "${codename}" = "jammy" ]; then
         cxxflags="-std=c++11 -I/usr/include/hdf5/serial/"
       else
         cxxflags="-std=c++20 -I/usr/include/hdf5/serial/"
