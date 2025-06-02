@@ -345,12 +345,7 @@ END
       if [ -n "${MPI_MODULE}" ]; then
         SCONS="${SCONS} mpi_module=${MPI_MODULE}"
       fi
-      # On RHEL7, tests need Python 2 rather than 3
-      if echo $CFG | grep -q 'epel-7' ; then
-        SCONS="${SCONS} python=python2"
-      else
-        SCONS="${SCONS} python=python3"
-      fi
+      SCONS="${SCONS} python=python3"
       mock -r $CFG --init \
       && mkdir packages-${CFG} \
       && mock -r $CFG --buildsrpm --no-clean --spec $SPEC --sources $IMPSOURCES \
