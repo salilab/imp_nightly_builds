@@ -329,7 +329,7 @@ END
       fi
       if echo ${CFG} | grep -q epel-10; then
         SCONS_PKG="python3-scons"
-        SCONS="scons-3"
+        SCONS="scons"
       fi
 
       SCONS="${SCONS} mock_config=$CFG cxxflags=${CXXFLAGS}"
