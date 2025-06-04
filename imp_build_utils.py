@@ -553,8 +553,8 @@ all_platforms = (('i386-intel8',
                  ('static9',
                   Platform(
                       'Stat', 'Static',
-                      'Static build (x86_64 Linux, Rocky 9.5, Boost 1.75)',
-                      static_vlong % "64-bit Rocky 9.5",
+                      'Static build (x86_64 Linux, Rocky 9.6, Boost 1.75)',
+                      static_vlong % "64-bit Rocky 9.6",
                       'bin-static.x86_64-intel8.log')),
                  ('coverage',
                   Platform(
@@ -608,8 +608,8 @@ all_platforms = (('i386-intel8',
                  ('pkg.el9-x86_64',
                   Platform(
                       'RH9', 'RH9 RPM',
-                      'RedHat Enterprise 9.5 RPM build; Boost 1.75',
-                      rpm_cvlong % ("Rocky Linux 9.5", ""),
+                      'RedHat Enterprise 9.6 RPM build; Boost 1.75',
+                      rpm_cvlong % ("Rocky Linux 9.6", ""),
                       'package.el9-x86_64.log')),
                  ('pkg.el10-x86_64',
                   Platform(
