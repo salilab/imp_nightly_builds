@@ -55,7 +55,7 @@ class Platform:
 rpm_vlong_header = """
 <p>This platform builds and tests the IMP RPM package on a fully updated
 %s system. The actual build is done in a
-<a href="https://github.com/rpm-software-management/mock/wiki">mock</a> environment.</p>
+<a href="https://rpm-software-management.github.io/mock/">mock</a> environment.</p>
 """  # noqa:E501
 rpm_vlong_footer = """
 <p>To build an RPM package yourself, you can rebuild from the source RPM
