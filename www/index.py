@@ -118,7 +118,8 @@ class TestPage(object):
                     'release/2.13.0', 'release/2.14.0', 'release/2.15.0',
                     'release/2.16.0', 'release/2.17.0', 'release/2.18.0',
                     'release/2.19.0', 'release/2.20.0', 'release/2.20.1',
-                    'release/2.20.2', 'release/2.21.0', 'release/2.22.0']
+                    'release/2.20.2', 'release/2.21.0', 'release/2.22.0',
+                    'release/2.23.0']
 
     def __init__(self):
         self.lab_only = (os.environ.get('HTTPS', 'off') == 'on'
