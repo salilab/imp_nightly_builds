@@ -148,6 +148,9 @@ do_build() {
       module list -t >& ${IMPBUILD}/modules.${PLATFORM}
       # Load extra modules for tests
       module load python3/scipy python3/scikit python3/matplotlib python3/pandas python3/pyrmsd gnuplot python3/biopython python3/networkx
+      # Build with numpy 2 headers so that IMP binaries work with both
+      # numpy 1 (RHEL 8, 9) and numpy 2 (Fedora)
+      patch -p1 < tools/debian-ppa/patches/imp-numpy2_vendor.patch
     fi
     if [ $PLATFORM = "fastmac15" ]; then
       # domino3 uses SSE3, so won't work on ARM; autodiff only currently
@@ -508,6 +511,9 @@ END
       module list -t >& ${IMPBUILD}/modules.${PLATFORM}
       # Load extra modules for tests
       module load python3/scipy python3/scikit python3/matplotlib python3/pandas python3/pyrmsd gnuplot python3/biopython python3/networkx
+      # Build with numpy 2 headers so that IMP binaries work with both
+      # numpy 1 (RHEL 8, 9) and numpy 2 (Fedora)
+      patch -p1 < tools/debian-ppa/patches/imp-numpy2_vendor.patch
       get_cmake $PLATFORM
       CMAKE_ARGS=("${CMAKE_ARGS[@]}" "-DCMAKE_BUILD_TYPE=Release" \
                   "-DIMP_TIMEOUT_FACTOR=2" \
