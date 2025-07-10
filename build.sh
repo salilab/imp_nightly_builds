@@ -163,7 +163,7 @@ do_build() {
                    "-DPython3_EXECUTABLE=/opt/homebrew/bin/python3")
     fi
     if [ $PLATFORM = "fast8" ]; then
-      CMAKE_ARGS+=("-DIMP_TIMEOUT_FACTOR=20" "-DUSE_PYTHON2=off" \
+      CMAKE_ARGS+=("-DIMP_TIMEOUT_FACTOR=20" \
                    "-DCMAKE_CXX_FLAGS='-std=c++14 -DOMPI_SKIP_MPICXX=1'")
     fi
     CMAKE_ARGS+=("-DCMAKE_BUILD_TYPE=Release" \
@@ -492,7 +492,6 @@ END
       get_cmake $PLATFORM
       CMAKE_ARGS=("${CMAKE_ARGS[@]}" "-DCMAKE_BUILD_TYPE=Release" \
                   "-DIMP_TIMEOUT_FACTOR=2" \
-                  "-DUSE_PYTHON2=off" \
                   "-DCMAKE_CXX_FLAGS='-std=c++14'" \
                   "-DIMP_MAX_CHECKS=INTERNAL" \
                    "-GNinja")
@@ -517,7 +516,6 @@ END
       get_cmake $PLATFORM
       CMAKE_ARGS=("${CMAKE_ARGS[@]}" "-DCMAKE_BUILD_TYPE=Release" \
                   "-DIMP_TIMEOUT_FACTOR=2" \
-                  "-DUSE_PYTHON2=off" \
                   "-DCMAKE_CXX_FLAGS='-std=c++14 -DOMPI_SKIP_MPICXX=1'" \
                   "-GNinja")
       # autodiff only currently tested on Fedora
