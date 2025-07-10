@@ -151,6 +151,8 @@ do_build() {
       # Build with numpy 2 headers so that IMP binaries work with both
       # numpy 1 (RHEL 8, 9) and numpy 2 (Fedora)
       patch -p1 < tools/debian-ppa/patches/imp-numpy2_vendor.patch
+      # Add support for the ancient numpy 1.14 in RHEL 8
+      patch -p1 < tools/build/numpy-rhel8.patch
     fi
     if [ $PLATFORM = "fastmac15" ]; then
       # domino3 uses SSE3, so won't work on ARM; autodiff only currently
@@ -513,6 +515,8 @@ END
       # Build with numpy 2 headers so that IMP binaries work with both
       # numpy 1 (RHEL 8, 9) and numpy 2 (Fedora)
       patch -p1 < tools/debian-ppa/patches/imp-numpy2_vendor.patch
+      # Add support for the ancient numpy 1.14 in RHEL 8
+      patch -p1 < tools/build/numpy-rhel8.patch
       get_cmake $PLATFORM
       CMAKE_ARGS=("${CMAKE_ARGS[@]}" "-DCMAKE_BUILD_TYPE=Release" \
                   "-DIMP_TIMEOUT_FACTOR=2" \
