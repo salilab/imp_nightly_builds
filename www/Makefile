@@ -1,26 +1,18 @@
-SUBDIRS=
-.PHONY: install ${SUBDIRS}
-WEB=/guitar3/home/www/IMP
-FILES=${WEB}/index.py ${WEB}/sorttable.js ${WEB}/testfunc.js ${WEB}/tests.css \
-      ${WEB}/jquery-1.8.1.min.js ${WEB}/jquery.jqplot.min.js \
-      ${WEB}/jqplot.dateAxisRenderer.min.js \
-      ${WEB}/jqplot.canvasAxisLabelRenderer.min.js \
-      ${WEB}/jqplot.canvasTextRenderer.min.js \
-      ${WEB}/jqplot.cursor.min.js ${WEB}/jqplot.highlighter.min.js \
-      ${WEB}/jquery.jqplot.css ${WEB}/excanvas.min.js
+# Makefile.include should set the WEBTOP variable to the location to install to
+include Makefile.include
 
-install: ${FILES} ${WEB}/README ${SUBDIRS}
+.PHONY: test install
 
-${SUBDIRS}:
-	${MAKE} -C $@
+test:
+	py.test --pep8
 
-${WEB}/README: Makefile
-	echo "Do not edit files in this directory!" > $@
-	echo "Edit the originals (in the git repo)" >> $@
-	echo "and use 'make' to install them here" >> $@
-	chmod go-rwx $@
-
-${WEB}/%: %
-	cp -f $< $@
-	chmod a-w $@
-	chmod a+rx $@
+install::
+	mkdir -p ${WEBTOP}/results/templates
+	mkdir -p ${WEBTOP}/static/images
+	cp results/*.py ${WEBTOP}/results/
+	cp results/templates/*.html ${WEBTOP}/results/templates/
+	cp static/*.{css,js} ${WEBTOP}/static/
+	echo "import sys; sys.path.insert(0, '${WEBTOP}')" > ${WEBTOP}/results.wsgi
+	echo "from results import app as application" >> ${WEBTOP}/results.wsgi
+	@echo "Do not edit files in this directory!" > ${WEBTOP}/README
+	@echo "Edit the originals and use 'make' to install them here" >> ${WEBTOP}/README

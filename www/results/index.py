@@ -1,9 +1,6 @@
-#!/usr/bin/python3
-
-import cgi
+from flask import request
 import html
-import cgitb
-import traceback
+import io
 import sys
 import re
 import os
@@ -81,18 +78,6 @@ def get_date_link(date):
     return date.strftime('%Y%m%d')
 
 
-def connect_mysql():
-    d = os.path.dirname(sys.argv[0])
-    with open(os.path.join(d, 'imp-sql-args.pck'), 'rb') as fh:
-        args = pickle.load(fh)
-    conn = MySQLdb.connect(**args)
-    return conn
-
-
-def print_footer():
-    print("</body></html>")
-
-
 def get_coverage_link(date, covtyp, component, pct, lab_only, branch,
                       nightly_url):
     fpct = float(pct)
@@ -121,7 +106,10 @@ class TestPage(object):
                     'release/2.20.2', 'release/2.21.0', 'release/2.22.0',
                     'release/2.23.0']
 
-    def __init__(self):
+    def __init__(self, db, config):
+        self.db = db
+        self.config = config
+        self._output = io.StringIO()
         self.lab_only = (os.environ.get('HTTPS', 'off') == 'on'
                          and os.environ.get('REMOTE_USER', None) is not None)
         self.script_name = os.environ.get('SCRIPT_NAME', '')
@@ -129,19 +117,18 @@ class TestPage(object):
             self.nightly_url = '/imp/nightly'
         else:
             self.nightly_url = '/nightly'
-        form = cgi.FieldStorage()
-        self.branch = form.getfirst('branch', 'develop')
+        self.branch = request.args.get('branch', 'develop')
         if self.branch not in self.all_branches:
             self.branch = 'develop'
         if self.branch != 'develop':
             self.lab_only = False
         (self.date, self.last_build_date, self.version,
-         self.last_build_version) = self.get_date_and_version(form)
+         self.last_build_version) = self.get_date_and_version()
         self.revision = self.get_revision()
-        self.test = self.get_form_integer(form, 'test')
-        self.platform = self.get_form_integer(form, 'plat')
-        self.component = self.get_form_integer(form, 'comp')
-        self.bench = self.get_form_integer(form, 'bench')
+        self.test = self.get_form_integer('test')
+        self.platform = self.get_form_integer('plat')
+        self.component = self.get_form_integer('comp')
+        self.bench = self.get_form_integer('bench')
         self.default_page = 'build'
         self.pages = {'results': self.display_test,
                       'runtime': self.display_test_runtime,
@@ -157,7 +144,7 @@ class TestPage(object):
                       'benchfile': self.display_benchmark_file,
                       'stat': self.display_build_status_badge,
                       'all': self.display_all_failures}
-        askpage = form.getfirst('p', self.default_page)
+        askpage = request.args.get('p', self.default_page)
         if self.test and self.platform:
             self.page = 'results'
         elif self.bench:
@@ -175,9 +162,6 @@ class TestPage(object):
                              'benchfile') \
                or self.page not in self.pages:
                 self.page = self.default_page
-        if self.page != 'stat':
-            print('Content-type: text/html')
-            print('X-Robots-Tag: noindex, nofollow\n\n')
 
     def get_branch_table(self, name):
         if self.branch == 'develop':
@@ -194,7 +178,7 @@ class TestPage(object):
         return id
 
     def print_header(self, include_charts=False):
-        print("""
+        self.p("""
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
      "http://www.w3.org/TR/html4/strict.dtd">
 <html>
@@ -203,7 +187,7 @@ class TestPage(object):
 <script type="text/javaScript" src="testfunc.js"></script>
 <script type="text/javaScript" src="sorttable.js"></script>""")
         if include_charts:
-            print("""
+            self.p("""
 <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="excanvas.min.js"></script><![endif]-->
 <script type="text/javaScript" src="jquery-1.8.1.min.js"></script>
 <script type="text/javaScript" src="jquery.jqplot.min.js"></script>
@@ -213,7 +197,7 @@ class TestPage(object):
 <script type="text/javaScript" src="jqplot.highlighter.min.js"></script>
 <script type="text/javaScript" src="jqplot.dateAxisRenderer.min.js"></script>
 <link href="jquery.jqplot.css" rel="stylesheet" type="text/css">""")  # noqa: E501
-        print("""
+        self.p("""
 <link href="tests.css" rel="stylesheet" type="text/css">
 <link href="/fontawesome6/css/fontawesome.min.css" rel="stylesheet" type="text/css">
 <link href="/fontawesome6/css/brands.min.css" rel="stylesheet" type="text/css">
@@ -257,16 +241,16 @@ window.onload = linkEmail;
 </div>
 """ % self.get_build_id())  # noqa: E501
 
-    def get_form_integer(self, form, name):
-        if name not in form:
+    def get_form_integer(self, name):
+        if name not in request.args:
             return None
         try:
-            return int(form.getfirst(name))
+            return int(request.args.get(name))
         except ValueError:
             return 0
 
     def get_revision(self):
-        conn = connect_mysql()
+        conn = self.db
         query = ('SELECT rev from ' + self.get_branch_table('imp_test_reporev')
                  + ' where date=%s')
         c = conn.cursor()
@@ -276,7 +260,7 @@ window.onload = linkEmail;
             return res[0]
 
     def get_other_repo_revs(self):
-        conn = connect_mysql()
+        conn = self.db
         query = 'SELECT repo,rev from ' \
                 + self.get_branch_table('imp_test_other_reporev') \
                 + ' where date=%s'
@@ -296,7 +280,7 @@ window.onload = linkEmail;
     def get_version(self, date):
         """Map date to version"""
         if self.branch == 'main':
-            conn = connect_mysql()
+            conn = self.db
             c = conn.cursor()
             table = self.get_branch_table('imp_test_reporev')
             query = 'SELECT version FROM ' + table + ' WHERE date=%s'
@@ -305,13 +289,13 @@ window.onload = linkEmail;
             if res:
                 return res[0]
 
-    def get_date_and_version(self, form):
+    def get_date_and_version(self):
         # Map version to date, if given
-        version = form.getfirst('version', None)
+        version = request.args.get('version', None)
         if version:
             self.branch = 'main'
             last_build_date = self.get_last_build_date()
-            conn = connect_mysql()
+            conn = self.db
             c = conn.cursor()
             table = self.get_branch_table('imp_test_reporev')
             query = 'SELECT date FROM ' + table + ' WHERE version=%s'
@@ -322,7 +306,7 @@ window.onload = linkEmail;
                         self.get_version(last_build_date))
 
         last_build_date = self.get_last_build_date()
-        date = form.getfirst('date', None)
+        date = request.args.get('date', None)
         if date:
             m = re.match(r'(\d{4})(\d{2})(\d{2})$', date)
             if m:
@@ -341,7 +325,15 @@ window.onload = linkEmail;
         else:
             self.print_header(self.bench is not None or self.page == 'runtime')
             self.display_page()
-            print_footer()
+            self.print_footer()
+        return self._output.getvalue()
+
+    def p(self, *args, sep=' ', end='\n'):
+        """Print to our internal output buffer"""
+        print(*args, sep=sep, end=end, file=self._output)
+
+    def print_footer(self):
+        self.p("</body></html>")
 
     def get_sql_lab_only(self):
         """Get a suitable SQL WHERE fragment to restrict a query to only
@@ -394,44 +386,44 @@ window.onload = linkEmail;
                     '%s/%s.build.log' % (plat, comp),
                     lab_only, "The build log file", remove_prefix=False)
             return link
-        conn = connect_mysql()
+        conn = self.db
         component_name, lab_only = self.get_component_from_id(conn,
                                                               self.component)
         if not component_name:
-            print("<p><b>Unknown component.</b></p>")
+            self.p("<p><b>Unknown component.</b></p>")
             return
         platform_name = self.get_platform_name_from_id(conn, self.platform)
         if not platform_name:
-            print("<p><b>Unknown platform.</b></p>")
+            self.p("<p><b>Unknown platform.</b></p>")
             return
         if len(component_name.split(" ")) == 2:
             results = "results"
         else:
             results = "test results"
-        print("<h1>%s %s for build on %s</h1>"
-              % (component_name, results, self.get_build_id()))
-        print('<p>These were generated by the '
+        self.p("<h1>%s %s for build on %s</h1>"
+               % (component_name, results, self.get_build_id()))
+        self.p('<p>These were generated by the '
               '<a href="%s">%s</a>.</p>'
               % (self.get_link(page='platform'),
                  platforms_dict[platform_name].long))
-        print('<p>See also:</p>')
-        print('<ul><li><a href="%s">Test results for this component on '
+        self.p('<p>See also:</p>')
+        self.p('<ul><li><a href="%s">Test results for this component on '
               '<b>all</b> platforms</a></li>' % self.get_link(page='comp'))
-        print('%s</ul>' % loglinks(platform_name, component_name, lab_only))
+        self.p('%s</ul>' % loglinks(platform_name, component_name, lab_only))
         db = BuildDatabase(conn, self.date, self.lab_only, self.branch)
         self.display_tests(db.get_all_component_tests(self.component,
                                                       self.platform),
                            include_component=False, include_platform=False)
 
     def display_component(self):
-        conn = connect_mysql()
+        conn = self.db
         component_name, lab_only = self.get_component_from_id(conn,
                                                               self.component)
         if not component_name:
-            print("<p><b>Unknown component.</b></p>")
+            self.p("<p><b>Unknown component.</b></p>")
             return
 
-        print("<h1>All %s test results for build on %s</h1>"
+        self.p("<h1>All %s test results for build on %s</h1>"
               % (component_name, self.get_build_id()))
         db = BuildDatabase(conn, self.date, self.lab_only, self.branch)
         self.display_tests(db.get_all_component_tests(self.component),
@@ -439,49 +431,49 @@ window.onload = linkEmail;
 
     def display_build_status_badge(self):
         imgroot = "https://img.shields.io/badge/"
-        db = BuildDatabase(connect_mysql(), self.date, self.lab_only,
+        db = BuildDatabase(self.db, self.date, self.lab_only,
                            self.branch)
         s = db.get_build_summary()
         if s in ("OK", "TEST"):
             imgurl = imgroot + "nightly build-passing-brightgreen.svg"
         else:
             imgurl = imgroot + "nightly build-failing-red.svg"
-        print("Status: 302 Found")
-        print(get_cache_headers())
-        print("Location: %s" % imgurl)
-        print()
+        self.p("Status: 302 Found")
+        self.p(get_cache_headers())
+        self.p("Location: %s" % imgurl)
+        self.p()
 
     def display_all_failures(self):
-        print("<h1>All test failures for build on %s</h1>"
+        self.p("<h1>All test failures for build on %s</h1>"
               % self.get_build_id())
-        db = BuildDatabase(connect_mysql(), self.date, self.lab_only,
+        db = BuildDatabase(self.db, self.date, self.lab_only,
                            self.branch)
         self.display_tests(db.get_all_failed_tests())
 
     def display_new_failures(self):
-        print("<h1>New test failures for build on %s</h1>"
+        self.p("<h1>New test failures for build on %s</h1>"
               % self.get_build_id())
-        db = BuildDatabase(connect_mysql(), self.date, self.lab_only,
+        db = BuildDatabase(self.db, self.date, self.lab_only,
                            self.branch)
         prev_build = db.get_previous_build_date()
         if prev_build is None:
-            print("<p><i>No previous builds exist, so no new test "
+            self.p("<p><i>No previous builds exist, so no new test "
                   "failures.</i></p>")
         else:
-            print("<p>All tests that failed on %s but passed on %s "
+            self.p("<p>All tests that failed on %s but passed on %s "
                   "are shown below.</p>" % (self.date, prev_build))
             self.display_tests(db.get_new_failed_tests())
 
     def display_long_tests(self):
-        print("<h1>Long-running tests for build on %s</h1>"
+        self.p("<h1>Long-running tests for build on %s</h1>"
               % self.get_build_id())
-        print("<p>All tests that ran for more than 20 seconds are shown.</p>")
-        db = BuildDatabase(connect_mysql(), self.date, self.lab_only,
+        self.p("<p>All tests that ran for more than 20 seconds are shown.</p>")
+        db = BuildDatabase(self.db, self.date, self.lab_only,
                            self.branch)
         self.display_tests(db.get_long_tests())
 
     def display_benchmark_file(self):
-        conn = connect_mysql()
+        conn = self.db
         c = MySQLdb.cursors.DictCursor(conn)
         plats = self.get_benchmark_platforms(c)
         thisplat = self.show_benchmark_platform_links(plats)
@@ -493,20 +485,20 @@ window.onload = linkEmail;
                   + self.get_sql_lab_only(), (self.bench,))
         fc_r = c.fetchone()
         if fc_r is None:
-            print("<p>Invalid benchmark file</p>")
+            self.p("<p>Invalid benchmark file</p>")
             return
         if thisplat is None:
-            print("<p>Invalid platform</p>")
+            self.p("<p>Invalid platform</p>")
             return
-        print("<h1>File benchmarks for build on %s</h1>" % self.get_build_id())
-        print("<p>All benchmarks from file <b>%s</b> in <b>%s</b> are shown. "
+        self.p("<h1>File benchmarks for build on %s</h1>" % self.get_build_id())
+        self.p("<p>All benchmarks from file <b>%s</b> in <b>%s</b> are shown. "
               "Each plot shows how long the benchmark ran for, and the "
               "check value, "
               "the meaning of which varies from test to test (for example, "
               "many benchmarks use it to track how much memory is "
               "being used).</p>" % (fc_r['file_name'], fc_r['unit_name']))
 
-        print("<p><i>Click and drag on a plot to zoom in; double click "
+        self.p("<p><i>Click and drag on a plot to zoom in; double click "
               "to reset the zoom.</i></p>")
 
         table = self.get_branch_table('imp_benchmark')
@@ -520,8 +512,8 @@ window.onload = linkEmail;
                 'imp_benchmark.platform=%s ' \
                 'AND date<=%s ORDER BY imp_benchmark_names.id,date'
         c.execute(query, (self.bench, self.platform, self.date))
-        print('<script type="text/javascript">')
-        print("""function plot_bench(chartid, values) {
+        self.p('<script type="text/javascript">')
+        self.p("""function plot_bench(chartid, values) {
   return $.jqplot(chartid, values, {
     series:[
       {label: 'Runtime'},
@@ -556,8 +548,8 @@ window.onload = linkEmail;
     }
   });
 }""")
-        print('</script>')
-        print("<ul>")
+        self.p('</script>')
+        self.p("<ul>")
         bench = {'id': None}
         for row in c:
             if row['id'] != bench['id']:
@@ -574,7 +566,7 @@ window.onload = linkEmail;
             bench['checkvals'].append(row['checkval'] or 0)
         if bench['id'] is not None:
             self.display_benchmark(bench)
-        print("</ul>")
+        self.p("</ul>")
 
     def display_benchmark(self, bench):
         def get_check(val):
@@ -585,21 +577,21 @@ window.onload = linkEmail;
         # Exclude benchmarks that didn't run today
         if len(bench['dates']) > 0 and bench['dates'][-1] != self.date:
             return
-        print('<li><a name="%d">%s %s</a> '
+        self.p('<li><a name="%d">%s %s</a> '
               '<a class="permalink" href="#%d">[link]</a>'
               % (bench['id'], bench['name'], bench['algorithm'], bench['id']))
-        print('<div id="bench_%d" class="benchmark">' % bench['id'])
-        print('</div>')
-        print('<script type="text/javascript">')
-        print("""$(document).ready(function() {
+        self.p('<div id="bench_%d" class="benchmark">' % bench['id'])
+        self.p('</div>')
+        self.p('<script type="text/javascript">')
+        self.p("""$(document).ready(function() {
   var plot%d = plot_bench('bench_%d', [[%s], [%s]]);
 });""" % (bench['id'], bench['id'],
           ",".join("['%s', %f]" % x
                    for x in zip(bench['dates'], bench['runtimes'])),
           ",".join("['%s', %f]" % get_check(x)
                    for x in zip(bench['dates'], bench['checkvals']))))
-        print('</script>')
-        print('</li>')
+        self.p('</script>')
+        self.p('</li>')
 
     def get_benchmark_platforms(self, c):
         table = self.get_branch_table('imp_benchmark')
@@ -612,8 +604,8 @@ window.onload = linkEmail;
 
     def show_benchmark_platform_links(self, plats):
         thisplat = None
-        print("<div class=\"linkspacer\"></div>")
-        print("<div class=\"implinks\">\n<ul>")
+        self.p("<div class=\"linkspacer\"></div>")
+        self.p("<div class=\"implinks\">\n<ul>")
         for p in plats:
             plat = platforms_dict[p['name']]
             if p['id'] == self.platform:
@@ -621,64 +613,64 @@ window.onload = linkEmail;
                 cls = ' class="thispage"'
             else:
                 cls = ''
-            print('<li%s><a title="%s" href="%s">%s</a>'
+            self.p('<li%s><a title="%s" href="%s">%s</a>'
                   % (cls, plat.long, self.get_link(platform=p['id']),
                      plat.short))
-        print("</ul></div>")
+        self.p("</ul></div>")
         return thisplat
 
     def display_doc_build_summary(self):
-        conn = connect_mysql()
+        conn = self.db
         db = BuildDatabase(conn, self.date, self.lab_only, self.branch)
-        print("<h1>Doc summary for build on %s</h1>" % self.get_build_id())
+        self.p("<h1>Doc summary for build on %s</h1>" % self.get_build_id())
         fh = db.get_broken_links()
         if fh:
             for line in fh:
                 sys.stdout.write(line)
         else:
-            print("<p>No information available for this build.</p>")
+            self.p("<p>No information available for this build.</p>")
 
     def display_platform(self):
-        conn = connect_mysql()
+        conn = self.db
         plat_name = self.get_platform_name_from_id(conn, self.platform)
         if not plat_name:
-            print("<p><b>Invalid platform requested</b></p>")
+            self.p("<p><b>Invalid platform requested</b></p>")
             return
         p = platforms_dict[plat_name]
-        print("<h1>Platform: %s</h1>" % p.short)
-        print("<p>%s</p>" % p.long)
-        print("<p>%s</p>" % p.very_long)
-        print("<ul>")
+        self.p("<h1>Platform: %s</h1>" % p.short)
+        self.p("<p>%s</p>" % p.long)
+        self.p("<p>%s</p>" % p.very_long)
+        self.p("<ul>")
         if self.lab_only:
-            print("<li>%s</li>"
+            self.p("<li>%s</li>"
                   % self.get_raw_log_link(
                       '%s/' % plat_name, False,
                       "All public log files for this platform",
                       remove_prefix=False))
-            print("<li>%s</li>"
+            self.p("<li>%s</li>"
                   % self.get_raw_log_link(
                       '%s/' % plat_name, True,
                       "All lab-only log files for this platform",
                       remove_prefix=False))
         else:
-            print("<li>%s</li>"
+            self.p("<li>%s</li>"
                   % self.get_raw_log_link('%s/' % plat_name, False,
                                           "All log files for this platform",
                                           remove_prefix=False))
-        print("</ul>")
+        self.p("</ul>")
 
     def display_benchmarks(self):
-        conn = connect_mysql()
+        conn = self.db
         c = MySQLdb.cursors.DictCursor(conn)
         plats = self.get_benchmark_platforms(c)
         if self.platform is None and len(plats) > 0:
             self.platform = plats[0]['id']
         thisplat = self.show_benchmark_platform_links(plats)
-        print("<h1>Benchmarks for build on %s</h1>" % self.get_build_id())
+        self.p("<h1>Benchmarks for build on %s</h1>" % self.get_build_id())
         if thisplat is None:
-            print("<p><b>No benchmarks for this platform</b></p>")
+            self.p("<p><b>No benchmarks for this platform</b></p>")
             return
-        print('<p>These benchmarks are run as part of the '
+        self.p('<p>These benchmarks are run as part of the '
               '<a href="%s">%s</a>.</p>'
               % (self.get_link(page='platform'), thisplat.long))
         table = self.get_branch_table('imp_benchmark')
@@ -695,18 +687,18 @@ window.onload = linkEmail;
                 'imp_benchmark_files.unit=imp_test_units.id AND ' \
                 'imp_benchmark.platform=%s ' \
                 'GROUP BY imp_test_units.name,imp_benchmark_files.name'
-        print("<table class=\"sortable\">\n<thead>")
-        print("<tr><th>Component</th>")
-        print("<th>File name</th>")
-        print("<th>Number of benchmarks</th></tr></thead><tbody>")
+        self.p("<table class=\"sortable\">\n<thead>")
+        self.p("<tr><th>Component</th>")
+        self.p("<th>File name</th>")
+        self.p("<th>Number of benchmarks</th></tr></thead><tbody>")
         c.execute(query, (self.date, self.platform))
         for row in c:
             link = self.get_link(page='benchfile', bench=row['file_id'])
-            print("<tr><td>%s</td> <td><a href=\"%s\">%s</a></td> "
+            self.p("<tr><td>%s</td> <td><a href=\"%s\">%s</a></td> "
                   "<td>%d</td></tr>"
                   % (row['unit_name'], link, row['file_name'],
                      row['n_benchmarks']))
-        print("</tbody></table>")
+        self.p("</tbody></table>")
 
     def get_link(self, page=None, test=None, platform=None, date=None,
                  component=None, bench=None, branch=None):
@@ -927,7 +919,7 @@ window.onload = linkEmail;
     def print_last_ok_build(self, db):
         last_ok = db.get_last_build_with_summary(('OK', 'TEST'))
         if last_ok is not None:
-            print('<p>IMP last built successfully on <a href="%s">%s</a>.</p>'
+            self.p('<p>IMP last built successfully on <a href="%s">%s</a>.</p>'
                   % (self.get_link(date=last_ok), last_ok))
 
     def print_doc_summary(self, db):
@@ -948,7 +940,7 @@ window.onload = linkEmail;
                    + fmt_msg('reference guide', s['nbroken_tutorial'])
                    + fmt_msg('RMF manual', s['nbroken_rmf_manual']))
             if msg:
-                print("<p>%s</p>" % msg)
+                self.p("<p>%s</p>" % msg)
 
     def print_build_summary(self, db):
         s = db.get_build_summary()
@@ -956,25 +948,25 @@ window.onload = linkEmail;
                         'build this version of IMP, unless you know what ' \
                         'you\'re doing.'
         if s == 'BUILD':
-            print('<p><span class="warning">At least part of IMP failed to '
+            self.p('<p><span class="warning">At least part of IMP failed to '
                   'build today</span> '
                   '(red boxes in the grid below). %s</p>' % not_recommend)
             self.print_last_ok_build(db)
         elif s == 'INCOMPLETE':
-            print('<p>The build system <span class="warning">ran out of '
+            self.p('<p>The build system <span class="warning">ran out of '
                   'time</span> on at least '
                   'one platform today. This <i>might</i> indicate a problem '
                   'with IMP. %s</p>' % not_recommend)
             self.print_last_ok_build(db)
         elif s == 'BADLOG':
-            print('<p><span class="warning">Something went wrong with the '
+            self.p('<p><span class="warning">Something went wrong with the '
                   'build system infrastructure today</span> '
                   '(see the "Miscellaneous log errors" below), '
                   'so at least part of IMP was not adequately '
                   'tested. %s</p>' % not_recommend)
             self.print_last_ok_build(db)
         elif s == 'TEST':
-            print('<p>Some of the IMP testcases '
+            self.p('<p>Some of the IMP testcases '
                   '<span class="warning">failed</span> today '
                   '(orange or blue boxes '
                   'in the grid below). These suggest that the indicated '
@@ -995,26 +987,26 @@ window.onload = linkEmail;
                     "return false;\" href=\"#\">%s</a>" % caption)
 
     def display_build_summary(self):
-        db = BuildDatabase(connect_mysql(), self.date, self.lab_only,
+        db = BuildDatabase(self.db, self.date, self.lab_only,
                            self.branch)
         summary = db.get_unit_summary()
         build_info = db.get_build_info()
 
-        print("<div class=\"linkspacer\"></div>")
-        print("<div class=\"implinks\">\n<ul>")
-        print("<li class=\"thispage\" id=\"faillink\">")
-        print(self.toggle_failmap(show_failures=True, caption="Failures"))
-        print("<li id=\"fulllink\">")
-        print(self.toggle_failmap(show_failures=False, caption="All"))
-        print("</ul></div>")
+        self.p("<div class=\"linkspacer\"></div>")
+        self.p("<div class=\"implinks\">\n<ul>")
+        self.p("<li class=\"thispage\" id=\"faillink\">")
+        self.p(self.toggle_failmap(show_failures=True, caption="Failures"))
+        self.p("<li id=\"fulllink\">")
+        self.p(self.toggle_failmap(show_failures=False, caption="All"))
+        self.p("</ul></div>")
 
-        print("<h1>Summary for build on %s</h1>" % self.get_build_id())
+        self.p("<h1>Summary for build on %s</h1>" % self.get_build_id())
         if self.lab_only:
             listname = 'IMP-lab-build'
         else:
             listname = 'IMP-build'
         if self.branch == 'develop':
-            print('<p class="maillist">To get an email when new results '
+            self.p('<p class="maillist">To get an email when new results '
                   'become available, subscribe to the '
                   '<a href="https://salilab.org/mailman/listinfo/%s">%s</a> '
                   'mailing list.</p>' % (listname.lower(), listname))
@@ -1025,7 +1017,7 @@ window.onload = linkEmail;
         if self.revision:
             git = len(self.revision) > 20
             if git:
-                print('<p>You can get IMP source code '
+                self.p('<p>You can get IMP source code '
                       '<a href="%s/tree/%s">'
                       'from github</a>. (To look at this '
                       '<a href="%s/tree/%s">specific revision</a>, '
@@ -1033,7 +1025,7 @@ window.onload = linkEmail;
                       % (imp_github, self.branch, imp_github, self.revision,
                          self.revision[:10]))
             else:
-                print('<p>To get this version of IMP, run the following '
+                self.p('<p>To get this version of IMP, run the following '
                       'command: "<tt>svn co -%s '
                       'http://svn.salilab.org/imp/trunk imp</tt>" (or, if '
                       'you have an existing SVN checkout, use "<tt>svn up '
@@ -1041,7 +1033,7 @@ window.onload = linkEmail;
             revs = self.get_other_repo_revs()
             rmf_rev = revs.get('rmf', '')
             if rmf_rev:
-                print('This includes <a href="%s">RMF</a> revision '
+                self.p('This includes <a href="%s">RMF</a> revision '
                       '<a href="%s/tree/%s">%s</a>.'
                       % (rmf_github, rmf_github, rmf_rev, rmf_rev[:7]))
             if self.date == self.last_build_date:
@@ -1051,20 +1043,20 @@ window.onload = linkEmail;
                 else:
                     lab_only_note = ""
                 if self.branch == 'develop':
-                    print('Pre-built binaries <a href="https://'
+                    self.p('Pre-built binaries <a href="https://'
                           'integrativemodeling.org/nightly/download/">'
                           'are also available</a>%s.' % lab_only_note)
             if git:
-                print('</p>')
+                self.p('</p>')
             else:
-                print(' You can also '
+                self.p(' You can also '
                       '<a href="http://svn.salilab.org/viewvc/imp/trunk/'
                       '?pathrev=%s">browse the source code</a>.</p>'
                       % self.revision[1:])
             if self.lab_only:
-                print('<p>Lab-only components can be obtained by git '
+                self.p('<p>Lab-only components can be obtained by git '
                       'or SVN from the following locations:</p>')
-                print('<ul>')
+                self.p('<ul>')
                 for comp, url in [
                         ('multifit2',
                          'https://svn.salilab.org/multifit/multifit2/'),
@@ -1087,22 +1079,22 @@ window.onload = linkEmail;
                                   % (url, hash, rev)
                         else:
                             rev = ", " + rev
-                    print('<li><a href="%s">%s</a>%s</li>' % (url, comp, rev))
-                print('</ul>')
+                    self.p('<li><a href="%s">%s</a>%s</li>' % (url, comp, rev))
+                self.p('</ul>')
 
-        print('<div id="fullmap" style="display:none">')
+        self.p('<div id="fullmap" style="display:none">')
         self.print_summary_table(summary, build_info,
                                  'All components and platforms are shown',
                                  show_failures=True)
-        print("</div>")
+        self.p("</div>")
 
-        print('<div id="failmap" style="display:block">')
+        self.p('<div id="failmap" style="display:block">')
         summary.make_only_failed()
         self.print_summary_table(summary, build_info,
                                  'Only components or platforms that have at '
                                  'least one failure are shown',
                                  show_failures=False)
-        print("</div>")
+        self.p("</div>")
         self.print_misc_errors(build_info[0], False)
         if self.lab_only:
             self.print_misc_errors(build_info[1], True)
@@ -1111,9 +1103,9 @@ window.onload = linkEmail;
     def print_git_log(self, db):
         log = db.get_git_log()
         if log:
-            print('<div class="gitlog">')
-            print('<h2>Log</h2>')
-            print('<table>')
+            self.p('<div class="gitlog">')
+            self.p('<h2>Log</h2>')
+            self.p('<table>')
             for lg in log:
                 title = lg.title
                 if len(title) > 100:
@@ -1129,12 +1121,12 @@ window.onload = linkEmail;
                 title = re.sub(r" #(\d+)",
                                r' <a href="' + imp_github +
                                r'/issues/\1">#\1</a>', title)
-                print('<tr><td><a href="%s/commit/%s">%s</a></td> '
+                self.p('<tr><td><a href="%s/commit/%s">%s</a></td> '
                       '<td>%s</td> <td>%s</td></tr>'
                       % (imp_github, lg.githash, lg.githash[:10],
                          lg.author_email.split('@')[0], title))
-            print('</table>')
-            print('</div>')
+            self.p('</table>')
+            self.p('</div>')
 
     def print_misc_errors(self, build_info, lab_only):
         if build_info is None:
@@ -1142,16 +1134,16 @@ window.onload = linkEmail;
         errs = build_info.get('misc_errors', [])
         if len(errs) == 0:
             return
-        print('<div class="comperrors">')
+        self.p('<div class="comperrors">')
         if lab_only:
-            print('<h2>Miscellaneous log errors for lab-only components</h2>')
+            self.p('<h2>Miscellaneous log errors for lab-only components</h2>')
         else:
-            print('<h2>Miscellaneous log errors</h2>')
-        print('<ul class="comperrors">')
+            self.p('<h2>Miscellaneous log errors</h2>')
+        self.p('<ul class="comperrors">')
         for e in errs:
             self.print_misc_error(e, lab_only)
-        print('</ul>')
-        print('</div>')
+        self.p('</ul>')
+        self.p('</div>')
 
     def get_raw_log_link(self, logfile, lab_only, caption=None,
                          remove_prefix=True, tags=''):
@@ -1188,7 +1180,7 @@ window.onload = linkEmail;
         else:
             txt = (self.get_raw_log_link(err['log'], lab_only, err['type'])
                    + ': ' + err['text'])
-        print('<li>%s</li>' % txt)
+        self.p('<li>%s</li>' % txt)
 
     def print_summary_table(self, summary, build_info, caption, show_failures):
         def get_row_header(component, component_id):
@@ -1199,37 +1191,37 @@ window.onload = linkEmail;
             else:
                 return '<td class="comptype">%s</td>' \
                        % self.get_component_link(row, summary.unit_ids[row])
-        print("<table class=\"modules\">")
-        print('<caption>%s; '
+        self.p("<table class=\"modules\">")
+        self.p('<caption>%s; '
               'mouseover or click for more details. %s</caption>'
               % (caption,
                  self.toggle_failmap(
                      show_failures,
                      "[show only failures]"
                      if show_failures else "[show all]")))
-        print("<thead><tr><th></th>")
+        self.p("<thead><tr><th></th>")
         for x in summary.all_archs:
             p = platforms_dict[x]
             if x in summary.cmake_archs:
-                print('<th title="%s"><a href="%s">%s</a></th>'
+                self.p('<th title="%s"><a href="%s">%s</a></th>'
                       % (p.long,
                          self.get_link(page='platform',
                                        platform=summary.arch_ids[x]),
                          p.short))
             else:
-                print('<th title="%s"><a href="%s">%s</a></th>'
+                self.p('<th title="%s"><a href="%s">%s</a></th>'
                       % (p.long,
                          self.get_link(page='log',
                                        platform=summary.arch_ids[x]),
                          p.short))
         if build_info[0]:
-            print('<th title="Percentage of all executable lines of Python '
+            self.p('<th title="Percentage of all executable lines of Python '
                   'code in this component that were executed by its '
                   'own regular (non-expensive) tests">Python coverage</th>')
-            print('<th title="Percentage of all executable lines of C++ '
+            self.p('<th title="Percentage of all executable lines of C++ '
                   'code in this component that were executed by its own '
                   'regular (non-expensive) tests">C++ coverage</th>')
-        print("</tr></thead><tbody>")
+        self.p("</tr></thead><tbody>")
         if build_info[0]:
             coverage = {}
             for m in build_info[0]['modules']:
@@ -1240,9 +1232,9 @@ window.onload = linkEmail;
                         coverage[m['name']] = (m['pycov'], m['cppcov'], True)
         for row in summary.all_units:
             unit_id = summary.unit_ids[row]
-            print("<tr>" + get_row_header(row, unit_id))
+            self.p("<tr>" + get_row_header(row, unit_id))
             for col in summary.all_archs:
-                print(self.format_build_summary(summary.data, row, col,
+                self.p(self.format_build_summary(summary.data, row, col,
                                                 summary.arch_ids[col],
                                                 unit_id))
             if build_info[0]:
@@ -1256,15 +1248,15 @@ window.onload = linkEmail;
                 if cov:
                     for dir, key in (('python', 0), ('cpp', 1)):
                         if cov[key] is None:
-                            print("<td></td>")
+                            self.p("<td></td>")
                         else:
-                            print("<td>%s</td>"
+                            self.p("<td>%s</td>"
                                   % get_coverage_link(self.date, dir, subdir,
                                                       cov[key], cov[2],
                                                       self.branch,
                                                       self.nightly_url))
-            print("</tr>")
-        print("</tbody></table>")
+            self.p("</tr>")
+        self.p("</tbody></table>")
 
     def get_logfile(self, arch_name, lab_only):
         if lab_only and not self.lab_only:
@@ -1282,16 +1274,16 @@ window.onload = linkEmail;
             return g[0]
 
     def display_log(self):
-        conn = connect_mysql()
+        conn = self.db
         c = MySQLdb.cursors.DictCursor(conn)
         arch_name = self.get_platform_name_from_id(conn, self.platform)
         if not arch_name:
-            print("<p><b>Invalid platform requested</b></p>")
+            self.p("<p><b>Invalid platform requested</b></p>")
             return
         logfile = self.get_logfile(arch_name, False)
         lab_only_logfile = self.get_logfile(arch_name, True)
         if logfile is None:
-            print("<p><b>Sorry, logs for this date are no longer "
+            self.p("<p><b>Sorry, logs for this date are no longer "
                   "available.</b></p>")
             return
         table = self.get_branch_table('imp_test_unit_result')
@@ -1304,10 +1296,10 @@ window.onload = linkEmail;
                  'imp_test_unit_result.logline is not null '
                  + self.get_sql_lab_only()
                  + ' order by imp_test_unit_result.logline')
-        print('<div class="loglinks">')
-        print('<p>The build on %s gave the following errors on %s:</p>'
+        self.p('<div class="loglinks">')
+        self.p('<p>The build on %s gave the following errors on %s:</p>'
               % (self.date, platforms_dict[arch_name].long))
-        print('<ul>')
+        self.p('<ul>')
         c.execute(query, (self.date, self.platform))
         rows = c.fetchall()
         loglines = []
@@ -1320,27 +1312,27 @@ window.onload = linkEmail;
             if r['lab_only']:
                 lab_only_loglines.append(r['logline'])
                 self.print_log_link(r, 'l')
-        print('</ul>')
-        print("<p>%s</p>" % self.get_raw_log_link(logfile, False,
+        self.p('</ul>')
+        self.p("<p>%s</p>" % self.get_raw_log_link(logfile, False,
                                                   "Download log file"))
-        print("<p>%s</p>"
+        self.p("<p>%s</p>"
               % self.get_raw_build_files_link(arch_name, False,
                                               "View other build files"))
 
         if self.lab_only and lab_only_logfile:
-            print("<p>%s</p>"
+            self.p("<p>%s</p>"
                   % self.get_raw_log_link(logfile, True,
                                           "Download log file (lab-only)"))
-            print("<p>%s</p>"
+            self.p("<p>%s</p>"
                   % self.get_raw_build_files_link(
                       arch_name, True, "View other build files (lab-only)"))
-        print('</div>')
+        self.p('</div>')
 
-        print('<div class="log">')
+        self.p('<div class="log">')
         self.print_log(logfile, loglines, 'n')
         if self.lab_only and lab_only_logfile:
             self.print_log(lab_only_logfile, lab_only_loglines, 'l')
-        print('</div>')
+        self.p('</div>')
 
     def print_log(self, logfile, loglines, prefix):
         build_complete = False
@@ -1351,25 +1343,25 @@ window.onload = linkEmail;
             else:
                 return 0
         next_link = get_next_link()
-        print("<pre>")
+        self.p("<pre>")
         for n, line in enumerate(open(logfile)):
             if 'BUILD COMPLETED' in line:
                 build_complete = True
             if n + 1 == next_link:
-                print('</pre>')
-                print('<a name="%s_%d"></a><pre class="errorline">'
+                self.p('</pre>')
+                self.p('<a name="%s_%d"></a><pre class="errorline">'
                       % (prefix, next_link))
                 sys.stdout.write(html.escape(line))
-                print("</pre><pre>")
+                self.p("</pre><pre>")
                 next_link = get_next_link()
             else:
                 sys.stdout.write(html.escape(line))
-        print("</pre>")
+        self.p("</pre>")
         if not build_complete:
             b = os.path.basename(logfile)
             if b.startswith('bin') or b.startswith('package') \
                or b.startswith('coverage'):
-                print('<pre class="incomplete">...\n[ Build appears to '
+                self.p('<pre class="incomplete">...\n[ Build appears to '
                       'be incomplete ]</pre>')
 
     def print_log_link(self, sql, prefix):
@@ -1377,49 +1369,49 @@ window.onload = linkEmail;
                      'BUILD': 'failed to build',
                      'BENCH': 'benchmark failure',
                      'DISABLED': 'disabled'}
-        print('<li><a href="#%s_%d">%s %s</a></li>'
+        self.p('<li><a href="#%s_%d">%s %s</a></li>'
               % (prefix, sql['logline'], sql['unit_name'],
                  state_msg[sql['state']]))
 
     def display_tests(self, cur, include_component=True,
                       include_platform=True):
-        print("<table class=\"sortable\">\n<thead>")
-        print("<tr>")
+        self.p("<table class=\"sortable\">\n<thead>")
+        self.p("<tr>")
         if include_component:
-            print("<th>Component</th>")
+            self.p("<th>Component</th>")
         if include_platform:
-            print("<th>Platform</th>")
-        print('<th class="sorttable_nosort"><a title="Show/hide all output" '
+            self.p("<th>Platform</th>")
+        self.p('<th class="sorttable_nosort"><a title="Show/hide all output" '
               'onclick="toggle_all_detail(); return false;" '
               'id="dettog" class="dettog" href="#">[+]</a></th>')
-        print('<th title="Name of the Python or C++ file containing test '
+        self.p('<th title="Name of the Python or C++ file containing test '
               'cases">Name</th>')
-        print('<th title="Time (in seconds) that all tests in this file '
+        self.p('<th title="Time (in seconds) that all tests in this file '
               'took to run">Runtime (s)</th>')
-        print('<th title="OK: all tests ran successfully; FAIL: at least '
+        self.p('<th title="OK: all tests ran successfully; FAIL: at least '
               'one test failed; SEGFAULT: the test program crashed with a '
               'segmentation fault; TIMEOUT: the test program ran out of '
               'time; SKIP: at least one test was deliberately skipped; '
               'EXPFAIL: at least one test failed, but the failure was '
               'expected; SKIP_EXPFAIL: this file contains both skipped '
               'tests and expected failures">State</th>')
-        print('<th title="Difference between this test and the same test '
+        self.p('<th title="Difference between this test and the same test '
               'run in the previous build">Delta</th></tr>')
-        print("<tbody>")
+        self.p("<tbody>")
         for n, row in enumerate(cur):
-            print("<tr>")
+            self.p("<tr>")
             if include_component:
-                print("<td>%s</td>"
+                self.p("<td>%s</td>"
                       % self.get_component_link(row['unit_name'],
                                                 row['unit_id']))
             if include_platform:
-                print(get_platform_td(row['arch_name']))
+                self.p(get_platform_td(row['arch_name']))
             detail = row['detail']
             if detail is None or detail == '':
                 detail = ''
-                print("<td></td>")
+                self.p("<td></td>")
             else:
-                print('<td><a title="Show/hide output" '
+                self.p('<td><a title="Show/hide output" '
                       'onclick="toggle_detail(%d); return false;" '
                       'id="dettog%d" class="dettog" '
                       'href="#">[+]</a></td>' % (n, n))
@@ -1431,12 +1423,12 @@ window.onload = linkEmail;
             if len(test_name) > 80:
                 test_name = test_name[:80] + '[...]'
 
-            print("<td><a href=\"%s\">%s</a>%s</td>"
+            self.p("<td><a href=\"%s\">%s</a>%s</td>"
                   % (testlink, test_name, detail))
-            print("<td>%.2f</td> %s %s</tr>"
+            self.p("<td>%.2f</td> %s %s</tr>"
                   % (row['runtime'], get_state_td(row['state']),
                      get_delta_td(row['delta'])))
-        print("</tbody>\n</table>")
+        self.p("</tbody>\n</table>")
 
     def get_contiguous_dates(self):
         """Get a contiguous set of dates either side of the current date.
@@ -1449,7 +1441,7 @@ window.onload = linkEmail;
            This queries the database, so days with no builds are skipped."""
         dates = []
         versions = []
-        conn = connect_mysql()
+        conn = self.db
         c = conn.cursor()
         table = self.get_branch_table('imp_test_reporev')
         if self.branch == 'main':
@@ -1473,7 +1465,7 @@ window.onload = linkEmail;
         return dates, versions
 
     def display_date_navigation(self):
-        print("<ul>")
+        self.p("<ul>")
         if self.branch == 'develop':
             dates = self.get_contiguous_dates()
             versions = [None] * len(dates)
@@ -1493,9 +1485,9 @@ window.onload = linkEmail;
                     txt = str(date)
                 if version:
                     txt += ' (%s)' % version
-                print("<li%s><a href=\"%s\">%s</a></li> "
+                self.p("<li%s><a href=\"%s\">%s</a></li> "
                       % (cls, self.get_link(date=date), txt))
-        print("</ul>")
+        self.p("</ul>")
 
     def get_component_link(self, component, component_id):
         # Hack to map 'IMP' to kernel
@@ -1513,8 +1505,8 @@ window.onload = linkEmail;
         return map
 
     def display_test_runtime(self):
-        print("<h1>Test runtime, %s</h1>" % self.get_build_id())
-        conn = connect_mysql()
+        self.p("<h1>Test runtime, %s</h1>" % self.get_build_id())
+        conn = self.db
         table = self.get_branch_table('imp_test')
         query = ("SELECT imp_test_names.name AS test_name, imp_test.name, "
                  "imp_test_names.unit, imp_test_units.name AS unit_name "
@@ -1527,24 +1519,24 @@ window.onload = linkEmail;
         c.execute(query, (self.date, self.test))
         row = c.fetchone()
         if row is None:
-            print("<b>No results for this test on this date</b>")
+            self.p("<b>No results for this test on this date</b>")
             return
-        print("<table><tbody>")
-        print("<tr><td>Name</td> <td>%s</td></tr>" % row['test_name'])
-        print("<tr><td>Component</td> <td>%s</td></tr>"
+        self.p("<table><tbody>")
+        self.p("<tr><td>Name</td> <td>%s</td></tr>" % row['test_name'])
+        self.p("<tr><td>Component</td> <td>%s</td></tr>"
               % self.get_component_link(row['unit_name'], row['unit']))
-        print("</tbody></table>")
-        print("<p>Runtimes on each platform are shown for this test, "
+        self.p("</tbody></table>")
+        self.p("<p>Runtimes on each platform are shown for this test, "
               "for each instance where the test completed successfully.</p>")
-        print("<p><i>Click and drag on the plot to zoom in; double click "
+        self.p("<p><i>Click and drag on the plot to zoom in; double click "
               "to reset the zoom.</i></p>")
 
-        print("<p>Note that test runtimes are <b>not</b> reliable "
+        self.p("<p>Note that test runtimes are <b>not</b> reliable "
               "measurements of "
               "IMP's performance. For that, please see the "
               "<a href=\"%s\">benchmarks</a>.</p>"
               % self.get_link(page='bench'))
-        print('<div id="runtime" class="benchmark"></div>')
+        self.p('<div id="runtime" class="benchmark"></div>')
 
         arch_id_map = self.get_arch_id_map(c)
 
@@ -1555,12 +1547,12 @@ window.onload = linkEmail;
         arch = None
         data = []
         arch_ids = []
-        print("""<script type="text/javascript">
+        self.p("""<script type="text/javascript">
 $(document).ready(function() {
   var plot = $.jqplot('runtime', [""")
 
         def print_series(d, suffix=''):
-            print("[" + ",".join("['%s', %f]" % x for x in d) + "]" + suffix)
+            self.p("[" + ",".join("['%s', %f]" % x for x in d) + "]" + suffix)
         for row in c:
             if arch != row['arch']:
                 if arch is not None and data:
@@ -1572,7 +1564,7 @@ $(document).ready(function() {
         if arch and data:
             print_series(data)
             arch_ids.append(arch)
-        print("""],
+        self.p("""],
  {
     series:[
 %s
@@ -1602,11 +1594,11 @@ $(document).ready(function() {
 });""" % ",\n".join("      {label: '%s'}" % arch_id_map[x].short
                     for x in arch_ids))
 
-        print('</script>')
+        self.p('</script>')
 
     def display_test(self):
-        print("<h1>Test results, %s</h1>" % self.get_build_id())
-        conn = connect_mysql()
+        self.p("<h1>Test results, %s</h1>" % self.get_build_id())
+        conn = self.db
         table = self.get_branch_table('imp_test')
         query = ("SELECT imp_test_names.name as test_name, imp_test.name, "
                  "imp_test_names.unit, imp_test.arch, imp_test_units.name "
@@ -1622,35 +1614,35 @@ $(document).ready(function() {
         c.execute(query, (self.date, self.test, self.platform))
         row = c.fetchone()
         if row is None:
-            print("<b>No results for this test on this date</b>")
+            self.p("<b>No results for this test on this date</b>")
             return
-        print('<table class="testres"><tbody>')
-        print("<tr><td>Name</td> <td>%s</td></tr>" % row['test_name'])
-        print("<tr><td>State</td> %s</tr>" % get_state_td(row['state']))
-        print("<tr><td>Detail</td> <td><pre>%s</pre></td></tr>"
+        self.p('<table class="testres"><tbody>')
+        self.p("<tr><td>Name</td> <td>%s</td></tr>" % row['test_name'])
+        self.p("<tr><td>State</td> %s</tr>" % get_state_td(row['state']))
+        self.p("<tr><td>Detail</td> <td><pre>%s</pre></td></tr>"
               % html_escape(row['detail']))
-        print("<tr><td>Component</td> <td>%s</td></tr>"
+        self.p("<tr><td>Component</td> <td>%s</td></tr>"
               % self.get_component_link(row['unit_name'], row['unit']))
-        print("<tr><td>Platform</td> %s</tr>"
+        self.p("<tr><td>Platform</td> %s</tr>"
               % get_platform_td(row['arch_name']))
-        print("<tr><td>Runtime (s)</td> <td>%.2f (<a title=\"Show a plot of "
+        self.p("<tr><td>Runtime (s)</td> <td>%.2f (<a title=\"Show a plot of "
               "runtimes for this test for every platform against date\" "
               "href=\"%s\">plot</a>)</td></tr>"
               % (row['runtime'], self.get_link(page='runtime')))
-        print("<tr><td>Date</td> <td>%s</td></tr>" % row['date'])
+        self.p("<tr><td>Date</td> <td>%s</td></tr>" % row['date'])
         if row['state'] in OK_STATES:
-            print("<tr><td>Previously failed on</td> <td>%s</td></tr>"
+            self.p("<tr><td>Previously failed on</td> <td>%s</td></tr>"
                   % self.get_previous_test_link(conn, self.test, self.platform,
                                                 False))
         else:
-            print("<tr><td>Previously passed on</td> <td>%s</td></tr>"
+            self.p("<tr><td>Previously passed on</td> <td>%s</td></tr>"
                   % self.get_previous_test_link(conn, self.test, self.platform,
                                                 True))
-        print("</tbody></table>")
+        self.p("</tbody></table>")
         self.display_test_other_platforms(conn, self.test, self.platform)
 
     def display_test_other_platforms(self, conn, test, arch):
-        print("<h2>Summary of results on all platforms</h2>")
+        self.p("<h2>Summary of results on all platforms</h2>")
         table = self.get_branch_table('imp_test')
         query = ("SELECT imp_test_archs.name as arch_name, imp_test.arch, "
                  "imp_test.runtime, imp_test.state from " + table
@@ -1661,17 +1653,17 @@ $(document).ready(function() {
                  "imp_test.arch=imp_test_archs.id" + self.get_sql_lab_only())
         c = MySQLdb.cursors.DictCursor(conn)
         c.execute(query, (self.date, test))
-        print("<table class=\"sortable\"><thead><tr><th>Platform</th>")
-        print("<th>State</th><th>Runtime (s)</th></tr></thead><tbody>")
+        self.p("<table class=\"sortable\"><thead><tr><th>Platform</th>")
+        self.p("<th>State</th><th>Runtime (s)</th></tr></thead><tbody>")
         for row in c:
             link = self.get_link(page='results', test=test,
                                  platform=row['arch'])
-            print("<tr>%s"
+            self.p("<tr>%s"
                   % get_platform_td(row['arch_name'],
                                     fmt="<a href=\"" + link + "\">%s</a>"))
-            print("%s <td>%.2f</td></tr>"
+            self.p("%s <td>%.2f</td></tr>"
                   % (get_state_td(row['state']), row['runtime']))
-        print("</tbody></table>")
+        self.p("</tbody></table>")
 
     def get_previous_test_link(self, conn, test, arch, previous_success):
         if previous_success:
@@ -1700,23 +1692,23 @@ $(document).ready(function() {
     def display_branch_link(self):
         branch_links = [self.get_link(branch=x).replace('&amp;', '&')
                         for x in self.all_branches]
-        print('<script type="text/javascript">')
-        print('function change_branch()')
-        print('{')
-        print('var sel=document.getElementById("branchlist");')
-        print('var branches=' + repr(branch_links) + ';')
-        print('window.location.assign(branches[sel.selectedIndex]);')
-        print('}')
-        print('</script>')
-        print('<div class="branchlink">')
-        print('<select id="branchlist" onchange="change_branch()">')
+        self.p('<script type="text/javascript">')
+        self.p('function change_branch()')
+        self.p('{')
+        self.p('var sel=document.getElementById("branchlist");')
+        self.p('var branches=' + repr(branch_links) + ';')
+        self.p('window.location.assign(branches[sel.selectedIndex]);')
+        self.p('}')
+        self.p('</script>')
+        self.p('<div class="branchlink">')
+        self.p('<select id="branchlist" onchange="change_branch()">')
         for branch in self.all_branches:
             if branch == self.branch:
                 sel = ' selected="selected"'
             else:
                 sel = ''
-            print('<option%s>Branch: %s</option>' % (sel, branch))
-        print('</select></div>')
+            self.p('<option%s>Branch: %s</option>' % (sel, branch))
+        self.p('</select></div>')
 
     def display_lab_only_link(self):
         if self.branch != 'develop':
@@ -1732,18 +1724,18 @@ $(document).ready(function() {
                        'Public', 'Only show results for components that are '
                                  'included in the IMP public release.')}
         d = data[self.lab_only]
-        print('<a class="labonly" title="%s" href="%s%s">%s</a>'
+        self.p('<a class="labonly" title="%s" href="%s%s">%s</a>'
               % (d[2], d[0], self.get_link(), d[1]))
         if self.lab_only:
-            print('<a class="nonimp" title="Show results for other lab '
+            self.p('<a class="nonimp" title="Show results for other lab '
                   'software, such as MODELLER (lab username and password '
                   'required)." href="https://salilab.org/internal/nightly/'
                   'tests.html">Non-IMP</a>')
 
     def display_navigation(self):
-        print('<div class="implinks">')
+        self.p('<div class="implinks">')
         self.display_lab_only_link()
-        print('  <ul>')
+        self.p('  <ul>')
         links = []
         if self.page in ('results', 'runtime', 'log', 'comp', 'compplattest',
                          'benchfile', 'doc'):
@@ -1767,49 +1759,14 @@ $(document).ready(function() {
                 cls = ' class="thispage"'
             else:
                 cls = ''
-            print('    <li%s><a href="%s">%s</a></li>'
+            self.p('    <li%s><a href="%s">%s</a></li>'
                   % (cls, self.get_link(page=link), linktext[link]))
-        print('    <li><a href="https://github.com/salilab/'
+        self.p('    <li><a href="https://github.com/salilab/'
               'imp_nightly_builds/blob/main/www/index.py">'
               '<i class="fab fa-github"></i> Edit on GitHub</a></li>')
-        print('  </ul>\n</div>')
-        print("<div class=\"linkspacer\"></div>")
-        print("<div class=\"implinks\">")
+        self.p('  </ul>\n</div>')
+        self.p("<div class=\"linkspacer\"></div>")
+        self.p("<div class=\"implinks\">")
         self.display_branch_link()
         self.display_date_navigation()
-        print("</div></div>")
-
-
-def email_error(email_to, email_from, exc_info):
-    import smtplib
-    import email.utils
-    from email.mime.text import MIMEText
-    text = "".join(traceback.format_exception(*exc_info))
-    msg = MIMEText(text)
-    msg['Subject'] = 'Error in IMP nightly build results CGI script'
-    msg['Date'] = email.utils.formatdate(localtime=True)
-    msg['From'] = email_from
-    msg['To'] = email_to
-    s = smtplib.SMTP()
-    s.connect()
-    s.sendmail(email_from, [email_to], msg.as_string())
-    s.close()
-
-
-def main():
-    t = TestPage()
-    t.display()
-
-
-if __name__ == '__main__':
-    try:
-        main()
-    except:  # noqa: E722
-        # Don't email if we're running from the command line (testing)
-        if sys.argv[0].startswith('./'):
-            raise
-        else:
-            email_error('ben@salilab.org', 'root@salilab.org', sys.exc_info())
-            print(cgitb.reset())
-            print("<p>Sorry, but an error was detected. We have been "
-                  "notified of the problem and will fix it shortly.</p>")
+        self.p("</div></div>")
