@@ -18,6 +18,6 @@ Windows, Linux) and environments (e.g. debug, release, static builds).
    if some `build.sh` runs failed and need to be restarted).
  - `check_build.py` collates the results from all of the `build.sh` runs
    and stores them in a database, and notifies the IMP developers by email.
- - the `www` subdirectory contains a CGI script that powers the
+ - the `www` subdirectory contains a simple Flask app that powers the
    https://integrativemodeling.org/nightly/results/ website, by taking
    data from the database.
