@@ -1,7 +1,7 @@
 import utils
 
 utils.set_search_paths(__file__)
-import results
+import results  # noqa: E402
 
 
 def test_summary():
