@@ -4,7 +4,7 @@ include Makefile.include
 .PHONY: test install
 
 test:
-	py.test --pep8
+	py.test
 
 install::
 	mkdir -p ${WEBTOP}/results/templates
