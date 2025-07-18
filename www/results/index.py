@@ -113,8 +113,8 @@ class TestPage(object):
         self._output = io.StringIO()
         # Show lab-only modules if a user is logged in
         self.lab_only = (request.scheme == 'https'
-                         and request.authorization is not None)
-        self.script_name = os.environ.get('SCRIPT_NAME', '')
+                         and request.environ.get('REMOTE_USER') is not None)
+        self.script_name = request.environ.get('SCRIPT_NAME', '')
         if '/imp' in self.script_name:
             self.nightly_url = '/imp/nightly'
         else:
