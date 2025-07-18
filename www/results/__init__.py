@@ -35,6 +35,8 @@ def close_db(error):
         g.db_conn.close()
 
 
+# The old CGI script didn't use routing and worked entirely with
+# request parameters. For compatibility, do the same thing here.
 @app.route('/')
 def summary():
     p = index.TestPage(get_db(), app.config)
