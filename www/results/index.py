@@ -1699,7 +1699,7 @@ $(document).ready(function() {
             self.p('    <li%s><a href="%s">%s</a></li>'
                    % (cls, self.get_link(page=link), linktext[link]))
         self.p('    <li><a href="https://github.com/salilab/'
-               'imp_nightly_builds/blob/main/www/index.py">'
+               'imp_nightly_builds/blob/main/www/results/index.py">'
                '<i class="fab fa-github"></i> Edit on GitHub</a></li>')
         self.p('  </ul>\n</div>')
         self.p("<div class=\"linkspacer\"></div>")
