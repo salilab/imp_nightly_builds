@@ -110,8 +110,9 @@ class TestPage(object):
         self.db = db
         self.config = config
         self._output = io.StringIO()
-        self.lab_only = (os.environ.get('HTTPS', 'off') == 'on'
-                         and os.environ.get('REMOTE_USER', None) is not None)
+        # Show lab-only modules if a user is logged in
+        self.lab_only = (request.scheme == 'https'
+                         and request.authorization is not None)
         self.script_name = os.environ.get('SCRIPT_NAME', '')
         if '/imp' in self.script_name:
             self.nightly_url = '/imp/nightly'
