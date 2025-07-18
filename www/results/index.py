@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, render_template
 import html
 import io
 import sys
@@ -177,70 +177,6 @@ class TestPage(object):
             id += ' (%s)' % self.version
         return id
 
-    def print_header(self, include_charts=False):
-        self.p("""
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-     "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-<script type="text/javaScript" src="testfunc.js"></script>
-<script type="text/javaScript" src="sorttable.js"></script>""")
-        if include_charts:
-            self.p("""
-<!--[if lt IE 9]><script language="javascript" type="text/javascript" src="excanvas.min.js"></script><![endif]-->
-<script type="text/javaScript" src="jquery-1.8.1.min.js"></script>
-<script type="text/javaScript" src="jquery.jqplot.min.js"></script>
-<script type="text/javaScript" src="jqplot.canvasAxisLabelRenderer.min.js"></script>
-<script type="text/javaScript" src="jqplot.canvasTextRenderer.min.js"></script>
-<script type="text/javaScript" src="jqplot.cursor.min.js"></script>
-<script type="text/javaScript" src="jqplot.highlighter.min.js"></script>
-<script type="text/javaScript" src="jqplot.dateAxisRenderer.min.js"></script>
-<link href="jquery.jqplot.css" rel="stylesheet" type="text/css">""")  # noqa: E501
-        self.p("""
-<link href="tests.css" rel="stylesheet" type="text/css">
-<link href="/fontawesome6/css/fontawesome.min.css" rel="stylesheet" type="text/css">
-<link href="/fontawesome6/css/brands.min.css" rel="stylesheet" type="text/css">
-
-<script type="text/javascript"><!--
-window.onload = linkEmail;
--->
-</script>
-
-<title>IMP nightly build results, %s</title>
-</head>
-
-<body>
-<div id="header">
-<div id="impnav">
-   <table class="imptnav">
-      <tr>
-         <td><a href="//integrativemodeling.org/">
-             <img src="//integrativemodeling.org/images/the_imp.png" height="60" alt="IMP logo"></a></td>
-         <td>
-            <div class="implinks">
-             <ul>
-               <li><a href="//integrativemodeling.org/">home</a></li>
-               <li><a href="//integrativemodeling.org/about.html">about</a></li>
-               <li><a href="//integrativemodeling.org/news.html">news</a></li>
-               <li><a href="//integrativemodeling.org/download.html">download</a></li>
-               <li><a href="//integrativemodeling.org/doc.html" title="Manual, tutorials, and reference guide">doc</a></li>
-               <li><a href="https://github.com/salilab/imp" title="Source code, maintained at GitHub">source</a></li>
-               <li><a href="//integrativemodeling.org/systems/" title="Applications of IMP to real biological systems">systems</a></li>
-               <li><a href="//integrativemodeling.org/nightly/results/" title="Results of IMP's internal test suite">tests</a></li>
-               <li><a href="https://github.com/salilab/imp/issues" title="Report a bug in IMP">bugs</a></li>
-               <li><a href="//integrativemodeling.org/contact.html" title="Mailing lists and email">contact</a></li>
-           </ul>
-            </div>
-         </td>
-      </tr>
-   </table>
-</div>
-
-<div id="impheaderline">
-</div>
-""" % self.get_build_id())  # noqa: E501
-
     def get_form_integer(self, name):
         if name not in request.args:
             return None
@@ -322,18 +258,17 @@ window.onload = linkEmail;
     def display(self):
         if self.page == 'stat':
             self.pages[self.page]()
+            return self._output.getvalue()
         else:
-            self.print_header(self.bench is not None or self.page == 'runtime')
             self.display_page()
-            self.print_footer()
-        return self._output.getvalue()
+            body = self._output.getvalue()
+            return render_template(
+                'layout.html', build_id=self.get_build_id(), body=body,
+                include_charts=self.bench is not None or self.page == 'runtime')
 
     def p(self, *args, sep=' ', end='\n'):
         """Print to our internal output buffer"""
         print(*args, sep=sep, end=end, file=self._output)
-
-    def print_footer(self):
-        self.p("</body></html>")
 
     def get_sql_lab_only(self):
         """Get a suitable SQL WHERE fragment to restrict a query to only

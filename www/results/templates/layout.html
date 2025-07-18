@@ -1,0 +1,74 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+     "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<script type="text/javaScript"
+        src="{{ url_for("static", filename="testfunc.js") }}"></script>
+<script type="text/javaScript"
+        src="{{ url_for("static", filename="sorttable.js") }}"></script>
+
+{% if include_charts %}
+<!--[if lt IE 9]><script language="javascript" type="text/javascript" src="{{ url_for("static", filename="excanvas.min.js") }}"></script><![endif]-->
+<script type="text/javaScript"
+        src="{{ url_for("static", filename="jquery-1.8.1.min.js") }}"></script>
+<script type="text/javaScript"
+        src="{{ url_for("static", filename="jquery.jqplot.min.js") }}"></script>
+<script type="text/javaScript"
+        src="{{ url_for("static", filename="jqplot.canvasAxisLabelRenderer.min.js") }}"></script>
+<script type="text/javaScript"
+        src="{{ url_for("static", filename="jqplot.canvasTextRenderer.min.js") }}"></script>
+<script type="text/javaScript"
+        src="{{ url_for("static", filename="jqplot.cursor.min.js") }}"></script>
+<script type="text/javaScript"
+        src="{{ url_for("static", filename="jqplot.highlighter.min.js") }}"></script>
+<script type="text/javaScript"
+        src="{{ url_for("static", filename="jqplot.dateAxisRenderer.min.js") }}"></script>
+<link href="jquery.jqplot.css" rel="stylesheet" type="text/css">
+{% endif %}
+
+<link href="{{ url_for("static", filename="tests.css") }}" rel="stylesheet" type="text/css">
+<link href="/fontawesome6/css/fontawesome.min.css" rel="stylesheet" type="text/css">
+<link href="/fontawesome6/css/brands.min.css" rel="stylesheet" type="text/css">
+
+<script type="text/javascript"><!--
+window.onload = linkEmail;
+-->
+</script>
+
+<title>IMP nightly build results, {{ build_id }}</title>
+</head>
+
+<body>
+<div id="header">
+<div id="impnav">
+   <table class="imptnav">
+      <tr>
+         <td><a href="//integrativemodeling.org/">
+             <img src="//integrativemodeling.org/images/the_imp.png" height="60" alt="IMP logo"></a></td>
+         <td>
+            <div class="implinks">
+             <ul>
+               <li><a href="//integrativemodeling.org/">home</a></li>
+               <li><a href="//integrativemodeling.org/about.html">about</a></li>
+               <li><a href="//integrativemodeling.org/news.html">news</a></li>
+               <li><a href="//integrativemodeling.org/download.html">download</a></li>
+               <li><a href="//integrativemodeling.org/doc.html" title="Manual, tutorials, and reference guide">doc</a></li>
+               <li><a href="https://github.com/salilab/imp" title="Source code, maintained at GitHub">source</a></li>
+               <li><a href="//integrativemodeling.org/systems/" title="Applications of IMP to real biological systems">systems</a></li>
+               <li><a href="//integrativemodeling.org/nightly/results/" title="Results of IMP's internal test suite">tests</a></li>
+               <li><a href="https://github.com/salilab/imp/issues" title="Report a bug in IMP">bugs</a></li>
+               <li><a href="//integrativemodeling.org/contact.html" title="Mailing lists and email">contact</a></li>
+           </ul>
+            </div>
+         </td>
+      </tr>
+   </table>
+</div>
+
+<div id="impheaderline">
+</div>
+
+{{ body|safe }}
+
+</body></html>
