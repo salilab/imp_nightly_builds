@@ -24,7 +24,7 @@
         src="{{ url_for("static", filename="jqplot.highlighter.min.js") }}"></script>
 <script type="text/javaScript"
         src="{{ url_for("static", filename="jqplot.dateAxisRenderer.min.js") }}"></script>
-<link href="jquery.jqplot.css" rel="stylesheet" type="text/css">
+<link href="{{ url_for("static", filename="jquery.jqplot.css") }}" rel="stylesheet" type="text/css">
 {% endif %}
 
 <link href="{{ url_for("static", filename="tests.css") }}" rel="stylesheet" type="text/css">
