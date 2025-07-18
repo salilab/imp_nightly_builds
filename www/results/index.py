@@ -561,7 +561,7 @@ class TestPage(object):
         fh = db.get_broken_links()
         if fh:
             for line in fh:
-                sys.stdout.write(line)
+                self.p(line, end='')
         else:
             self.p("<p>No information available for this build.</p>")
 
@@ -1286,11 +1286,11 @@ class TestPage(object):
                 self.p('</pre>')
                 self.p('<a name="%s_%d"></a><pre class="errorline">'
                       % (prefix, next_link))
-                sys.stdout.write(html.escape(line))
+                self.p(html.escape(line), end='')
                 self.p("</pre><pre>")
                 next_link = get_next_link()
             else:
-                sys.stdout.write(html.escape(line))
+                self.p(html.escape(line), end='')
         self.p("</pre>")
         if not build_complete:
             b = os.path.basename(logfile)
