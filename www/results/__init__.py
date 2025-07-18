@@ -1,6 +1,6 @@
 import logging.handlers
 import MySQLdb
-from flask import Flask, render_template, g
+from flask import Flask, g
 from . import index
 
 app = Flask(__name__, instance_relative_config=True)
