@@ -1,3 +1,4 @@
+import flask
 from flask import request, render_template
 import html
 import io
@@ -21,15 +22,15 @@ rmf_github = 'https://github.com/salilab/rmf'
 pmi_github = 'https://github.com/salilab/pmi'
 
 
-def get_cache_headers():
+def set_cache_headers(headers):
     """Cache results for 1 hour"""
     def get_time(t):
         mtime = time.gmtime(t)
         return time.strftime('%a, %d %b %Y %H:%M:%S GMT', mtime)
     t = time.time()
-    return """Cache-Control: public, max-age=3600
-Last-Modified: %s
-Expires: %s""" % (get_time(t), get_time(t + 3600))
+    headers["Cache-Control"] = "public, max-age=3600"
+    headers["Last-Modified"] = get_time(t)
+    headers["Expires"] = get_time(t + 3600)
 
 
 def get_platform_td(platform, fmt="%s"):
@@ -258,8 +259,7 @@ class TestPage(object):
 
     def display(self):
         if self.page == 'stat':
-            self.pages[self.page]()
-            return self._output.getvalue()
+            return self.display_build_status_badge()
         else:
             self.display_page()
             body = self._output.getvalue()
@@ -374,10 +374,10 @@ class TestPage(object):
             imgurl = imgroot + "nightly build-passing-brightgreen.svg"
         else:
             imgurl = imgroot + "nightly build-failing-red.svg"
-        self.p("Status: 302 Found")
-        self.p(get_cache_headers())
-        self.p("Location: %s" % imgurl)
-        self.p()
+        resp = flask.make_response("", 302)
+        set_cache_headers(resp.headers)
+        resp.headers['Location'] = imgurl
+        return resp
 
     def display_all_failures(self):
         self.p("<h1>All test failures for build on %s</h1>"
