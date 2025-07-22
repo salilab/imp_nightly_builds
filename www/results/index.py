@@ -1,5 +1,5 @@
 import flask
-from flask import request, render_template
+from flask import request, render_template, url_for
 import html
 import io
 import sys
@@ -654,28 +654,29 @@ class TestPage(object):
         if branch is None:
             branch = self.branch
         if page == 'results' and test is not None and platform is not None:
-            ret = "?test=%d&amp;plat=%d" % (test, platform)
+            kwargs = {'test': test, 'plat': platform}
         elif page == 'runtime' and test is not None:
-            ret = "?p=runtime&amp;test=%d" % test
+            kwargs = {'p': 'runtime', 'test': test}
         elif page == 'log' and platform is not None:
-            ret = "?plat=%d" % platform
+            kwargs = {'plat': platform}
         elif page == 'comp' and component is not None:
-            ret = "?comp=%d" % component
+            kwargs = {'comp': component}
         elif (page == 'compplattest' and component is not None
               and platform is not None):
-            ret = "?comp=%d&amp;plat=%d" % (component, platform)
+            kwargs = {'comp': component, 'plat': platform}
         elif (page == 'benchfile' and bench is not None
               and platform is not None):
-            ret = "?bench=%d&amp;plat=%d" % (bench, platform)
+            kwargs = {'bench': bench, 'plat': platform}
         else:
-            ret = "?p=%s" % page
+            kwargs = {'p': page}
         if page in ('bench', 'platform') and platform is not None:
-            ret += "&amp;plat=%d" % platform
+            kwargs['plat'] = platform
         if date != self.last_build_date:
-            ret += '&amp;date=%s' % get_date_link(date)
+            kwargs['date'] = get_date_link(date)
         if branch != 'develop':
-            ret += '&amp;branch=%s' % branch
-        return ret
+            kwargs['branch'] = branch
+        # For now, send everything via the default "/" route
+        return url_for('summary', **kwargs)
 
     def format_build_summary(self, summary, unit, arch, arch_id, unit_id):
         def make_cmake_loglink(cls, title, build_type, data, numfails=0,
@@ -1661,8 +1662,11 @@ $(document).ready(function() {
                        'Public', 'Only show results for components that are '
                                  'included in the IMP public release.')}
         d = data[self.lab_only]
+        # get_link returns an absolute URL so we need to strip the root
+        abs_link = self.get_link()
+        rel_link = abs_link[abs_link.find('results/') + 8:]
         self.p('<a class="labonly" title="%s" href="%s%s">%s</a>'
-               % (d[2], d[0], self.get_link(), d[1]))
+               % (d[2], d[0], rel_link, d[1]))
         if self.lab_only:
             self.p('<a class="nonimp" title="Show results for other lab '
                    'software, such as MODELLER (lab username and password '
