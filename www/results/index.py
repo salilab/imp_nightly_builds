@@ -106,7 +106,7 @@ class TestPage(object):
                     'release/2.20.2', 'release/2.21.0', 'release/2.22.0',
                     'release/2.23.0']
 
-    def __init__(self, db, config):
+    def __init__(self, db, config, page=None, platform=None, component=None):
         self.db = db
         self.config = config
         self._output = io.StringIO()
@@ -127,8 +127,14 @@ class TestPage(object):
          self.last_build_version) = self.get_date_and_version()
         self.revision = self.get_revision()
         self.test = self.get_form_integer('test')
-        self.platform = self.get_form_integer('plat')
-        self.component = self.get_form_integer('comp')
+        if platform is None:
+            self.platform = self.get_form_integer('plat')
+        else:
+            self.platform = platform
+        if component is None:
+            self.component = self.get_form_integer('comp')
+        else:
+            self.component = component
         self.bench = self.get_form_integer('bench')
         self.default_page = 'build'
         self.pages = {'results': self.display_test,
@@ -145,20 +151,21 @@ class TestPage(object):
                       'benchfile': self.display_benchmark_file,
                       'stat': self.display_build_status_badge,
                       'all': self.display_all_failures}
-        askpage = request.args.get('p', self.default_page)
+        if page is None:
+            page = request.args.get('p', self.default_page)
         if self.test and self.platform:
             self.page = 'results'
         elif self.bench:
             self.page = 'benchfile'
         elif self.platform and self.component:
             self.page = 'compplattest'
-        elif (self.platform and not askpage.startswith('bench')
-              and askpage != 'platform'):
+        elif (self.platform and not page.startswith('bench')
+              and page != 'platform'):
             self.page = 'log'
         elif self.component:
             self.page = 'comp'
         else:
-            self.page = askpage
+            self.page = page
             if self.page in ('results', 'log', 'comp', 'compplattest',
                              'benchfile') \
                or self.page not in self.pages:
@@ -639,6 +646,7 @@ class TestPage(object):
 
     def get_link(self, page=None, test=None, platform=None, date=None,
                  component=None, bench=None, branch=None):
+        route = 'summary'
         if page is None:
             page = self.page
         if test is None:
@@ -660,6 +668,7 @@ class TestPage(object):
         elif page == 'log' and platform is not None:
             kwargs = {'plat': platform}
         elif page == 'comp' and component is not None:
+            route = 'component'
             kwargs = {'comp': component}
         elif (page == 'compplattest' and component is not None
               and platform is not None):
@@ -667,16 +676,18 @@ class TestPage(object):
         elif (page == 'benchfile' and bench is not None
               and platform is not None):
             kwargs = {'bench': bench, 'plat': platform}
+        elif page == 'platform' and platform is not None:
+            route = 'platform'
+            kwargs = {'plat': platform}
         else:
             kwargs = {'p': page}
-        if page in ('bench', 'platform') and platform is not None:
+        if page == 'bench' and platform is not None:
             kwargs['plat'] = platform
         if date != self.last_build_date:
             kwargs['date'] = get_date_link(date)
         if branch != 'develop':
             kwargs['branch'] = branch
-        # For now, send everything via the default "/" route
-        return url_for('summary', **kwargs)
+        return url_for(route, **kwargs)
 
     def format_build_summary(self, summary, unit, arch, arch_id, unit_id):
         def make_cmake_loglink(cls, title, build_type, data, numfails=0,
