@@ -42,11 +42,13 @@ def summary():
     p = index.TestPage(get_db(), app.config)
     return p.display()
 
+
 @app.route('/platform/<int:plat>')
 def platform(plat):
     p = index.TestPage(get_db(), app.config, platform=plat,
                        page='platform')
     return p.display()
+
 
 @app.route('/comp/<int:comp>')
 def component(comp):
