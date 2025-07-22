@@ -647,6 +647,8 @@ class TestPage(object):
     def get_link(self, page=None, test=None, platform=None, date=None,
                  component=None, bench=None, branch=None):
         route = 'summary'
+        route_map = {'all': 'all_failed_tests', 'new': 'new_failed_tests',
+                     'long': 'long_tests', 'doc': 'doc'}
         if page is None:
             page = self.page
         if test is None:
@@ -679,14 +681,8 @@ class TestPage(object):
         elif page == 'platform' and platform is not None:
             route = 'platform'
             kwargs = {'plat': platform}
-        elif page == 'all':
-            route = 'all_failed_tests'
-            kwargs = {}
-        elif page == 'new':
-            route = 'new_failed_tests'
-            kwargs = {}
-        elif page == 'long':
-            route = 'long_tests'
+        elif page in route_map:
+            route = route_map[page]
             kwargs = {}
         else:
             kwargs = {'p': page}

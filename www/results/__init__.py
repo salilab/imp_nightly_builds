@@ -72,3 +72,9 @@ def new_failed_tests():
 def long_tests():
     p = index.TestPage(get_db(), app.config, page='long')
     return p.display()
+
+
+@app.route('/doc')
+def doc():
+    p = index.TestPage(get_db(), app.config, page='doc')
+    return p.display()
