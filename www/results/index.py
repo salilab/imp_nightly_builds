@@ -679,6 +679,15 @@ class TestPage(object):
         elif page == 'platform' and platform is not None:
             route = 'platform'
             kwargs = {'plat': platform}
+        elif page == 'all':
+            route = 'all_failed_tests'
+            kwargs = {}
+        elif page == 'new':
+            route = 'new_failed_tests'
+            kwargs = {}
+        elif page == 'long':
+            route = 'long_tests'
+            kwargs = {}
         else:
             kwargs = {'p': page}
         if page == 'bench' and platform is not None:
