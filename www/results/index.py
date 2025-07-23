@@ -702,6 +702,8 @@ class TestPage(object):
             else:
                 route = 'benchmark_platform'
                 kwargs = {'plat': platform}
+        elif page == 'build':
+            kwargs = {}
         else:
             kwargs = {'p': page}
         if date != self.last_build_date:
