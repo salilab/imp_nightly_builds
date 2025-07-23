@@ -127,22 +127,8 @@ class TestPage(object):
         (self.date, self.last_build_date, self.version,
          self.last_build_version) = self.get_date_and_version()
         self.revision = self.get_revision()
-        if test is None:
-            self.test = self.get_form_integer('test')
-        else:
-            self.test = test
-        if platform is None:
-            self.platform = self.get_form_integer('plat')
-        else:
-            self.platform = platform
-        if component is None:
-            self.component = self.get_form_integer('comp')
-        else:
-            self.component = component
-        if bench is None:
-            self.bench = self.get_form_integer('bench')
-        else:
-            self.bench = bench
+        self.test, self.platform, self.component = test, platform, component
+        self.bench, self.page = bench, page
         self.default_page = 'build'
         self.pages = {'results': self.display_test,
                       'runtime': self.display_test_runtime,
@@ -158,8 +144,6 @@ class TestPage(object):
                       'benchfile': self.display_benchmark_file,
                       'stat': self.display_build_status_badge,
                       'all': self.display_all_failures}
-        if page is None:
-            page = request.args.get('p', self.default_page)
         if self.test and self.platform:
             self.page = 'results'
         elif self.bench:
@@ -191,14 +175,6 @@ class TestPage(object):
         if self.version:
             id += ' (%s)' % self.version
         return id
-
-    def get_form_integer(self, name):
-        if name not in request.args:
-            return None
-        try:
-            return int(request.args.get(name))
-        except ValueError:
-            return 0
 
     def get_revision(self):
         conn = self.db

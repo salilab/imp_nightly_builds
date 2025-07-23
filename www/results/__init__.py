@@ -1,6 +1,6 @@
 import logging.handlers
 import MySQLdb
-from flask import Flask, g
+from flask import Flask, g, request
 from . import index
 
 app = Flask(__name__, instance_relative_config=True)
@@ -35,11 +35,24 @@ def close_db(error):
         g.db_conn.close()
 
 
+def _get_arg_int(name):
+    """Get a request argument as an integer, or None if not present"""
+    if name not in request.args:
+        return None
+    try:
+        return int(request.args.get(name))
+    except ValueError:
+        return 0
+
+
 # The old CGI script didn't use routing and worked entirely with
 # request parameters. For compatibility, do the same thing here.
 @app.route('/')
 def summary():
-    p = index.TestPage(get_db(), app.config)
+    p = index.TestPage(
+        get_db(), app.config, test=_get_arg_int('test'),
+        platform=_get_arg_int('plat'), component=_get_arg_int('comp'),
+        bench=_get_arg_int('bench'), page=request.args.get('p', 'build'))
     return p.display()
 
 
