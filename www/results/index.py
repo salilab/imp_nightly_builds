@@ -106,7 +106,8 @@ class TestPage(object):
                     'release/2.20.2', 'release/2.21.0', 'release/2.22.0',
                     'release/2.23.0']
 
-    def __init__(self, db, config, page=None, platform=None, component=None):
+    def __init__(self, db, config, page=None, platform=None, component=None,
+                 test=None):
         self.db = db
         self.config = config
         self._output = io.StringIO()
@@ -126,7 +127,10 @@ class TestPage(object):
         (self.date, self.last_build_date, self.version,
          self.last_build_version) = self.get_date_and_version()
         self.revision = self.get_revision()
-        self.test = self.get_form_integer('test')
+        if test is None:
+            self.test = self.get_form_integer('test')
+        else:
+            self.test = test
         if platform is None:
             self.platform = self.get_form_integer('plat')
         else:
@@ -664,6 +668,7 @@ class TestPage(object):
         if branch is None:
             branch = self.branch
         if page == 'results' and test is not None and platform is not None:
+            route = 'one_test'
             kwargs = {'test': test, 'plat': platform}
         elif page == 'runtime' and test is not None:
             kwargs = {'p': 'runtime', 'test': test}

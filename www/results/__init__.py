@@ -81,6 +81,13 @@ def platform_component_tests(plat, comp):
     return p.display()
 
 
+@app.route('/platform/<int:plat>/test/<int:test>')
+def one_test(plat, test):
+    p = index.TestPage(get_db(), app.config, page='results',
+                       platform=plat, test=test)
+    return p.display()
+
+
 @app.route('/doc')
 def doc():
     p = index.TestPage(get_db(), app.config, page='doc')
