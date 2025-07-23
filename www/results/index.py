@@ -674,7 +674,8 @@ class TestPage(object):
             route = 'one_test'
             kwargs = {'test': test, 'plat': platform}
         elif page == 'runtime' and test is not None:
-            kwargs = {'p': 'runtime', 'test': test}
+            route = 'test_runtime'
+            kwargs = {'test': test}
         elif page == 'log' and platform is not None:
             kwargs = {'plat': platform}
         elif page == 'comp' and component is not None:

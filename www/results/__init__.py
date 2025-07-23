@@ -88,6 +88,12 @@ def one_test(plat, test):
     return p.display()
 
 
+@app.route('/test/<int:test>/runtime')
+def test_runtime(test):
+    p = index.TestPage(get_db(), app.config, page='runtime', test=test)
+    return p.display()
+
+
 @app.route('/platform/<int:plat>/benchmark/<int:bench>')
 def benchmark_file(plat, bench):
     p = index.TestPage(get_db(), app.config, page='benchfile',
