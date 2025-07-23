@@ -107,7 +107,7 @@ class TestPage(object):
                     'release/2.23.0']
 
     def __init__(self, db, config, page=None, platform=None, component=None,
-                 test=None):
+                 test=None, bench=None):
         self.db = db
         self.config = config
         self._output = io.StringIO()
@@ -139,7 +139,10 @@ class TestPage(object):
             self.component = self.get_form_integer('comp')
         else:
             self.component = component
-        self.bench = self.get_form_integer('bench')
+        if bench is None:
+            self.bench = self.get_form_integer('bench')
+        else:
+            self.bench = bench
         self.default_page = 'build'
         self.pages = {'results': self.display_test,
                       'runtime': self.display_test_runtime,
@@ -683,6 +686,7 @@ class TestPage(object):
             kwargs = {'comp': component, 'plat': platform}
         elif (page == 'benchfile' and bench is not None
               and platform is not None):
+            route = 'benchmark_file'
             kwargs = {'bench': bench, 'plat': platform}
         elif page == 'platform' and platform is not None:
             route = 'platform'
@@ -690,10 +694,15 @@ class TestPage(object):
         elif page in route_map:
             route = route_map[page]
             kwargs = {}
+        elif page == 'bench':
+            if platform is None:
+                route = 'benchmark_default_platform'
+                kwargs = {}
+            else:
+                route = 'benchmark_platform'
+                kwargs = {'plat': platform}
         else:
             kwargs = {'p': page}
-        if page == 'bench' and platform is not None:
-            kwargs['plat'] = platform
         if date != self.last_build_date:
             kwargs['date'] = get_date_link(date)
         if branch != 'develop':

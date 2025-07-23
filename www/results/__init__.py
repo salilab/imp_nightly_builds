@@ -88,6 +88,26 @@ def one_test(plat, test):
     return p.display()
 
 
+@app.route('/platform/<int:plat>/benchmark/<int:bench>')
+def benchmark_file(plat, bench):
+    p = index.TestPage(get_db(), app.config, page='benchfile',
+                       platform=plat, bench=bench)
+    return p.display()
+
+
+@app.route('/platform/<int:plat>/benchmark')
+def benchmark_platform(plat):
+    p = index.TestPage(get_db(), app.config, page='bench',
+                       platform=plat)
+    return p.display()
+
+
+@app.route('/benchmark')
+def benchmark_default_platform():
+    p = index.TestPage(get_db(), app.config, page='bench')
+    return p.display()
+
+
 @app.route('/badge.svg')
 def stat():
     p = index.TestPage(get_db(), app.config, page='stat')
