@@ -56,19 +56,19 @@ def component(comp):
     return p.display()
 
 
-@app.route('/test/all-fail')
+@app.route('/all-fail')
 def all_failed_tests():
     p = index.TestPage(get_db(), app.config, page='all')
     return p.display()
 
 
-@app.route('/test/new-fail')
+@app.route('/new-fail')
 def new_failed_tests():
     p = index.TestPage(get_db(), app.config, page='new')
     return p.display()
 
 
-@app.route('/test/long')
+@app.route('/long')
 def long_tests():
     p = index.TestPage(get_db(), app.config, page='long')
     return p.display()
