@@ -74,6 +74,13 @@ def long_tests():
     return p.display()
 
 
+@app.route('/platform/<int:plat>/comp/<int:comp>')
+def platform_component_tests(plat, comp):
+    p = index.TestPage(get_db(), app.config, page='compplattest',
+                       platform=plat, component=comp)
+    return p.display()
+
+
 @app.route('/doc')
 def doc():
     p = index.TestPage(get_db(), app.config, page='doc')

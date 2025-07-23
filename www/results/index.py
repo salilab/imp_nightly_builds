@@ -674,6 +674,7 @@ class TestPage(object):
             kwargs = {'comp': component}
         elif (page == 'compplattest' and component is not None
               and platform is not None):
+            route = 'platform_component_tests'
             kwargs = {'comp': component, 'plat': platform}
         elif (page == 'benchfile' and bench is not None
               and platform is not None):
