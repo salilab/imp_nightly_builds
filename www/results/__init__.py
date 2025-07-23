@@ -88,6 +88,12 @@ def one_test(plat, test):
     return p.display()
 
 
+@app.route('/badge.svg')
+def stat():
+    p = index.TestPage(get_db(), app.config, page='stat')
+    return p.display_build_status_badge()
+
+
 @app.route('/doc')
 def doc():
     p = index.TestPage(get_db(), app.config, page='doc')
