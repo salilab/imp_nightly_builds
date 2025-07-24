@@ -20,6 +20,20 @@ def test_invalid_platform():
     with results.app.app_context():
         utils.set_up_database(results.get_db())
         c = results.app.test_client()
-        rv = c.get('/platform/999')
-        assert rv.status_code == 200
-        assert b'Invalid platform requested' in rv.data
+        for url in ('/platform/999', '/?p=platform&plat=999'):
+            rv = c.get(url)
+            assert rv.status_code == 200
+            assert b'Invalid platform requested' in rv.data
+
+
+def test_platform():
+    """Test the platform page"""
+    with results.app.app_context():
+        utils.set_up_database(results.get_db())
+        c = results.app.test_client()
+        for url in ('/platform/3', '/?p=platform&plat=3'):
+            rv = c.get(url)
+            assert rv.status_code == 200
+            assert b'Platform: Coverage' in rv.data
+            assert b'The build scripts can also be found' in rv.data
+            assert b'All log files for this platform<' in rv.data

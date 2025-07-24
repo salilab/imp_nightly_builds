@@ -56,6 +56,8 @@ def set_up_database(db):
     c.execute("CREATE TABLE imp_test_names ( id INT, name VARCHAR(150), "
               "unit INT)")
     c.execute("CREATE TABLE imp_test_archs ( id INT, name VARCHAR(20) )")
+    c.execute('INSERT INTO imp_test_archs (id, name) VALUES (%s,%s)',
+              (3, 'coverage'))
     c.execute("CREATE TABLE imp_test_units ( id INT, name VARCHAR(40), "
               "lab_only BOOL )")
     c.execute("CREATE TABLE imp_test_unit_result ( arch INT, unit INT, "
