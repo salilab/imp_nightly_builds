@@ -13,6 +13,9 @@ class MockCursor:
         # sqlite uses ? as a placeholder; MySQL uses %s
         self.dbcursor.execute(statement.replace('%s', '?'), args)
 
+    def fetchone(self):
+        return self.dbcursor.fetchone()
+
     def __iter__(self):
         fa = self.dbcursor.fetchall()
         return fa.__iter__()
@@ -35,11 +38,6 @@ class MockConnection:
         self.keys = keys
         self.db = sqlite3.connect(":memory:")
         self.sql = []
-        # Use the database 'name' argument as a set of sqlite3 statements
-        # to initialize it
-        c = self.db.cursor()
-        for d in db:
-            c.execute(d)
 
     def cursor(self):
         return MockCursor(self)
