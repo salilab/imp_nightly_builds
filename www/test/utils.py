@@ -59,10 +59,12 @@ def set_up_database(db):
     c.execute('INSERT INTO imp_test_archs (id, name) VALUES (%s,%s)',
               (3, 'coverage'))
     c.execute("CREATE TABLE imp_test_units ( id INT, name VARCHAR(40), "
-              "lab_only BOOL )")
+              "lab_only INT )")
+    c.execute('INSERT INTO imp_test_units (id, name, lab_only) '
+              'VALUES (%s,%s,%s)', (5, 'IMP.em', 0))
     c.execute("CREATE TABLE imp_test_unit_result ( arch INT, unit INT, "
               "state TEXT, logline INT, date DATE )")
     c.execute("CREATE TABLE imp_build_summary ( state TEXT, date DATE, "
-              "lab_only BOOL )")
+              "lab_only INT )")
     c.execute("CREATE TABLE imp_doc ( date DATE, nbroken_tutorial INT, "
               "nbroken_manual INT, nbroken_rmf_manual INT )")

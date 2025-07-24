@@ -37,3 +37,36 @@ def test_platform():
             assert b'Platform: Coverage' in rv.data
             assert b'The build scripts can also be found' in rv.data
             assert b'All log files for this platform<' in rv.data
+
+
+def test_invalid_component():
+    """Test the component page with an invalid component ID"""
+    with results.app.app_context():
+        utils.set_up_database(results.get_db())
+        c = results.app.test_client()
+        for url in ('/comp/999', '/?comp=999'):
+            rv = c.get(url)
+            assert rv.status_code == 200
+            assert b'Unknown component.' in rv.data
+
+
+def test_component():
+    """Test the component page"""
+    with results.app.app_context():
+        utils.set_up_database(results.get_db())
+        c = results.app.test_client()
+        for url in ('/comp/5', '/?comp=5'):
+            rv = c.get(url)
+            assert rv.status_code == 200
+            assert b'All IMP.em test results for build' in rv.data
+            assert b'Name of the Python or C++ file ' in rv.data
+
+
+def test_badge():
+    """Test the status badge"""
+    with results.app.app_context():
+        utils.set_up_database(results.get_db())
+        c = results.app.test_client()
+        for url in ('/badge.svg', '/?p=stat'):
+            rv = c.get(url)
+            assert rv.status_code == 302
