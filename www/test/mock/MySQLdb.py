@@ -1,6 +1,11 @@
 # Mock for database access; use sqlite3 in memory rather than MySQL
 
 import sqlite3
+import datetime
+
+
+# Don't use deprecated default date adapter
+sqlite3.register_adapter(datetime.date, lambda x: x.isoformat())
 
 
 class MockCursor:
