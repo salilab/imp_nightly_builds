@@ -1,3 +1,4 @@
+import datetime
 import os
 import sys
 import flask
@@ -5,7 +6,7 @@ import tempfile
 import pathlib
 
 
-DEFAULT_DATE = "20200101"
+DEFAULT_DATE = datetime.date(year=2020, month=1, day=1)
 
 
 # Make reading flask config a noop
@@ -33,8 +34,9 @@ def import_mocked():
     tempdir = tempfile.TemporaryDirectory()
     del imp_build_utils.topdir
     topdir = imp_build_utils.topdir = pathlib.Path(tempdir.name) / 'topdir'
-    (topdir / 'develop' / DEFAULT_DATE).mkdir(parents=True, exist_ok=True)
-    (topdir / 'develop' / '.last').symlink_to(DEFAULT_DATE)
+    date_dir = DEFAULT_DATE.strftime('%Y%m%d')
+    (topdir / 'develop' / date_dir).mkdir(parents=True, exist_ok=True)
+    (topdir / 'develop' / '.last').symlink_to(date_dir)
 
     results.app.config.DEBUG = True
     results.app.config.TESTING = True
@@ -51,10 +53,34 @@ def set_up_database(db):
               'date DATE NOT NULL PRIMARY KEY )')
     c.execute('INSERT INTO imp_test_reporev (rev, date) VALUES (%s,%s)',
               ('testrev', DEFAULT_DATE))
-    c.execute("CREATE TABLE imp_test ( name INT, arch INT, state TEXT, "
-              "detail TEXT, runtime FLOAT, date DATE, delta TEXT )")
+    c.execute('CREATE TABLE imp_test_other_reporev ( rev VARCHAR(40), '
+              'repo TEXT, date DATE)')
+    c.execute('INSERT INTO imp_test_other_reporev (rev, repo, date) '
+              'VALUES (%s,%s,%s)', ('rmfgithash', 'rmf', DEFAULT_DATE))
     c.execute("CREATE TABLE imp_test_names ( id INT, name VARCHAR(150), "
               "unit INT)")
+    c.execute("INSERT INTO imp_test_names (id, name, unit) VALUES (%s,%s,%s)",
+              (42, 'em-goodtest', 5))
+    c.execute("INSERT INTO imp_test_names (id, name, unit) VALUES (%s,%s,%s)",
+              (60, 'em-badtest', 5))
+    c.execute("INSERT INTO imp_test_names (id, name, unit) VALUES (%s,%s,%s)",
+              (99, 'em-newbadtest', 5))
+    c.execute("INSERT INTO imp_test_names (id, name, unit) VALUES (%s,%s,%s)",
+              (100, 'em-longtest', 5))
+    c.execute("CREATE TABLE imp_test ( name INT, arch INT, state TEXT, "
+              "detail TEXT, runtime FLOAT, date DATE, delta TEXT )")
+    c.execute("INSERT INTO imp_test (name, arch, state, detail, runtime, "
+              "date, delta) VALUES (%s,%s,%s,%s,%s,%s,%s)",
+              (42, 3, "OK", "", 1.0, DEFAULT_DATE, None))
+    c.execute("INSERT INTO imp_test (name, arch, state, detail, runtime, "
+              "date, delta) VALUES (%s,%s,%s,%s,%s,%s,%s)",
+              (60, 3, "FAIL", "", 1.0, DEFAULT_DATE, None))
+    c.execute("INSERT INTO imp_test (name, arch, state, detail, runtime, "
+              "date, delta) VALUES (%s,%s,%s,%s,%s,%s,%s)",
+              (99, 3, "FAIL", "", 1.0, DEFAULT_DATE, "NEWFAIL"))
+    c.execute("INSERT INTO imp_test (name, arch, state, detail, runtime, "
+              "date, delta) VALUES (%s,%s,%s,%s,%s,%s,%s)",
+              (100, 3, "OK", "", 100.0, DEFAULT_DATE, None))
     c.execute("CREATE TABLE imp_test_archs ( id INT, name VARCHAR(20) )")
     c.execute('INSERT INTO imp_test_archs (id, name) VALUES (%s,%s)',
               (3, 'coverage'))

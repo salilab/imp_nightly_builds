@@ -70,3 +70,48 @@ def test_badge():
         for url in ('/badge.svg', '/?p=stat'):
             rv = c.get(url)
             assert rv.status_code == 302
+
+
+def test_all_failures():
+    """Test display of all failed tests"""
+    with results.app.app_context():
+        utils.set_up_database(results.get_db())
+        c = results.app.test_client()
+        for url in ('/all-fail', '/?p=all'):
+            rv = c.get(url)
+            assert rv.status_code == 200
+            assert b'All test failures for build on 2020-01-01' in rv.data
+            assert b'em-goodtest' not in rv.data
+            assert b'em-badtest' in rv.data
+            assert b'em-newbadtest' in rv.data
+            assert b'em-longtest' not in rv.data
+
+
+def test_new_failures():
+    """Test display of new failed tests"""
+    with results.app.app_context():
+        utils.set_up_database(results.get_db())
+        c = results.app.test_client()
+        for url in ('/new-fail', '/?p=new'):
+            rv = c.get(url)
+            assert rv.status_code == 200
+            assert b'New test failures for build on 2020-01-01' in rv.data
+            assert b'em-goodtest' not in rv.data
+            assert b'em-badtest' not in rv.data
+            assert b'em-newbadtest' in rv.data
+            assert b'em-longtest' not in rv.data
+
+
+def test_long_tests():
+    """Test display of new failed tests"""
+    with results.app.app_context():
+        utils.set_up_database(results.get_db())
+        c = results.app.test_client()
+        for url in ('/long', '/?p=long'):
+            rv = c.get(url)
+            assert rv.status_code == 200
+            assert b'Long-running tests for build on 2020-01-01' in rv.data
+            assert b'em-goodtest' not in rv.data
+            assert b'em-badtest' not in rv.data
+            assert b'em-newbadtest' not in rv.data
+            assert b'em-longtest' in rv.data
