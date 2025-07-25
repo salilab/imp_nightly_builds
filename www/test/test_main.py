@@ -141,7 +141,18 @@ def test_one_test():
         for url in ('/platform/3/test/100', '/?p=results&plat=3&test=100'):
             rv = c.get(url)
             assert rv.status_code == 200
-            print(rv.data.decode(), file=sys.stderr)
             assert b'Test results, 2020-01-01, develop testrev' in rv.data
             assert b'Previously failed on' in rv.data
             assert b'em-longtest' in rv.data
+
+
+def test_runtime():
+    """Test display of test runtime"""
+    with results.app.app_context():
+        utils.set_up_database(results.get_db())
+        c = results.app.test_client()
+        for url in ('/test/100/runtime', '/?p=runtime&test=100'):
+            rv = c.get(url)
+            assert rv.status_code == 200
+            assert b'Test runtime, 2020-01-01, develop testrev' in rv.data
+            assert b'Runtimes on each platform are shown for this' in rv.data
