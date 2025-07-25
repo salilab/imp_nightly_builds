@@ -115,3 +115,19 @@ def test_long_tests():
             assert b'em-badtest' not in rv.data
             assert b'em-newbadtest' not in rv.data
             assert b'em-longtest' in rv.data
+
+
+def test_platform_component_tests():
+    """Test display of tests for a given platform and component"""
+    with results.app.app_context():
+        utils.set_up_database(results.get_db())
+        c = results.app.test_client()
+        for url in ('/platform/3/comp/5', '/?p=compplattest&plat=3&comp=5'):
+            rv = c.get(url)
+            assert rv.status_code == 200
+            assert b'IMP.em test results for build on 2020-01-01' in rv.data
+            assert b'Coverage build' in rv.data
+            assert b'em-goodtest' in rv.data
+            assert b'em-badtest' in rv.data
+            assert b'em-newbadtest' in rv.data
+            assert b'em-longtest' in rv.data
