@@ -1,3 +1,6 @@
+[![build](https://github.com/salilab/imp_nightly_builds/actions/workflows/build.yml/badge.svg)](https://github.com/salilab/imp_nightly_builds/actions/workflows/build.yml)
+[![codecov](https://codecov.io/gh/salilab/imp_nightly_builds/branch/main/graph/badge.svg)](https://codecov.io/gh/salilab/imp_nightly_builds)
+
 This repository contains the scripts used internally by the Sali Lab
 to build IMP in a variety of operating systems (different versions of macOS,
 Windows, Linux) and environments (e.g. debug, release, static builds).
