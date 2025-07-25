@@ -94,3 +94,16 @@ def set_up_database(db):
               "lab_only INT )")
     c.execute("CREATE TABLE imp_doc ( date DATE, nbroken_tutorial INT, "
               "nbroken_manual INT, nbroken_rmf_manual INT )")
+    c.execute("CREATE TABLE imp_benchmark ( name INT, runtime FLOAT, "
+              "checkval FLOAT, date DATE, platform INT )")
+    c.execute("CREATE TABLE imp_benchmark_files ( id INT, unit INT, "
+              "name TEXT )")
+    c.execute("CREATE TABLE imp_benchmark_names ( id INT, file INT, "
+              "name TEXT, algorithm TEXT )")
+    c.execute("INSERT INTO imp_benchmark (name, runtime, checkval, date, "
+              "platform) VALUES (%s,%s,%s,%s,%s)",
+              (19, 0.5, 99, DEFAULT_DATE, 3))
+    c.execute("INSERT INTO imp_benchmark_names (id, file, name, algorithm) "
+              "VALUES (%s,%s,%s,%s)", (19, 29, "rmf load", "rmf"))
+    c.execute("INSERT INTO imp_benchmark_files (id, unit, name) "
+              "VALUES (%s,%s,%s)", (29, 5, "benchmark_load"))

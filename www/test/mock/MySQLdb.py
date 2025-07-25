@@ -21,6 +21,9 @@ class MockCursor:
     def fetchone(self):
         return self.dbcursor.fetchone()
 
+    def fetchall(self):
+        return self.dbcursor.fetchall()
+
     def __iter__(self):
         fa = self.dbcursor.fetchall()
         return fa.__iter__()

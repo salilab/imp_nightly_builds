@@ -156,3 +156,52 @@ def test_runtime():
             assert rv.status_code == 200
             assert b'Test runtime, 2020-01-01, develop testrev' in rv.data
             assert b'Runtimes on each platform are shown for this' in rv.data
+
+
+def test_benchmark_default_platform():
+    """Test display of all benchmarks for the default platform"""
+    with results.app.app_context():
+        utils.set_up_database(results.get_db())
+        c = results.app.test_client()
+        for url in ('/benchmark', '/?p=bench'):
+            rv = c.get(url)
+            assert rv.status_code == 200
+            assert b'Benchmarks for build on 2020-01-01, develop' in rv.data
+            assert b'Coverage build' in rv.data
+            assert b'benchmark_load' in rv.data
+
+
+def test_benchmark_platform():
+    """Test display of all benchmarks for the given platform"""
+    with results.app.app_context():
+        utils.set_up_database(results.get_db())
+        c = results.app.test_client()
+        for url in ('/platform/3/benchmark', '/?p=bench&plat=3'):
+            rv = c.get(url)
+            assert rv.status_code == 200
+            assert b'Benchmarks for build on 2020-01-01, develop' in rv.data
+            assert b'Coverage build' in rv.data
+            assert b'benchmark_load' in rv.data
+
+
+def test_benchmark_bad_platform():
+    """Test display of all benchmarks for the given bad platform"""
+    with results.app.app_context():
+        utils.set_up_database(results.get_db())
+        c = results.app.test_client()
+        for url in ('/platform/999/benchmark', '/?p=bench&plat=999'):
+            rv = c.get(url)
+            assert rv.status_code == 200
+            assert b'No benchmarks for this platform' in rv.data
+
+
+def test_benchmark_file():
+    """Test display of a single benchmark file"""
+    with results.app.app_context():
+        utils.set_up_database(results.get_db())
+        c = results.app.test_client()
+        for url in ('/platform/3/benchmark/29', '/?p=bench&plat=3&bench=29'):
+            rv = c.get(url)
+            assert rv.status_code == 200
+            assert b'File benchmarks for build on 2020-01-01' in rv.data
+            assert b'file <b>benchmark_load</b> in <b>IMP.em</b>' in rv.data
