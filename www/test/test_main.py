@@ -131,3 +131,17 @@ def test_platform_component_tests():
             assert b'em-badtest' in rv.data
             assert b'em-newbadtest' in rv.data
             assert b'em-longtest' in rv.data
+
+
+def test_one_test():
+    """Test display of a single test"""
+    with results.app.app_context():
+        utils.set_up_database(results.get_db())
+        c = results.app.test_client()
+        for url in ('/platform/3/test/100', '/?p=results&plat=3&test=100'):
+            rv = c.get(url)
+            assert rv.status_code == 200
+            print(rv.data.decode(), file=sys.stderr)
+            assert b'Test results, 2020-01-01, develop testrev' in rv.data
+            assert b'Previously failed on' in rv.data
+            assert b'em-longtest' in rv.data
