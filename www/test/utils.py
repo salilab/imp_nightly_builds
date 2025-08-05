@@ -34,9 +34,14 @@ def import_mocked():
     tempdir = tempfile.TemporaryDirectory()
     del imp_build_utils.topdir
     topdir = imp_build_utils.topdir = pathlib.Path(tempdir.name) / 'topdir'
-    date_dir = DEFAULT_DATE.strftime('%Y%m%d')
-    (topdir / 'develop' / date_dir).mkdir(parents=True, exist_ok=True)
+    githash = 'abcde'
+    date_dir = DEFAULT_DATE.strftime('%Y%m%d') + '-' + githash
+    (topdir / 'develop' / date_dir / 'build').mkdir(parents=True,
+                                                    exist_ok=True)
     (topdir / 'develop' / '.last').symlink_to(date_dir)
+    linkfile = topdir / 'develop' / date_dir / 'build' / 'broken-links.html'
+    with open(linkfile, 'w') as fh:
+        fh.write('broken link 1\nbroken link 2\n')
 
     results.app.config.DEBUG = True
     results.app.config.TESTING = True

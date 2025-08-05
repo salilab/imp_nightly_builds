@@ -205,3 +205,28 @@ def test_benchmark_file():
             assert rv.status_code == 200
             assert b'File benchmarks for build on 2020-01-01' in rv.data
             assert b'file <b>benchmark_load</b> in <b>IMP.em</b>' in rv.data
+
+
+def test_doc_summary_bad_date():
+    """Test doc summary page for a date with no results"""
+    with results.app.app_context():
+        utils.set_up_database(results.get_db())
+        c = results.app.test_client()
+        for url in ('/doc?date=19900101', '/?p=doc&date=19900101'):
+            rv = c.get(url)
+            assert rv.status_code == 200
+            assert b'Doc summary for build on 1990-01-01' in rv.data
+            assert b'No information available for this build' in rv.data
+
+
+def test_doc_summary():
+    """Test doc summary page"""
+    with results.app.app_context():
+        utils.set_up_database(results.get_db())
+        c = results.app.test_client()
+        for url in ('/doc', '/?p=doc'):
+            rv = c.get(url)
+            assert rv.status_code == 200
+            assert b'Doc summary for build on 2020-01-01' in rv.data
+            assert b'broken link 1' in rv.data
+            assert b'broken link 2' in rv.data
