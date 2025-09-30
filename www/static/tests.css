@@ -510,6 +510,11 @@ a.pdb_dev {
   font-size: 90%;
 }
 
+a.pdb_ihm {
+  font-style: normal;
+  font-size: 90%;
+}
+
 a.low_coverage {
   color: #FF0000;
 }
