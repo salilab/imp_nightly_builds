@@ -1246,10 +1246,10 @@ def send_imp_results_email(conn, msg_from, lab_only, branch):
 
     if lab_only:
         url = lab_only_results_url
-        msg_to = 'imp-lab-build@salilab.org'
+        msg_to = 'imp-lab-build@listsrv.ucsf.edu'
     else:
         url = results_url
-        msg_to = 'imp-build@salilab.org'
+        msg_to = 'imp-build@listsrv.ucsf.edu'
     db = BuildDatabase(conn, datetime.date.today(), lab_only, branch)
     buildsum = db.get_build_summary()
     summary = db.get_unit_summary()
