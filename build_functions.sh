@@ -244,7 +244,7 @@ add_extra_python() {
   (cd ${IMPINSTALL}/lib/${PLATFORM} && for ext in _*.so; do mv $ext ${ext%.so}.${PY3ABITAG}.so; done)
 
   # Add symlinks for newer compatible Python versions (Wynton and Fedora)
-  for pyver in 37m 38 39 310 311 312 313; do
+  for pyver in 37m 38 39 310 311 312 313 314; do
     echo "Adding symlinks for Python ${pyver}..."
     (cd lib && for ext in _*.so; do ln -sf ${ext%.so}.${PY3ABITAG}.so ${IMPINSTALL}/lib/${PLATFORM}/${ext%.so}.cpython-${pyver}-x86_64-linux-gnu.so; done)
   done
