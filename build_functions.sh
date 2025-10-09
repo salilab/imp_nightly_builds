@@ -81,7 +81,7 @@ build_w32_package() {
   mkdir -p ${IMPPKG}
   # Note that 3.9 is first since IMP should already be built against 3.9;
   # this should avoid an unnecessary rebuild
-  local PYVERS="3.9 3.8 3.10 3.11 3.12 3.13"
+  local PYVERS="3.9 3.10 3.11 3.12 3.13 3.14"
   for PYVER in ${PYVERS}; do
     PYLIB=`echo "python${PYVER}.lib" | sed -e 's/\.//'`
     ${CMAKE} ${SRCDIR} -DCMAKE_INSTALL_PYTHONDIR=/pylib/$PYVER \
