@@ -1256,7 +1256,10 @@ def send_imp_results_email(conn, msg_from, lab_only, branch):
     doc = db.get_doc_summary()
     summary.make_only_failed()
     msg = EmailMessage()
-    msg.set_content(_get_email_body(db, buildsum, summary, url, log, doc))
+    e = _PlainEmailBody(db, buildsum, summary, url, log, doc)
+    msg.set_content(e.get_text())
+    e = _HTMLEmailBody(db, buildsum, summary, url, log, doc)
+    msg.add_alternative(e.get_text(), subtype='html')
     msg['Keywords'] = ", ".join("FAIL:" + _short_unit_name(x)
                                 for x in frozenset(summary.failed_units))
     msg['Subject'] = 'IMP nightly build results, %s' % db.date
@@ -1282,60 +1285,161 @@ def _get_email_build_summary(buildsum):
         return ''
 
 
-def _get_email_body(db, buildsum, summary, url, logs, doc):
-    body = """IMP nightly build results, %s.
-%sPlease see %s for
-full details.
+class _EmailBody:
+    def __init__(self, db, buildsum, summary, url, logs, doc):
+        self.db, self.buildsum, self.summary = db, buildsum, summary
+        self.url, self.logs, self.doc = url, logs, doc
 
-IMP component build summary (BUILD = failed to build;
-BENCH = benchmarks failed to build or run;
-INCOM = component did not complete building;
-TEST = failed tests; EXAMP = failed examples;
-DISAB = disabled due to wrong configuration;
-UNCON = was not configured; skip = not built on this platform;
-only components that failed on at least one platform are shown)
-""" % (db.date, _get_email_build_summary(buildsum), url)
-    body += " " * 18 + " ".join("%-5s" % platforms_dict[x].very_short
-                                for x in summary.all_archs) + "\n"
+    build_key = {'BUILD': 'failed to build',
+                 'BENCH': 'benchmarks failed to build or run',
+                 'INCOM': 'component did not complete building',
+                 'TEST': 'failed tests',
+                 'EXAMP': 'failed examples',
+                 'DISAB': 'disabled due to wrong configuration',
+                 'UNCON': 'was not configured',
+                 'skip': 'not built on this platform'}
 
-    for row in summary.all_units:
-        errs = [_text_format_build_summary(summary.data, row, col,
-                                           summary.arch_ids[col])
-                for col in summary.all_archs]
-        body += "%-18s" % row[:18] + " ".join("%-5s" % e[:5] for e in errs) \
-                + "\n"
+    def get_failed_units(self):
+        numfail = 0
+        failed_units = {}
+        for test in self.db.get_new_failed_tests():
+            numfail += 1
+            failed_units[test['unit_name']] = None
+        return numfail, failed_units
 
-    numfail = 0
-    failed_units = {}
-    for test in db.get_new_failed_tests():
-        numfail += 1
-        failed_units[test['unit_name']] = None
-    if numfail > 0:
-        body += "\nThere were %d new test failures (tests that passed " \
-                "yesterday\n" % numfail \
-                + "but failed today) in the following components:\n" \
-                + "\n".join("   " + unit
-                            for unit in sorted(failed_units.keys()))
-    if doc:
-        def _format_doc(title, nbroken):
-            if nbroken > 0:
-                if nbroken == 1:
-                    suffix = ""
-                else:
-                    suffix = "s"
-                return '\nToday\'s %s contains %d broken link%s.' \
-                       % (title, nbroken, suffix)
+    def get_all_broken_links(self):
+        if not self.doc:
+            return
+
+        def _format_broken(nbroken):
+            if nbroken == 1:
+                suffix = ""
             else:
-                return ''
-        body += (_format_doc('manual', doc['nbroken_manual'])
-                 + _format_doc('reference guide', doc['nbroken_tutorial'])
-                 + _format_doc('RMF manual', doc['nbroken_rmf_manual']))
-    if logs:
+                suffix = "s"
+            return '%d broken link%s.' % (nbroken, suffix)
+        for title, nbrok in (('manual', self.doc['nbroken_manual']),
+                             ('reference guide', self.doc['nbroken_tutorial']),
+                             ('RMF manual', self.doc['nbroken_rmf_manual'])):
+            if nbrok > 0:
+                yield title, _format_broken(nbrok)
+
+    def get_footer(self):
+        return ''
+
+    def get_text(self):
+        return (self.get_header() + self.get_component_summary()
+                + self.get_new_failures() + self.get_broken_links()
+                + self.get_logs() + self.get_footer())
+
+
+class _PlainEmailBody(_EmailBody):
+    def get_header(self):
+        return ("IMP nightly build results, %s.\n"
+                "%sPlease see %s for\nfull details.\n\n"
+                "IMP component build summary (%s;\n"
+                "only components that failed on at least one "
+                "platform are shown)"
+                % (self.db.date, _get_email_build_summary(self.buildsum),
+                   self.url,
+                   ";\n".join("%s = %s" % kv
+                              for kv in self.build_key.items())))
+
+    def get_component_summary(self):
+        body = " " * 18 + " ".join("%-5s" % platforms_dict[x].very_short
+                                   for x in self.summary.all_archs) + "\n"
+
+        for row in self.summary.all_units:
+            errs = [_text_format_build_summary(self.summary.data, row, col,
+                                               self.summary.arch_ids[col])
+                    for col in self.summary.all_archs]
+            body += "%-18s" % row[:18] + \
+                    " ".join("%-5s" % e[:5] for e in errs) + "\n"
+        return body
+
+    def get_new_failures(self):
+        numfail, failed_units = self.get_failed_units()
+        if numfail > 0:
+            return "\nThere were %d new test failures (tests that passed " \
+                   "yesterday\n" % numfail \
+                   + "but failed today) in the following components:\n" \
+                   + "\n".join("   " + unit
+                               for unit in sorted(failed_units.keys()))
+        else:
+            return ""
+
+    def get_broken_links(self):
+        return "\n".join(f"Today's {title} contains {broken}"
+                         for title, broken in self.get_all_broken_links())
+
+    def get_logs(self):
+        if not self.logs:
+            return ''
+
         def _format_log(log):
             txt = '%s %-10s %s' % (log.githash[:10],
                                    log.author_email.split('@')[0][:10],
                                    log.title)
             return txt[:75]
-        body += "\n\nChangelog:\n" + "\n".join(_format_log(log)
-                                               for log in logs)
-    return body
+        return "\n\nChangelog:\n" + "\n".join(_format_log(log)
+                                              for log in self.logs)
+
+
+class _HTMLEmailBody(_EmailBody):
+    def get_header(self):
+        return ("<html>\n<body>\n\n<p>IMP nightly build results, %s.\n"
+                "%s <a href=\"%s\">Full details</a>.\n</p>\n"
+                "<p>IMP component <abbr title=\"%s\">build summary</abbr>"
+                "(only components that failed on at least one platform "
+                "are shown):</p>"
+                % (self.db.date, _get_email_build_summary(self.buildsum),
+                   self.url,
+                   "; ".join("%s = %s" % kv for kv in self.build_key.items())))
+
+    def get_footer(self):
+        return "</body>\n</html>\n"
+
+    def get_component_summary(self):
+        body = "<table>\n<tr><th></th> " \
+               + " ".join("<th title=\"%s\">%s</th>"
+                          % (platforms_dict[x].long,
+                             platforms_dict[x].short)
+                          for x in self.summary.all_archs) + "</tr>\n"
+
+        for row in self.summary.all_units:
+            errs = [_text_format_build_summary(self.summary.data, row, col,
+                                               self.summary.arch_ids[col])
+                    for col in self.summary.all_archs]
+            body += "<tr><td>%s</td>" % row + \
+                    " ".join("<td>%s</td>" % e for e in errs) + "</tr>\n"
+        return body + "\n</table>\n"
+
+    def get_new_failures(self):
+        numfail, failed_units = self.get_failed_units()
+        if numfail > 0:
+            return "\n<p>There were %d new test failures (tests that passed " \
+                   "yesterday\n" % numfail \
+                   + "but failed today) in the following components:</p>\n" \
+                   + "<ul>" \
+                   + "\n".join("  <li>%s</li>" % unit
+                               for unit in sorted(failed_units.keys())) \
+                   + "\n</ul>"
+        else:
+            return ""
+
+    def get_broken_links(self):
+        txt = "\n".join(f"Today's {title} contains {broken}<br>"
+                        for title, broken in self.get_all_broken_links())
+        if txt:
+            txt = "<p>" + txt + "</p>"
+        return txt
+
+    def get_logs(self):
+        if not self.logs:
+            return ''
+
+        def _format_log(log):
+            return '<tr><td><tt>%s</tt></td> <td>%s</td> <td>%s</td></tr>' \
+                   % (log.githash, log.author_email.split('@')[0], log.title)
+        return "<p>Changelog:</p>\n<table>" \
+               + "\n".join(_format_log(log) for log in self.logs) \
+               + "\n</table>\n"
