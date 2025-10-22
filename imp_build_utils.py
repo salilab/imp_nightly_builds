@@ -4,8 +4,7 @@ import pickle
 import os
 import MySQLdb
 import collections
-from email.utils import formatdate
-from email.mime.text import MIMEText
+from email.message import EmailMessage
 
 topdir = '/salilab/diva1/home/imp'
 lab_only_topdir = '/salilab/diva1/home/imp-salilab/develop'
@@ -1256,11 +1255,11 @@ def send_imp_results_email(conn, msg_from, lab_only, branch):
     log = db.get_git_log()
     doc = db.get_doc_summary()
     summary.make_only_failed()
-    msg = MIMEText(_get_email_body(db, buildsum, summary, url, log, doc))
+    msg = EmailMessage()
+    msg.set_content(_get_email_body(db, buildsum, summary, url, log, doc))
     msg['Keywords'] = ", ".join(["FAIL:" + _short_unit_name(x)
                                  for x in set(summary.failed_units)])
     msg['Subject'] = 'IMP nightly build results, %s' % db.date
-    msg['Date'] = formatdate(localtime=True)
     msg['From'] = msg_from
     msg['To'] = msg_to
     s = smtplib.SMTP()
