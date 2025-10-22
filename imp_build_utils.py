@@ -1257,8 +1257,8 @@ def send_imp_results_email(conn, msg_from, lab_only, branch):
     summary.make_only_failed()
     msg = EmailMessage()
     msg.set_content(_get_email_body(db, buildsum, summary, url, log, doc))
-    msg['Keywords'] = ", ".join(["FAIL:" + _short_unit_name(x)
-                                 for x in set(summary.failed_units)])
+    msg['Keywords'] = ", ".join("FAIL:" + _short_unit_name(x)
+                                for x in frozenset(summary.failed_units))
     msg['Subject'] = 'IMP nightly build results, %s' % db.date
     msg['From'] = msg_from
     msg['To'] = msg_to
