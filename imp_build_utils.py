@@ -1439,7 +1439,8 @@ class _HTMLEmailBody(_EmailBody):
 
         def _format_log(log):
             return '<tr><td><tt>%s</tt></td> <td>%s</td> <td>%s</td></tr>' \
-                   % (log.githash, log.author_email.split('@')[0], log.title)
+                   % (log.githash[:10], log.author_email.split('@')[0],
+                      log.title)
         return "<p>Changelog:</p>\n<table>" \
                + "\n".join(_format_log(log) for log in self.logs) \
                + "\n</table>\n"
