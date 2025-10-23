@@ -46,6 +46,9 @@ case $host in
     ;;
 esac
 
+# Run all IMP tests, even unstable ones
+export IMP_UNSTABLE_TESTS=1
+
 if [ $# -lt 2 ]; then
   echo "Usage: $0 platform branch [branch...]"
   exit 1
