@@ -254,14 +254,18 @@ add_extra_python() {
 
   # Python 3.14 appears not to be ABI compatible with 3.6 (trying to create an
   # IMP.Model results in a segfault) so rebuild extensions
+  PY3ABITAG="cpython-314-x86_64-linux-gnu"
   ${CMAKE} ${SRCDIR} \
            -DIMP_USE_PYTHON_SOABI=ON \
-           -DPYTHON_SOABI=cpython-314-x86_64-linux-gnu  \
+           -DPYTHON_SOABI=${PY3ABITAG} \
            -DPYTHON_INCLUDE_DIRS=/usr/include/python3.14/ \
            -DPYTHON_LIBRARIES=/usr/lib64/libpython3.14.so \
            -DSWIG_PYTHON_LIBRARIES=/usr/lib64/libpython3.14.so \
       && ${MAKE} \
-      && cp lib/_*.cpython-314*.so ${IMPINSTALL}/lib/${PLATFORM} || return 1
+      && cp lib/_*.cpython-314*.so ${IMPINSTALL}/lib/${PLATFORM} \
+      && cp lib/_RMF.so ${IMPINSTALL}/lib/${PLATFORM}/_RMF.${PY3ABITAG}.so \
+      && cp lib/_RMF_HDF5.so ${IMPINSTALL}/lib/${PLATFORM}/_RMF_HDF5.${PY3ABITAG}.so \
+      || return 1
 }
 
 # Configure, build and test IMP using cmake
