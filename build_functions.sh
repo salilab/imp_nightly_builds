@@ -265,6 +265,7 @@ add_extra_python() {
       && cp lib/_*.cpython-314*.so ${IMPINSTALL}/lib/${PLATFORM} \
       && cp lib/_RMF.so ${IMPINSTALL}/lib/${PLATFORM}/_RMF.${PY3ABITAG}.so \
       && cp lib/_RMF_HDF5.so ${IMPINSTALL}/lib/${PLATFORM}/_RMF_HDF5.${PY3ABITAG}.so \
+      && chrpath -d ${IMPINSTALL}/lib/${PLATFORM}/_*.cpython-314*.so \
       || return 1
 }
 
