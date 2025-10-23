@@ -235,7 +235,10 @@ do_make_install() {
 
 # Add Python interfaces for multiple versions of Python 3
 add_extra_python() {
-  local PLATFORM=$1
+  local CMAKE=$1
+  local SRCDIR=$2
+  local MAKE=$3
+  local PLATFORM=$4
 
   local PY3ABITAG="cpython-36m-x86_64-linux-gnu"
   # Rename already-installed Python 3 extensions to use PEP3149 naming
@@ -244,10 +247,21 @@ add_extra_python() {
   (cd ${IMPINSTALL}/lib/${PLATFORM} && for ext in _*.so; do mv $ext ${ext%.so}.${PY3ABITAG}.so; done)
 
   # Add symlinks for newer compatible Python versions (Wynton and Fedora)
-  for pyver in 37m 38 39 310 311 312 313 314; do
+  for pyver in 37m 38 39 310 311 312 313; do
     echo "Adding symlinks for Python ${pyver}..."
     (cd lib && for ext in _*.so; do ln -sf ${ext%.so}.${PY3ABITAG}.so ${IMPINSTALL}/lib/${PLATFORM}/${ext%.so}.cpython-${pyver}-x86_64-linux-gnu.so; done)
   done
+
+  # Python 3.14 appears not to be ABI compatible with 3.6 (trying to create an
+  # IMP.Model results in a segfault) so rebuild extensions
+  ${CMAKE} ${SRCDIR} \
+           -DIMP_USE_PYTHON_SOABI=ON \
+           -DPYTHON_SOABI=cpython-314-x86_64-linux-gnu  \
+           -DPYTHON_INCLUDE_DIRS=/usr/include/python3.14/ \
+           -DPYTHON_LIBRARIES=/usr/lib64/libpython3.14.so \
+           -DSWIG_PYTHON_LIBRARIES=/usr/lib64/libpython3.14.so \
+      && ${MAKE} \
+      && cp lib/_*.cpython-314*.so ${IMPINSTALL}/lib/${PLATFORM} || return 1
 }
 
 # Configure, build and test IMP using cmake
@@ -291,7 +305,7 @@ run_cmake_build() {
     run_imp_build COVERAGE ${LOG_DIR} report_coverage "${SRCDIR}" ${LOG_DIR}
   fi
   if echo "${EXTRA}" | grep -q allpython; then
-    run_imp_build ALLPYTHON ${LOG_DIR} add_extra_python "${PLATFORM}"
+    run_imp_build ALLPYTHON ${LOG_DIR} add_extra_python "${CMAKE}" "${SRCDIR}" "${MAKE}" "${PLATFORM}"
   fi
   if [ ${BUILDRET} -eq 0 ]; then
     if echo "${EXTRA}" | grep -q w..package; then
