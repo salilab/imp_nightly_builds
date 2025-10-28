@@ -821,6 +821,13 @@ all_platforms = (('i386-intel8',
                       rpm_vlong_header % "Fedora 42"
                       + rpm_vlong_footer + "</p>",
                       'package.fc42-x86_64.log')),
+                 ('pkg.f43-x86_64',
+                  Platform(
+                      'F43', 'F43 RPM',
+                      'Fedora 43 RPM build; Boost 1.83, gcc 15.2',
+                      rpm_vlong_header % "Fedora 43"
+                      + rpm_vlong_footer + "</p>",
+                      'package.fc43-x86_64.log')),
                  ('pkg.precise-x86_64',
                   Platform(
                       'deb12', 'deb12',
