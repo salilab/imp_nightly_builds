@@ -570,9 +570,9 @@ all_platforms = (('i386-intel8',
                  ('coverage',
                   Platform(
                       'Cov', 'Coverage',
-                      'Coverage build (debug build on Fedora 42, 64-bit; '
-                      'Boost 1.83, gcc 15.0)',
-                      coverage_vlong % ("64-bit Fedora 42",
+                      'Coverage build (debug build on Fedora 43, 64-bit; '
+                      'Boost 1.83, gcc 15.2)',
+                      coverage_vlong % ("64-bit Fedora 43",
                                         debug_build_vlong),
                       'coverage.log')),
                  ('pkg.el5-i386',
