@@ -14,9 +14,9 @@ page at https://integrativemodeling.org/nightly/results/.
      MySQL server.
    - `TOPDIR`, `LAB_ONLY_TOPDIR`: directories where IMP build results (both
      public and lab-only) can be found.
-   - `MAIL_SERVER`, `MAIL_PORT`, `ADMINS`: host and port to connect to to
-     send emails when the application encounters an error, and a Python
-     list of users to notify.
+   - `MAIL_SERVER`, `MAIL_PORT`, `FROM_ADDR`, `ADMINS`: host and port to
+     connect to to send emails when the application encounters an error, the
+     address emails should come from, and a Python list of users to notify.
 
 ## Apache setup
 
