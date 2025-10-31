@@ -292,6 +292,20 @@ license = '${MODELLER_LICENSE_KEY}'
 END
     }
 
+    # Do any necessary fixes to make the Modeller package work with Python
+    fix_modeller_python() {
+      local CFG="$1"
+      local MODELLER_VERSION="$2"
+      # Modeller 10.7 does not include Python 3.14 (for Fedora 43) symlinks,
+      # so add them
+      if [ "${CFG}" = "fedora-43-x86_64" ] && [ "${MODELLER_VERSION}" = "10.7" ]; then
+        mock -r $CFG --shell "ln -sf /usr/lib/modeller10.7/modlib/modeller /usr/lib64/python3.14/site-packages/modeller" \
+            && mock -r $CFG --shell "ln -sf /usr/lib/modeller10.7/lib/x86_64-intel8/python3.3/_modeller.so /usr/lib64/python3.14/site-packages/"
+      else
+        return 0
+      fi
+    }
+
     mock_build() {
       local CFG="$1"
       local LOG_DIR="$2"
@@ -363,6 +377,7 @@ END
       && make_modeller_config ${MODELLER_VERSION} config.py.$$ \
       && mock -r $CFG --copyin config.py.$$ \
              /usr/lib/modeller${MODELLER_VERSION}/modlib/modeller/config.py \
+      && fix_modeller_python $CFG ${MODELLER_VERSION} \
       && mock -r $CFG --no-clean -D "keep_going 1" \
               --enable-network \
               -D "RHEL_SALI_LAB 1" --rebuild $RESDIR/IMP-*.src.rpm \
