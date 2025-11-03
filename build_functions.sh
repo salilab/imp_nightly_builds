@@ -310,7 +310,13 @@ run_cmake_build() {
     run_imp_build COVERAGE ${LOG_DIR} report_coverage "${SRCDIR}" ${LOG_DIR}
   fi
   if echo "${EXTRA}" | grep -q allpython; then
-    run_imp_build ALLPYTHON ${LOG_DIR} add_extra_python "${CMAKE}" "${SRCDIR}" "${MAKE}" "${PLATFORM}"
+    # Build for other Python versions in a temporary copy of the build dir,
+    # so as not to affect further builds
+    local cwd=`pwd`
+    cd .. && mv build build.bak && cp -a build.bak build && cd build && \
+        run_imp_build ALLPYTHON ${LOG_DIR} add_extra_python "${CMAKE}" "${SRCDIR}" "${MAKE}" "${PLATFORM}"
+    cd $cwd/.. && rm -rf build && mv build.bak build
+    cd $cwd
   fi
   if [ ${BUILDRET} -eq 0 ]; then
     if echo "${EXTRA}" | grep -q w..package; then
