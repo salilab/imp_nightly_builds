@@ -104,7 +104,7 @@ class TestPage(object):
                     'release/2.16.0', 'release/2.17.0', 'release/2.18.0',
                     'release/2.19.0', 'release/2.20.0', 'release/2.20.1',
                     'release/2.20.2', 'release/2.21.0', 'release/2.22.0',
-                    'release/2.23.0']
+                    'release/2.23.0', 'release/2.24.0']
 
     def __init__(self, db, config, page=None, platform=None, component=None,
                  test=None, bench=None):
