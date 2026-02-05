@@ -82,6 +82,10 @@ rpm_cvlong = rpm_vlong_header + """
 rpm_centos5 = """In particular, the versions of cmake, HDF5 and SWIG that ship
 with CentOS 5 are too old for IMP. We provide newer versions."""
 
+jax_build_vlong = """
+<p>This build also tests IMP's <a href="https://integrativemodeling.org/nightly/doc/manual/gpu.html">JAX support</a>.</p>
+"""
+
 debug_build_vlong = """
 <p>This is a <b>debug</b> build, built with all checks turned on
 (<tt>IMP_MAX_CHECKS=INTERNAL</tt> cmake option). This is so that the tests
@@ -444,7 +448,7 @@ all_platforms = (('i386-intel8',
                                    "Homebrew Python",
                                    "<tt>doxygen@1.8.6</tt>, "
                                    "<tt>graphviz</tt>, ")
-                      + percpp_vlong,
+                      + percpp_vlong + jax_build_vlong,
                       'bin.mac26arm64-gnu.log')),
                  ('mac12-intel',
                   Platform(
@@ -488,7 +492,8 @@ all_platforms = (('i386-intel8',
                       'clang++; Boost 1.90)',
                       mac_header % ("Apple Silicon MacOS 15 (Sequoia) Mac",
                                     "Homebrew Python", "")
-                      + fast_build_vlong, 'bin-fast.mac15-intel.log')),
+                      + fast_build_vlong + jax_build_vlong,
+                      'bin-fast.mac15-intel.log')),
                  ('i386-w32',
                   Platform(
                       'Win32', 'Win32',
@@ -573,7 +578,7 @@ all_platforms = (('i386-intel8',
                       'Coverage build (debug build on Fedora 43, 64-bit; '
                       'Boost 1.83, gcc 15.2)',
                       coverage_vlong % ("64-bit Fedora 43",
-                                        debug_build_vlong),
+                                        debug_build_vlong + jax_build_vlong),
                       'coverage.log')),
                  ('pkg.el5-i386',
                   Platform(
