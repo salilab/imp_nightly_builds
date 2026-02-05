@@ -84,7 +84,7 @@ with CentOS 5 are too old for IMP. We provide newer versions."""
 
 jax_build_vlong = """
 <p>This build also tests IMP's <a href="https://integrativemodeling.org/nightly/doc/manual/gpu.html">JAX support</a>.</p>
-"""
+"""  # noqa:E501
 
 debug_build_vlong = """
 <p>This is a <b>debug</b> build, built with all checks turned on
