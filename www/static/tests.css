@@ -63,7 +63,7 @@ body {
 }
 
 td.testfail {
-  color: red;
+  color: #CC0000;
 }
 
 td.testok {
@@ -71,7 +71,7 @@ td.testok {
 }
 
 li.compfail {
-  color: red;
+  color: #CC0000;
   margin-bottom: 1em;
 }
 
@@ -322,7 +322,7 @@ div.last_build {
 }
 
 span.build_fail {
-  color: red;
+  color: #CC0000;
 }
 
 div.branch_summary {
