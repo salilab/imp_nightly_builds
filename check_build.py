@@ -1889,6 +1889,7 @@ def main():
     rh10_64 = 'pkg.el10-x86_64'  # RHEL 10 RPM
     jammy = 'pkg.jammy-x86_64'   # Ubuntu 22.04 (Jammy Jellyfish) .deb package
     noble = 'pkg.noble-x86_64'   # Ubuntu 24.04 (Noble Numbat) .deb package
+    resolute = 'pkg.resolute-x86_64'   # Ubuntu 26.04 (Resolute Raccoon)
 
     # Check CUDA builds
     cuda = 'cuda'
@@ -1898,14 +1899,14 @@ def main():
     coverage = 'coverage'
     c.add_cmake_log(coverage, ['build', 'test', 'example'], [])
 
-    new_archs_map = [rh8_64, rh9_64, rh10_64, jammy, noble, win64]
+    new_archs_map = [rh8_64, rh9_64, rh10_64, jammy, noble, resolute, win64]
     rh_rpms = [rh8_64, rh9_64, rh10_64]
     all_archs_map = [debug8, mac14, mac26arm, win32, fast8, fastmac, static,
                      release8, f43_64] + new_archs_map + [coverage, cuda]
     c.make_module_map(all_archs_map)
     # Only cmake builds have an ALL component
     incs = [f43_64, fastmac, coverage, cuda, fast8, static, debug8,
-            release8, jammy, noble] + rh_rpms + all_archs
+            release8, jammy, noble, resolute] + rh_rpms + all_archs
     c.include_component('ALL', incs)
     c.include_component('INSTALL', [fastmac, fast8, debug8,
                                     release8, cuda] + all_archs)
@@ -1918,7 +1919,7 @@ def main():
     for m in ('mpi', 'spb', 'nestor'):
         mods = [release8, debug8, rh8_64, rh9_64, rh10_64, f43_64, fast8,
                 coverage, win32, win64, mac14, mac26arm, fastmac,
-                jammy, noble]
+                jammy, noble, resolute]
         c.include_component(m, mods)
     # Documentation only built on one platform
     c.include_component('DOC', mac26arm)
@@ -1926,7 +1927,7 @@ def main():
 
     # scratch module is excluded from all RPM and deb builds
     for m in ('scratch',):
-        c.exclude_component(m, [f43_64, jammy, noble] + rh_rpms)
+        c.exclude_component(m, [f43_64, jammy, noble, resolute] + rh_rpms)
     for m in ('RMF', 'rmf', 'gsl', 'multifit', 'em2d', 'EMageFit',
               'domino', 'example', 'pepdock', 'cgal',
               'cnmultifit', 'saxs_merge', 'integrative_docking',
@@ -1950,6 +1951,8 @@ def main():
                     _deb_packages(repo.newlongver, 'jammy'))
     c.add_cmake_log(noble, ['build', 'test'],
                     _deb_packages(repo.newlongver, 'noble'))
+    c.add_cmake_log(resolute, ['build', 'test'],
+                    _deb_packages(repo.newlongver, 'resolute'))
     repo = Repository("imp")
     if imp_lab_check:
         imp_lab_check.add_repository(repo)
@@ -1980,7 +1983,7 @@ def main():
 
         # Only cmake builds have an ALL_LAB component
         incs = [f43_64, fastmac, cuda, coverage, fast8, debug8,
-                static, release8, jammy, noble] + rh_rpms + all_archs
+                static, release8, jammy, noble, resolute] + rh_rpms + all_archs
         c.include_component('ALL_LAB', incs)
         c.include_component('COVERAGE_LAB', [coverage])
         c.include_component('INSTALL_LAB',

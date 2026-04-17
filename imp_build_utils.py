@@ -881,7 +881,14 @@ all_platforms = (('i386-intel8',
                       'Ubuntu 24.04 (Noble Numbat) 64-bit package; '
                       'Boost 1.83, gcc 13.2',
                       ubuntu_vlong % "24.04 (Noble Numbat)",
-                      'package.noble-x86_64.log')))
+                      'package.noble-x86_64.log')),
+                 ('pkg.resolute-x86_64',
+                  Platform(
+                      'deb26', 'deb26',
+                      'Ubuntu 26.04 (Resolute Raccoon) 64-bit package; '
+                      'Boost 1.90, gcc 15.2',
+                      ubuntu_vlong % "26.04 (Resolute Raccoon)",
+                      'package.resolute-x86_64.log')))
 platforms_dict = dict(all_platforms)
 
 
