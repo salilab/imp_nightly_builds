@@ -238,6 +238,11 @@ END
       else
         cxxflags="-std=c++20 -I/usr/include/hdf5/serial/"
       fi
+      if [ "${codename}" = "resolute" ]; then
+        rmf_boost_system=false
+      else
+        rmf_boost_system=true
+      fi
       # Build files for Ubuntu apt-get repository (/etc/apt/sources.list)
       # For stable releases, should also make Release.gpg by running
       # gpg -bas -o Release.gpg Release
@@ -260,6 +265,7 @@ EOF
           && cd tools/nightly-tests/test-install \
           && scons python=python3 mock_config=ubuntu-${codename} \
                    cxxflags="${cxxflags}" cpppath="${cpppath}" \
+                   rmf_needs_boost_system="${rmf_boost_system}" \
           && dpkg -r imp imp-dev imp-openmpi
         RET=$?
       fi
