@@ -1414,7 +1414,7 @@ class _HTMLEmailBody(_EmailBody):
     def get_header(self):
         return ("<html>\n<body>\n\n<p>IMP nightly build results, %s.\n"
                 "%s <a href=\"%s\">Full details</a>.\n</p>\n"
-                "<p>IMP component <abbr title=\"%s\">build summary</abbr>"
+                "<p>IMP component <abbr title=\"%s\">build summary</abbr> "
                 "(only components that failed on at least one platform "
                 "are shown):</p>"
                 % (self.db.date, _get_email_build_summary(self.buildsum),
