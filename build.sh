@@ -462,7 +462,7 @@ END
                 "-DIMP_TIMEOUT_FACTOR=30" \
                 "-DCGAL_DO_NOT_WARN_ABOUT_CMAKE_BUILD_TYPE=TRUE" \
                 "-GNinja" \
-                "-DCMAKE_CXX_FLAGS='-std=c++11 -fprofile-arcs -ftest-coverage'")
+                "-DCMAKE_CXX_FLAGS='-std=c++14 -fprofile-arcs -ftest-coverage'")
     mkdir ../build && cd ../build && CMAKE_PYTHONPATH="$(pwd)/coverage" run_cmake_build ../imp-${IMPVERSION} $PLATFORM python3 "$CMAKE" "$CTEST -j4" "ninja -k9999 -j4" "--run-tests=fast --run-examples --coverage" coverage
 
   # Normal full build
