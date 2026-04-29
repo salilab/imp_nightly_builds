@@ -316,7 +316,7 @@ all_platforms = (('i386-intel8',
                  ('cuda',
                   Platform(
                       'CUDA', 'CUDA',
-                      'CUDA build (64-bit Linux, Fedora 44, gcc 16.0, '
+                      'CUDA build (64-bit Linux, Fedora 44, gcc 14.3, '
                       'Boost 1.90, CUDA toolkit 12.8)',
                       cuda_vlong % "64-bit Fedora 44",
                       'bin-cuda.log')),
