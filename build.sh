@@ -162,8 +162,7 @@ do_build() {
       # tested on Fedora
       CMAKE_LAB_ONLY_ARGS+=("-DIMP_DISABLED_MODULES=domino3:liegroup:autodiff")
       export LANG="en_US.UTF-8"
-      # Work around boost/clang incompatibility
-      CMAKE_ARGS+=("-DCMAKE_CXX_FLAGS='-std=c++17 -D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION'" \
+      CMAKE_ARGS+=("-DCMAKE_CXX_FLAGS='-std=c++17'" \
                    "-DIMP_TIMEOUT_FACTOR=4" \
                    "-DPython3_EXECUTABLE=/opt/homebrew/bin/python3")
     fi
