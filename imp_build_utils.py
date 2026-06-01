@@ -75,7 +75,7 @@ GitHub repo.
 
 rpm_cvlong = rpm_vlong_header + """
 <p>The resulting package should install on a RedHat Enterprise machine
-(or clones such as CentOS, Rocky, or Alma) with the
+(or clones such as Rocky or Alma) with the
 <a href="https://fedoraproject.org/wiki/EPEL">EPEL repository</a>.</p>
 """ + rpm_vlong_footer + "%s"
 
