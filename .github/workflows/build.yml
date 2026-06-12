@@ -26,6 +26,6 @@ jobs:
     - name: Test
       run: |
         pytest --cov=www/results --cov-branch --cov-report=xml -v www/test
-    - uses: codecov/codecov-action@v6
+    - uses: codecov/codecov-action@v7
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
