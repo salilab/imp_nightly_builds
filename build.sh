@@ -571,7 +571,7 @@ END
       # Build IMP for Windows
       if [ ${PLATFORM} = "i386-w32" ]; then
         local BITS=32
-        local EXTRA_CXX_FLAGS=""
+        local EXTRA_CXX_FLAGS=" /bigobj"
         local HOSTPYTHON="python3"
       else
         local BITS=64
