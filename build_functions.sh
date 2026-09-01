@@ -77,25 +77,15 @@ build_w32_package() {
   local SRCDIR="$2"
   local MAKE="$3"
   local BITS="$4"
-  local w32py="/usr/lib/w${BITS}comp/w${BITS}python"
   mkdir -p ${IMPPKG}
-  # Note that 3.9 is first since IMP should already be built against 3.9;
-  # this should avoid an unnecessary rebuild
-  local PYVERS="3.9 3.10 3.11 3.12 3.13 3.14"
-  for PYVER in ${PYVERS}; do
-    PYLIB=`echo "python${PYVER}.lib" | sed -e 's/\.//'`
-    ${CMAKE} ${SRCDIR} -DCMAKE_INSTALL_PYTHONDIR=/pylib/$PYVER \
-                -DSWIG_PYTHON_LIBRARIES=$w32py/$PYVER/lib/$PYLIB \
-                -DPYTHON_INCLUDE_DIRS=$w32py/$PYVER/include/ \
-                -DPYTHON_LIBRARIES=$w32py/$PYVER/lib/$PYLIB \
-                -DCMAKE_INSTALL_PREFIX=/usr/local \
-                -DCMAKE_INSTALL_DATADIR=share \
-                -DCMAKE_INSTALL_INCLUDEDIR=include \
-                -DCMAKE_INSTALL_LIBDIR=lib \
-                -DCMAKE_INSTALL_BINDIR=bin \
-                -DCMAKE_INSTALL_DOCDIR=share/doc/IMP \
-        && ${MAKE} DESTDIR=`pwd`/w32-inst install || return 1
-  done
+  ${CMAKE} ${SRCDIR} -DCMAKE_INSTALL_PYTHONDIR=/python \
+              -DCMAKE_INSTALL_PREFIX=/usr/local \
+              -DCMAKE_INSTALL_DATADIR=share \
+              -DCMAKE_INSTALL_INCLUDEDIR=include \
+              -DCMAKE_INSTALL_LIBDIR=lib \
+              -DCMAKE_INSTALL_BINDIR=bin \
+              -DCMAKE_INSTALL_DOCDIR=share/doc/IMP \
+      && ${MAKE} DESTDIR=`pwd`/w32-inst install || return 1
   $SRCDIR/tools/w32/make-package.sh ${IMPVERSION} ${BITS} \
           && cp IMP-${IMPVERSION}-${BITS}bit.exe ${IMPPKG} || return 1
 }

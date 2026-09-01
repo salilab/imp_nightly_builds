@@ -586,10 +586,17 @@ END
       export MPLBACKEND=Agg
 
       get_cmake $PLATFORM
+      # Build IMP and RMF with Python limited API, but not python-ihm
+      # (as that requires Python 3.11 or later). Clear PYTHON_LIBRARIES
+      # so that we take the value given in python3*.lib which will be different
+      # for IMP (python3.dll) and python-ihm (python39.dll)
       CMAKE_ARGS+=("-DCMAKE_BUILD_TYPE=Release" \
                    "-DCMAKE_CXX_FLAGS='/DBOOST_ALL_DYN_LINK /EHsc /DH5_BUILT_AS_DYNAMIC_LIB /DWIN32 /DGSL_DLL${EXTRA_CXX_FLAGS}'" \
                    "-DIMP_TIMEOUT_FACTOR=20" \
-                   "-DCMAKE_DEPENDS_USE_COMPILER=FALSE")
+                   "-DCMAKE_DEPENDS_USE_COMPILER=FALSE" \
+                   "-DPYTHON_LIBRARIES=" \
+                   "-DIMP_PY_LIMITED_API=3.9" \
+                   "-DRMF_PY_LIMITED_API=3.9")
       if [ ${BITS} = "32" ]; then
         CMAKE_ARGS+=("-Dfftw3_LIBRARY='/usr/lib/w32comp/Program Files/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.16.27023/lib/x86/libfftw3-3.lib'")
 	CMAKE_ARGS+=("-DCGAL_DIR=/usr/lib/w32comp/CGAL-5.1/")
