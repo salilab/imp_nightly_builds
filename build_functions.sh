@@ -98,10 +98,10 @@ test_w32_package() {
   # Test silent install, run tests, then uninstall
   local TESTDIR=$SRCDIR/tools/nightly-tests/test-install
   if [ "${BITS}" = "64" ]; then
-    local WINPYTHONA="w64python3.9"
+    local WINPYTHONA="w64python3.10"
     local WINPYTHONB="w64python3.12"
   else
-    local WINPYTHONA="w32python3.9"
+    local WINPYTHONA="w32python3.10"
     local WINPYTHONB="w32python3.12"
   fi
   # Need to set pipefail otherwise test failures get ignored (only the return
