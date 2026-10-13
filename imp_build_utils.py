@@ -457,7 +457,7 @@ all_platforms = (('i386-intel8',
                   Platform(
                       'MARM', 'Mac ARM',
                       'Debug build (Apple Silicon Mac; MacOS 27 '
-                      '(Golden Gate); clang++; Boost 1.90; '
+                      '(Golden Gate); clang++; Boost 1.92; '
                       'per-cpp compilation)',
                       mac_vlong % ("64-bit Apple Silicon "
                                    "MacOS 27 (Golden Gate) Mac",
@@ -505,7 +505,7 @@ all_platforms = (('i386-intel8',
                   Platform(
                       'McFst', 'Mac Fast',
                       'Fast build (Apple Silicon Mac; MacOS 15 (Sequoia); '
-                      'clang++; Boost 1.90)',
+                      'clang++; Boost 1.92)',
                       mac_header % ("Apple Silicon MacOS 15 (Sequoia) Mac",
                                     "Homebrew Python", "")
                       + fast_build_vlong + jax_build_vlong,
