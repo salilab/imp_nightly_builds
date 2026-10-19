@@ -207,16 +207,27 @@ def test_benchmark_file():
             assert b'file <b>benchmark_load</b> in <b>IMP.em</b>' in rv.data
 
 
-def test_doc_summary_bad_date():
+def test_doc_summary_no_results_date():
     """Test doc summary page for a date with no results"""
+    with results.app.app_context():
+        utils.set_up_database(results.get_db())
+        c = results.app.test_client()
+        for url in ('/doc?date=29900101', '/?p=doc&date=29900101'):
+            rv = c.get(url)
+            assert rv.status_code == 200
+            assert b'Doc summary for build on 2990-01-01' in rv.data
+            assert b'No information available for this build' in rv.data
+
+
+def test_doc_summary_ancient_date():
+    """Test doc summary page for too old a date"""
     with results.app.app_context():
         utils.set_up_database(results.get_db())
         c = results.app.test_client()
         for url in ('/doc?date=19900101', '/?p=doc&date=19900101'):
             rv = c.get(url)
             assert rv.status_code == 200
-            assert b'Doc summary for build on 1990-01-01' in rv.data
-            assert b'No information available for this build' in rv.data
+            assert b'for this date is no longer available' in rv.data
 
 
 def test_doc_summary():
