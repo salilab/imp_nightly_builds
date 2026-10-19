@@ -1125,7 +1125,7 @@ class BuildDatabase:
         g = glob.glob(g)
         if len(g) > 0:
             data = []
-            for line in open(g[0]):
+            for line in open(g[0], encoding='utf8'):
                 fields = line.rstrip('\r\n').split('\0')
                 data.append(_Log._make(fields))
             return data
