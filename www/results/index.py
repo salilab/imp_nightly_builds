@@ -1635,7 +1635,12 @@ $(document).ready(function() {
 
     def display_page(self):
         self.display_navigation()
-        self.pages[self.page]()
+        # Only show builds after we switched to git and CMake
+        if self.date < datetime.date(year=2013, month=5, day=1):
+            self.p("<p><b>Sorry, information for this date is no longer "
+                   "available.</b></p>")
+        else:
+            self.pages[self.page]()
 
     def display_branch_link(self):
         branch_links = [self.get_link(branch=x).replace('&amp;', '&')
