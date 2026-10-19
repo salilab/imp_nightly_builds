@@ -432,22 +432,18 @@ END
     fi
     rm -f config.py.$$
 
-  # Build with CUDA
-  elif [ $PLATFORM = "cuda" ]; then
-    # Latest CUDA doesn't support latest Fedora gcc, so use previous version
+  # Build with JAX on GPU on Fedora
+  elif [ $PLATFORM = "jax_gpu_fedora" ]; then
     module purge
-    module load cuda/12.8.1 gnuplot
+    module load python3/jax-cuda12
     get_cmake $PLATFORM
     use_modeller_svn
 
     CMAKE_ARGS=("${CMAKE_ARGS[@]}" \
-                "-DCMAKE_LIBRARY_PATH=$CUDA_LIB_PATH" \
-                "-DCMAKE_INCLUDE_PATH=$CUDA_LIB_PATH/../include" \
-                "-DIMP_CUDA=ALL" \
-                "-DCUDA_HOST_COMPILER=/usr/bin/gcc-14" \
                 "-DCMAKE_BUILD_TYPE=Release" \
-                "-DIMP_TIMEOUT_FACTOR=2" \
-                "-DIMP_DISABLED_MODULES=multifit2" \
+                "-DCGAL_DO_NOT_WARN_ABOUT_CMAKE_BUILD_TYPE=TRUE" \
+                "-DCMAKE_CXX_FLAGS='-std=c++20'" \
+                "-DIMP_USE_PYTHON_SOABI=ON" \
                 "-GNinja")
     mkdir ../build && cd ../build && run_cmake_build ../imp-${IMPVERSION} $PLATFORM python3 "$CMAKE" "$CTEST" "ninja -k9999 -j4" "--run-tests=fast --run-examples" allinstall
 

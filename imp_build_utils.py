@@ -82,8 +82,16 @@ rpm_cvlong = rpm_vlong_header + """
 rpm_centos5 = """In particular, the versions of cmake, HDF5 and SWIG that ship
 with CentOS 5 are too old for IMP. We provide newer versions."""
 
+jax_vlong = """
+<p>This platform builds and tests IMP on a fully updated %s system with
+the CUDA toolkit, using scripts in the
+<a href="https://github.com/salilab/imp_nightly_builds">IMP nightly builds</a>
+GitHub repo, and activates and tests
+IMP's <a href="https://integrativemodeling.org/nightly/doc/manual/gpu.html">JAX support</a> on GPU.</p>
+"""  # noqa:E501
+
 jax_build_vlong = """
-<p>This build also tests IMP's <a href="https://integrativemodeling.org/nightly/doc/manual/gpu.html">JAX support</a>.</p>
+<p>This build also tests IMP's <a href="https://integrativemodeling.org/nightly/doc/manual/gpu.html">JAX support</a> on CPU.</p>
 """  # noqa:E501
 
 debug_build_vlong = """
@@ -323,6 +331,13 @@ all_platforms = (('i386-intel8',
                       'Boost 1.90, CUDA toolkit 12.8)',
                       cuda_vlong % "64-bit Fedora 44",
                       'bin-cuda.log')),
+                 ('jax_gpu_fedora',
+                  Platform(
+                      'JAX', 'JAX',
+                      'JAX GPU build (64-bit Linux, Fedora 44, gcc 14.3, '
+                      'Boost 1.90, CUDA toolkit 12.8, JAX 0.9.0)',
+                      jax_vlong % "64-bit Fedora 44",
+                      'bin-jax-gpu-fedora.log')),
                  ('mac10v4-intel',
                   Platform(
                       'Mac', 'Mac 10.4',
