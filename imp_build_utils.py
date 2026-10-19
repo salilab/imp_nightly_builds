@@ -959,8 +959,7 @@ class _UnitSummary:
                                        'numnewfails': ntf}
             if row['state'].startswith('CMAKE_'):
                 self.cmake_archs[row['arch_name']] = None
-            if row['state'] not in ('OK', 'SKIP', 'NOTEST', 'NOLOG',
-                                    'CMAKE_OK', 'CMAKE_SKIP', 'CMAKE_FAILDEP',
+            if row['state'] not in ('CMAKE_OK', 'CMAKE_SKIP', 'CMAKE_FAILDEP',
                                     'CMAKE_NOBUILD', 'CMAKE_NOTEST',
                                     'CMAKE_NOEX', 'CMAKE_NOBENCH'):
                 failed_archs[row['arch_name']] = None
@@ -1251,16 +1250,7 @@ class BuildDatabase:
 
 
 def _text_format_build_summary(summary, unit, arch, arch_id):
-    statemap = {'SKIP': 'skip',
-                'OK': '-',
-                'BUILD': 'BUILD',
-                'BENCH': 'BENCH',
-                'TEST': 'TEST',
-                'NOTEST': '-',
-                'NOLOG': '-',
-                'UNCON': 'UNCON',
-                'DISABLED': 'DISAB',
-                'CMAKE_OK': '-',
+    statemap = {'CMAKE_OK': '-',
                 'CMAKE_BUILD': 'BUILD',
                 'CMAKE_BENCH': 'BENCH',
                 'CMAKE_TEST': 'TEST',

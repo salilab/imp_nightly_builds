@@ -749,38 +749,9 @@ class TestPage(object):
             s = summary[unit][arch]
         except KeyError:
             s = None
-        if s is None or s['state'] in ('SKIP', 'CMAKE_SKIP'):
+        if s is None or s['state'] == 'CMAKE_SKIP':
             return make_cmake('moduleskip',
                               "Component is not built on this platform")
-        elif s['state'] == 'OK':
-            return '<td><img src="%s/images/moduleok.png" alt="ok" ' \
-                   'title="Component built successfully"></td>' \
-                   % self.nightly_url
-        elif s['state'] == 'BUILD':
-            return make_loglink(img='modulebuild.png', alt='BUILD',
-                                title="Component failed to build", data=s)
-        elif s['state'] == 'TEST':
-            return make_loglink(img='moduletest.png', alt='TEST',
-                                title="Component failed test cases", data=s)
-        elif s['state'] == 'NOTEST':
-            return ('<td><img src="%s/images/moduletestnotrun.png" '
-                    'alt="TEST" title="Component test cases did not run"></td>'
-                    % self.nightly_url)
-        elif s['state'] == 'NOLOG':
-            return '<td><img src="%s/images/moduletestnotrun.png" ' \
-                   'alt="NOLOG" title="No log file for build on this ' \
-                   'platform"></td>' % self.nightly_url
-        elif s['state'] == 'DISABLED':
-            return make_loglink(img='modulebuild.png', alt='DISAB',
-                                title="Component disabled due to "
-                                      "configuration error", data=s)
-        elif s['state'] == 'UNCON':
-            return '<td><img src="%s/images/modulebuild.png" ' \
-                   'alt="UNCON" title="Component was not configured"></td>' \
-                   % self.nightly_url
-        elif s['state'] == 'BENCH':
-            return make_loglink(img='modulebuild.png', alt='BENCH',
-                                title="Component benchmark failed", data=s)
         elif s['state'] == 'CMAKE_OK':
             if unit.endswith(' examples'):
                 return make_cmake_loglink(
