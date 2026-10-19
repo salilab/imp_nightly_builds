@@ -915,21 +915,13 @@ class TestPage(object):
         self.print_doc_summary(db)
 
         if self.revision:
-            git = len(self.revision) > 20
-            if git:
-                self.p('<p>You can get IMP source code '
-                       '<a href="%s/tree/%s">'
-                       'from github</a>. (To look at this '
-                       '<a href="%s/tree/%s">specific revision</a>, '
-                       'run "<tt>git checkout %s</tt>".)'
-                       % (imp_github, self.branch, imp_github, self.revision,
-                          self.revision[:10]))
-            else:
-                self.p('<p>To get this version of IMP, run the following '
-                       'command: "<tt>svn co -%s '
-                       'http://svn.salilab.org/imp/trunk imp</tt>" (or, if '
-                       'you have an existing SVN checkout, use "<tt>svn up '
-                       '-%s</tt>").' % (self.revision, self.revision))
+            self.p('<p>You can get IMP source code '
+                   '<a href="%s/tree/%s">'
+                   'from github</a>. (To look at this '
+                   '<a href="%s/tree/%s">specific revision</a>, '
+                   'run "<tt>git checkout %s</tt>".)'
+                   % (imp_github, self.branch, imp_github, self.revision,
+                      self.revision[:10]))
             revs = self.get_other_repo_revs()
             rmf_rev = revs.get('rmf', '')
             if rmf_rev:
@@ -946,13 +938,7 @@ class TestPage(object):
                     self.p('Pre-built binaries <a href="https://'
                            'integrativemodeling.org/nightly/download/">'
                            'are also available</a>%s.' % lab_only_note)
-            if git:
-                self.p('</p>')
-            else:
-                self.p(' You can also '
-                       '<a href="http://svn.salilab.org/viewvc/imp/trunk/'
-                       '?pathrev=%s">browse the source code</a>.</p>'
-                       % self.revision[1:])
+            self.p('</p>')
             if self.lab_only:
                 self.p('<p>Lab-only components can be obtained by git '
                        'or SVN from the following locations:</p>')
