@@ -1,17 +1,14 @@
 import flask
 from flask import request, render_template, url_for
-import html
 import io
 import sys
 import re
 import os
-import glob
 import MySQLdb
 import time
 import datetime
 sys.path.append('/home/ben/imp_nightly_builds')
 from imp_build_utils import BuildDatabase, get_topdir  # noqa: E402
-from imp_build_utils import lab_only_topdir  # noqa: E402
 from imp_build_utils import platforms_dict, OK_STATES  # noqa: E402
 from imp_build_utils import results_url, lab_only_results_url  # noqa: E402
 from imp_build_utils import SPECIAL_COMPONENTS  # noqa: E402
@@ -132,7 +129,6 @@ class TestPage(object):
         self.default_page = 'build'
         self.pages = {'results': self.display_test,
                       'runtime': self.display_test_runtime,
-                      'log': self.display_log,
                       'build': self.display_build_summary,
                       'comp': self.display_component,
                       'compplattest': self.display_comp_plat_tests,
@@ -150,15 +146,11 @@ class TestPage(object):
             self.page = 'benchfile'
         elif self.platform and self.component:
             self.page = 'compplattest'
-        elif (self.platform and not page.startswith('bench')
-              and page != 'platform'):
-            self.page = 'log'
         elif self.component:
             self.page = 'comp'
         else:
             self.page = page
-            if self.page in ('results', 'log', 'comp', 'compplattest',
-                             'benchfile') \
+            if self.page in ('results', 'comp', 'compplattest', 'benchfile') \
                or self.page not in self.pages:
                 self.page = self.default_page
 
@@ -652,8 +644,6 @@ class TestPage(object):
         elif page == 'runtime' and test is not None:
             route = 'test_runtime'
             kwargs = {'test': test}
-        elif page == 'log' and platform is not None:
-            kwargs = {'plat': platform}
         elif page == 'comp' and component is not None:
             route = 'component'
             kwargs = {'comp': component}
@@ -729,15 +719,6 @@ class TestPage(object):
         def make_cmake(cls, title):
             return '<td><div class="summbox %s" title="%s">&nbsp;</div></td>' \
                    % (cls, title)
-
-        def make_loglink(img, alt, title, data):
-            prefixes = {True: 'l', False: 'n'}
-            return '<td><a href="%s#%s_%d">' \
-                   '<img src="%s/images/%s" ' \
-                   'alt="%s" title="%s"></a></td>' \
-                   % (self.get_link(page='log', platform=arch_id),
-                      prefixes[data['lab_only']], data['logline'],
-                      self.nightly_url, img, alt, title)
 
         def print_newfail(s):
             if s['numnewfails'] == 0:
@@ -1121,18 +1102,11 @@ class TestPage(object):
         self.p("<thead><tr><th></th>")
         for x in summary.all_archs:
             p = platforms_dict[x]
-            if x in summary.cmake_archs:
-                self.p('<th title="%s"><a href="%s">%s</a></th>'
-                       % (p.long,
-                          self.get_link(page='platform',
-                                        platform=summary.arch_ids[x]),
-                          p.short))
-            else:
-                self.p('<th title="%s"><a href="%s">%s</a></th>'
-                       % (p.long,
-                          self.get_link(page='log',
-                                        platform=summary.arch_ids[x]),
-                          p.short))
+            self.p('<th title="%s"><a href="%s">%s</a></th>'
+                   % (p.long,
+                      self.get_link(page='platform',
+                                    platform=summary.arch_ids[x]),
+                      p.short))
         if build_info[0]:
             self.p('<th title="Percentage of all executable lines of Python '
                    'code in this component that were executed by its '
@@ -1176,121 +1150,6 @@ class TestPage(object):
                                                        self.nightly_url))
             self.p("</tr>")
         self.p("</tbody></table>")
-
-    def get_logfile(self, arch_name, lab_only):
-        if lab_only and not self.lab_only:
-            return None
-        fname = platforms_dict[arch_name].logfile
-        if lab_only:
-            g = os.path.join(lab_only_topdir, get_date_link(self.date) + '-*',
-                             'build', 'logs', 'imp-salilab', fname)
-        else:
-            g = os.path.join(get_topdir(self.branch),
-                             get_date_link(self.date) + '-*', 'build',
-                             'logs', 'imp', fname)
-        g = glob.glob(g)
-        if len(g) > 0:
-            return g[0]
-
-    def display_log(self):
-        conn = self.db
-        c = MySQLdb.cursors.DictCursor(conn)
-        arch_name = self.get_platform_name_from_id(conn, self.platform)
-        if not arch_name:
-            self.p("<p><b>Invalid platform requested</b></p>")
-            return
-        logfile = self.get_logfile(arch_name, False)
-        lab_only_logfile = self.get_logfile(arch_name, True)
-        if logfile is None:
-            self.p("<p><b>Sorry, logs for this date are no longer "
-                   "available.</b></p>")
-            return
-        table = self.get_branch_table('imp_test_unit_result')
-        query = ('SELECT imp_test_units.name as unit_name, '
-                 'imp_test_units.lab_only, imp_test_unit_result.state, '
-                 'imp_test_unit_result.logline from imp_test_units, '
-                 + table + ' imp_test_unit_result '
-                 'where imp_test_units.id=imp_test_unit_result.unit and '
-                 'date=%s and imp_test_unit_result.arch=%s and '
-                 'imp_test_unit_result.logline is not null '
-                 + self.get_sql_lab_only()
-                 + ' order by imp_test_unit_result.logline')
-        self.p('<div class="loglinks">')
-        self.p('<p>The build on %s gave the following errors on %s:</p>'
-               % (self.date, platforms_dict[arch_name].long))
-        self.p('<ul>')
-        c.execute(query, (self.date, self.platform))
-        rows = c.fetchall()
-        loglines = []
-        lab_only_loglines = []
-        for r in rows:
-            if not r['lab_only']:
-                loglines.append(r['logline'])
-                self.print_log_link(r, 'n')
-        for r in rows:
-            if r['lab_only']:
-                lab_only_loglines.append(r['logline'])
-                self.print_log_link(r, 'l')
-        self.p('</ul>')
-        self.p("<p>%s</p>" % self.get_raw_log_link(logfile, False,
-                                                   "Download log file"))
-        self.p("<p>%s</p>"
-               % self.get_raw_build_files_link(arch_name, False,
-                                               "View other build files"))
-
-        if self.lab_only and lab_only_logfile:
-            self.p("<p>%s</p>"
-                   % self.get_raw_log_link(logfile, True,
-                                           "Download log file (lab-only)"))
-            self.p("<p>%s</p>"
-                   % self.get_raw_build_files_link(
-                       arch_name, True, "View other build files (lab-only)"))
-        self.p('</div>')
-
-        self.p('<div class="log">')
-        self.print_log(logfile, loglines, 'n')
-        if self.lab_only and lab_only_logfile:
-            self.print_log(lab_only_logfile, lab_only_loglines, 'l')
-        self.p('</div>')
-
-    def print_log(self, logfile, loglines, prefix):
-        build_complete = False
-
-        def get_next_link():
-            if len(loglines) > 0:
-                return loglines.pop(0)
-            else:
-                return 0
-        next_link = get_next_link()
-        self.p("<pre>")
-        for n, line in enumerate(open(logfile)):
-            if 'BUILD COMPLETED' in line:
-                build_complete = True
-            if n + 1 == next_link:
-                self.p('</pre>')
-                self.p('<a name="%s_%d"></a><pre class="errorline">'
-                       % (prefix, next_link))
-                self.p(html.escape(line), end='')
-                self.p("</pre><pre>")
-                next_link = get_next_link()
-            else:
-                self.p(html.escape(line), end='')
-        self.p("</pre>")
-        if not build_complete:
-            b = os.path.basename(logfile)
-            if b.startswith('bin') or b.startswith('package') \
-               or b.startswith('coverage'):
-                self.p('<pre class="incomplete">...\n[ Build appears to '
-                       'be incomplete ]</pre>')
-
-    def print_log_link(self, sql, prefix):
-        state_msg = {'TEST': 'test failure',
-                     'BUILD': 'failed to build',
-                     'BENCH': 'benchmark failure',
-                     'DISABLED': 'disabled'}
-        self.p('<li><a href="#%s_%d">%s %s</a></li>'
-               % (prefix, sql['logline'], sql['unit_name'],
-                  state_msg[sql['state']]))
 
     def display_tests(self, cur, include_component=True,
                       include_platform=True):
@@ -1664,13 +1523,12 @@ $(document).ready(function() {
         self.display_lab_only_link()
         self.p('  <ul>')
         links = []
-        if self.page in ('results', 'runtime', 'log', 'comp', 'compplattest',
+        if self.page in ('results', 'runtime', 'comp', 'compplattest',
                          'benchfile', 'doc'):
             links.append(self.page)
         links.extend(('build', 'new', 'all', 'long', 'bench'))
         linktext = {'results': 'Test results',
                     'runtime': 'Test runtime',
-                    'log': 'Log file',
                     'build': 'Build summary',
                     'compplattest': 'Component tests',
                     'comp': 'Component summary',
