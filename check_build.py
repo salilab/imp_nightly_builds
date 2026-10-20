@@ -1891,9 +1891,9 @@ def main():
     noble = 'pkg.noble-x86_64'   # Ubuntu 24.04 (Noble Numbat) .deb package
     resolute = 'pkg.resolute-x86_64'   # Ubuntu 26.04 (Resolute Raccoon)
 
-    # Check CUDA builds
-    cuda = 'cuda'
-    c.add_cmake_log(cuda, ['build', 'test', 'example'], [])
+    # Check JAX builds
+    jax = 'jax_gpu_fedora'
+    c.add_cmake_log(jax, ['build', 'test', 'example'], [])
 
     # Check coverage (on Fedora)
     coverage = 'coverage'
@@ -1902,14 +1902,14 @@ def main():
     new_archs_map = [rh8_64, rh9_64, rh10_64, jammy, noble, resolute, win64]
     rh_rpms = [rh8_64, rh9_64, rh10_64]
     all_archs_map = [debug8, mac14, mac27arm, win32, fast8, fastmac, static,
-                     release8, f44_64] + new_archs_map + [coverage, cuda]
+                     release8, f44_64] + new_archs_map + [coverage, jax]
     c.make_module_map(all_archs_map)
     # Only cmake builds have an ALL component
-    incs = [f44_64, fastmac, coverage, cuda, fast8, static, debug8,
+    incs = [f44_64, fastmac, coverage, jax, fast8, static, debug8,
             release8, jammy, noble, resolute] + rh_rpms + all_archs
     c.include_component('ALL', incs)
     c.include_component('INSTALL', [fastmac, fast8, debug8,
-                                    release8, cuda] + all_archs)
+                                    release8, jax] + all_archs)
     incs = [win32, win64]
     c.include_component('PACKAGE', incs)
     # Only the Windows installer has a separate package test step
@@ -1973,33 +1973,31 @@ def main():
             c.add_cmake_log(f, ['build', 'benchmark', 'test', 'example'],
                             [])
         c.add_cmake_log(static, ['build'], [])
-        # Add CUDA build
-        c.add_cmake_log(cuda, ['build', 'test', 'example'], [])
+        # Add JAX build
+        c.add_cmake_log(jax, ['build', 'test', 'example'], [])
         # Add coverage build
         c.add_cmake_log(coverage, ['build', 'test', 'example'], [])
         all_archs_map = [debug8, mac14, mac27arm, fast8, fastmac, static,
-                         release8, win32, win64, cuda, coverage]
+                         release8, win32, win64, jax, coverage]
         c.make_module_map(all_archs_map)
 
         # Only cmake builds have an ALL_LAB component
-        incs = [f44_64, fastmac, cuda, coverage, fast8, debug8,
+        incs = [f44_64, fastmac, jax, coverage, fast8, debug8,
                 static, release8, jammy, noble, resolute] + rh_rpms + all_archs
         c.include_component('ALL_LAB', incs)
         c.include_component('COVERAGE_LAB', [coverage])
         c.include_component('INSTALL_LAB',
-                            [fastmac, fast8, debug8, release8, cuda]
+                            [fastmac, fast8, debug8, release8, jax]
                             + all_archs)
 
         for m in ('multifit2', 'domino3', 'bayesem2d'):
             c.exclude_component(m, (static,))
-        for m in ('multifit2',):
-            c.exclude_component(m, (cuda,))
         for m in ('domino3',):
             c.exclude_component(m, (win32, win64, mac27arm, fastmac))
         # Seth's code only works on very recent machines with cppad-devel
         # installed (just our Fedora boxes)
         for m in ('liegroup', 'autodiff'):
-            c.include_component(m, [cuda, coverage])
+            c.include_component(m, [jax, coverage])
         for m in ('isd_emxl',):
             incs = [release8, debug8, f44_64, fast8, coverage, win32,
                     win64, mac14, mac27arm, fastmac] + rh_rpms
