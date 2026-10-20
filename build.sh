@@ -441,6 +441,7 @@ END
 
     CMAKE_ARGS=("${CMAKE_ARGS[@]}" \
                 "-DCMAKE_BUILD_TYPE=Release" \
+                "-DIMP_TIMEOUT_FACTOR=4" \
                 "-DCGAL_DO_NOT_WARN_ABOUT_CMAKE_BUILD_TYPE=TRUE" \
                 "-DCMAKE_CXX_FLAGS='-std=c++20'" \
                 "-DIMP_USE_PYTHON_SOABI=ON" \
