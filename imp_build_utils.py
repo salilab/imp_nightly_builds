@@ -158,8 +158,9 @@ standard Mac with XCode installed plus <a href="https://brew.sh/">Homebrew</a>;
 the <tt>salilab/salilab</tt> Homebrew tap;
 the following Homebrew packages: %s<tt>boost</tt>, <tt>cgal</tt>,
 <tt>cmake</tt>, <tt>hdf5</tt>, <tt>libtau</tt>, <tt>ninja</tt>,
-<tt>pkg-config</tt>, <tt>opencv</tt>, <tt>protobuf</tt>, <tt>eigen</tt>,
-<tt>cereal</tt>, <tt>fftw</tt>, <tt>open-mpi</tt>, and <tt>swig</tt>;
+<tt>pkg-config</tt>, <tt>libtiff</tt>, <tt>jpeg-turbo</tt>, <tt>protobuf</tt>,
+<tt>eigen</tt>, <tt>cereal</tt>, <tt>fftw</tt>, <tt>open-mpi</tt>,
+and <tt>swig</tt>;
 and the following pip packages: <tt>pandas</tt>, <tt>matplotlib</tt>,
 <tt>PyYAML</tt>, <tt>protobuf</tt>, <tt>jax</tt>, <tt>mpi4py</tt>,
 <tt>networkx</tt> and <tt>scikit-learn</tt>.

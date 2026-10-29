@@ -147,7 +147,7 @@ do_build() {
       module load mpi/openmpi-x86_64
       # Load modules for build tools and dependencies not present on a
       # Wynton dev node
-      module load swig ninja boost eigen cereal cgal libtau hdf5 opencv python3/protobuf python3/numpy
+      module load swig ninja boost eigen cereal cgal libtau hdf5 python3/protobuf python3/numpy
       module list -t >& ${IMPBUILD}/modules.${PLATFORM}
       # Load extra modules for tests
       module load python3/scipy python3/scikit python3/matplotlib python3/pandas python3/pyrmsd gnuplot python3/biopython python3/networkx
@@ -507,7 +507,7 @@ END
       module load mpi/openmpi-x86_64
       # Load modules for build tools and dependencies not present on a
       # Wynton dev node
-      module load swig ninja boost eigen cereal cgal libtau hdf5 opencv python3/protobuf python3/numpy
+      module load swig ninja boost eigen cereal cgal libtau hdf5 python3/protobuf python3/numpy
       module list -t >& ${IMPBUILD}/modules.${PLATFORM}
       # Load extra modules for tests
       module load python3/scipy python3/scikit python3/matplotlib python3/pandas python3/pyrmsd gnuplot python3/biopython python3/networkx
@@ -528,7 +528,7 @@ END
       module load mpi/openmpi-x86_64
       # Load modules for build tools and dependencies not present on a
       # Wynton dev node
-      module load swig ninja boost eigen cereal cgal libtau hdf5 opencv python3/protobuf python3/numpy
+      module load swig ninja boost eigen cereal cgal libtau hdf5 python3/protobuf python3/numpy
       module list -t >& ${IMPBUILD}/modules.${PLATFORM}
       # Load extra modules for tests
       module load python3/scipy python3/scikit python3/matplotlib python3/pandas python3/pyrmsd gnuplot python3/biopython python3/networkx
