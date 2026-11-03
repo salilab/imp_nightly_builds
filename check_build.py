@@ -1883,7 +1883,7 @@ def main():
     for f in (fastmac, fast8, release8, debug8):
         c.add_cmake_log(f, ['build', 'benchmark', 'test', 'example'], [])
 
-    f44_64 = 'pkg.f44-x86_64'    # Fedora 44 RPM
+    f45_64 = 'pkg.f45-x86_64'    # Fedora 45 RPM
     rh8_64 = 'pkg.el8-x86_64'    # RHEL 8 RPM
     rh9_64 = 'pkg.el9-x86_64'    # RHEL 9 RPM
     rh10_64 = 'pkg.el10-x86_64'  # RHEL 10 RPM
@@ -1902,10 +1902,10 @@ def main():
     new_archs_map = [rh8_64, rh9_64, rh10_64, jammy, noble, resolute, win64]
     rh_rpms = [rh8_64, rh9_64, rh10_64]
     all_archs_map = [debug8, mac14, mac27arm, win32, fast8, fastmac, static,
-                     release8, f44_64] + new_archs_map + [coverage, jax]
+                     release8, f45_64] + new_archs_map + [coverage, jax]
     c.make_module_map(all_archs_map)
     # Only cmake builds have an ALL component
-    incs = [f44_64, fastmac, coverage, jax, fast8, static, debug8,
+    incs = [f45_64, fastmac, coverage, jax, fast8, static, debug8,
             release8, jammy, noble, resolute] + rh_rpms + all_archs
     c.include_component('ALL', incs)
     c.include_component('INSTALL', [fastmac, fast8, debug8,
@@ -1917,7 +1917,7 @@ def main():
     c.include_component('COVERAGE', [coverage])
     c.include_component('ALLPYTHON', [fast8, release8])
     for m in ('mpi', 'spb', 'nestor'):
-        mods = [release8, debug8, rh8_64, rh9_64, rh10_64, f44_64, fast8,
+        mods = [release8, debug8, rh8_64, rh9_64, rh10_64, f45_64, fast8,
                 coverage, win32, win64, mac14, mac27arm, fastmac,
                 jammy, noble, resolute]
         c.include_component(m, mods)
@@ -1927,7 +1927,7 @@ def main():
 
     # scratch module is excluded from all RPM and deb builds
     for m in ('scratch',):
-        c.exclude_component(m, [f44_64, jammy, noble, resolute] + rh_rpms)
+        c.exclude_component(m, [f45_64, jammy, noble, resolute] + rh_rpms)
     for m in ('RMF', 'rmf', 'gsl', 'multifit', 'em2d', 'EMageFit',
               'domino', 'example', 'pepdock', 'cgal',
               'cnmultifit', 'saxs_merge', 'integrative_docking',
@@ -1937,8 +1937,8 @@ def main():
     # Check RPMs
     c.add_log('rpm.source.log', 'RPM specfile',
               ['packages/IMP.spec', 'packages/IMP-copr.spec'])
-    c.add_cmake_log(f44_64, ['build', 'test'],
-                    'packages/IMP-%s-1.fc44.x86_64.rpm' % repo.newlongver)
+    c.add_cmake_log(f45_64, ['build', 'test'],
+                    'packages/IMP-%s-1.fc45.x86_64.rpm' % repo.newlongver)
     c.add_cmake_log(rh8_64, ['build', 'test'],
                     'packages/IMP-%s-1.el8.x86_64.rpm' % repo.newlongver)
     c.add_cmake_log(rh9_64, ['build', 'test'],
@@ -1982,7 +1982,7 @@ def main():
         c.make_module_map(all_archs_map)
 
         # Only cmake builds have an ALL_LAB component
-        incs = [f44_64, fastmac, jax, coverage, fast8, debug8,
+        incs = [f45_64, fastmac, jax, coverage, fast8, debug8,
                 static, release8, jammy, noble, resolute] + rh_rpms + all_archs
         c.include_component('ALL_LAB', incs)
         c.include_component('COVERAGE_LAB', [coverage])
@@ -1999,7 +1999,7 @@ def main():
         for m in ('liegroup', 'autodiff'):
             c.include_component(m, [jax, coverage])
         for m in ('isd_emxl',):
-            incs = [release8, debug8, f44_64, fast8, coverage, win32,
+            incs = [release8, debug8, f45_64, fast8, coverage, win32,
                     win64, mac14, mac27arm, fastmac] + rh_rpms
             c.include_component(m, incs)
 

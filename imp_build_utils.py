@@ -801,6 +801,12 @@ all_platforms = (('i386-intel8',
                       'Fedora 44 RPM build; Boost 1.90, gcc 16.0',
                       rpm_vlong_header % "Fedora 44"
                       + rpm_vlong_footer + "</p>")),
+                 ('pkg.f45-x86_64',
+                  Platform(
+                      'F45', 'F45 RPM',
+                      'Fedora 45 RPM build; Boost 1.90, gcc 16.2',
+                      rpm_vlong_header % "Fedora 45"
+                      + rpm_vlong_footer + "</p>")),
                  ('pkg.precise-x86_64',
                   Platform(
                       'deb12', 'deb12',
