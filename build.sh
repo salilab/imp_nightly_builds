@@ -301,11 +301,11 @@ END
     fix_modeller_python() {
       local CFG="$1"
       local MODELLER_VERSION="$2"
-      # Modeller 10.7 does not include Python 3.14 (for Fedora 43) symlinks,
+      # Modeller 10.8 does not include Python 3.15 (for Fedora 45) symlinks,
       # so add them
-      if [ "${CFG}" = "fedora-43-x86_64" ] && [ "${MODELLER_VERSION}" = "10.7" ]; then
-        mock -r $CFG --shell "ln -sf /usr/lib/modeller10.7/modlib/modeller /usr/lib64/python3.14/site-packages/modeller" \
-            && mock -r $CFG --shell "ln -sf /usr/lib/modeller10.7/lib/x86_64-intel8/python3.3/_modeller.so /usr/lib64/python3.14/site-packages/"
+      if [ "${CFG}" = "fedora-45-x86_64" ] && [ "${MODELLER_VERSION}" = "10.8" ]; then
+        mock -r $CFG --shell "ln -sf /usr/lib/modeller10.8/modlib/modeller /usr/lib64/python3.15/site-packages/modeller" \
+            && mock -r $CFG --shell "ln -sf /usr/lib/modeller10.8/lib/x86_64-intel8/python3.3/_modeller.so /usr/lib64/python3.15/site-packages/"
       else
         return 0
       fi
