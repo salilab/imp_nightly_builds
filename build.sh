@@ -600,6 +600,7 @@ END
 	CMAKE_ARGS+=("-DPYTHON_TEST_EXECUTABLE=w32python3")
 	CMAKE_ARGS+=("-DPYTHON_INCLUDE_DIRS=/usr/lib/w32comp/w32python/3.10/include/")
 	CMAKE_ARGS+=("-DPYTHON_EXECUTABLE=python3")
+	CMAKE_ARGS+=("-DIMP_PER_CPP_COMPILATION=cgal")
       else
         CMAKE_ARGS+=("-DCMAKE_C_FLAGS='/Dinline=__inline'")
         CMAKE_ARGS+=("-Dfftw3_LIBRARY='/usr/lib/w64comp/Program Files/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.16.27023/lib/x64/libfftw3-3.lib'")
