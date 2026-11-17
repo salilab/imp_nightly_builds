@@ -621,8 +621,8 @@ all_platforms = (('i386-intel8',
                  ('pkg.el10-x86_64',
                   Platform(
                       'RH10', 'RH10 RPM',
-                      'RedHat Enterprise 10.2 RPM build; Boost 1.83',
-                      rpm_cvlong % ("Rocky Linux 10.2", ""))),
+                      'RedHat Enterprise 10.3 RPM build; Boost 1.83',
+                      rpm_cvlong % ("Rocky Linux 10.3", ""))),
                  ('pkg.f16-x86_64',
                   Platform(
                       'F16', 'F16 RPM',
