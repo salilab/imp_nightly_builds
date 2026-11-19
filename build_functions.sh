@@ -260,7 +260,6 @@ add_extra_python() {
 
   # Add symlinks for newer (than 3.14) compatible Python versions (Fedora)
   (cd ${IMPINSTALL}/lib/${PLATFORM} && for ext in _*-314-*.so; do ln -sf ${ext} ${ext/314/315}; done)
-  done
 }
 
 # Configure, build and test IMP using cmake
