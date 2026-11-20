@@ -326,9 +326,9 @@ all_platforms = (('i386-intel8',
                  ('jax_gpu_fedora',
                   Platform(
                       'JAX', 'JAX',
-                      'JAX GPU build (64-bit Linux, Fedora 44, gcc 14.3, '
-                      'Boost 1.90, CUDA toolkit 12.8, JAX 0.9.0)',
-                      jax_vlong % "64-bit Fedora 44")),
+                      'JAX GPU build (64-bit Linux, Fedora 45, gcc 16.2, '
+                      'Boost 1.90, CUDA toolkit 12.8, JAX 0.11.2)',
+                      jax_vlong % "64-bit Fedora 45")),
                  ('mac10v4-intel',
                   Platform(
                       'Mac', 'Mac 10.4',
